@@ -73,6 +73,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() expandedOnInit = false;
   @Input() $data: Observable<any> = Observable.empty();
   @Input() selection = [];
+  @Input() defaultSelectionRule;
   @Input() bypassSecurityTrustHtml: boolean = false;
   @Input() delayedSettings;
   @Input() delay: number = 0;
@@ -147,6 +148,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       if (this.$data) {
         this.$data.take(1).subscribe((data) => {
           this.data = data;
+          if (this.defaultSelectionRule) {
+            this.selection = this.data.filter(dataElem => {
+              return this.defaultSelectionRule(dataElem);
+            });
+          }
         });
       }
     }

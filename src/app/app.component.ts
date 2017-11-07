@@ -55,7 +55,7 @@ export const COUNTRIES_DATA = {
       [$data]="$objectArray"
       [renderItem]="renderCountry"
       [renderSelectionItem]="renderCountry"
-      [selection]="[objectArray[0]]"
+      [defaultSelectionRule]="defaultSelectionRule" 
       [bypassSecurityTrustHtml]="true"
       (onSelect)="onSelectCountry($event)"
     ></app-ng-selectio>
@@ -107,7 +107,9 @@ export class AppComponent {
   renderItem(item: any) {
     return item.name.first;
   }
-
+  defaultSelectionRule(item: any) {
+    return item.id === 'fr';
+  }
   renderCountry(countryItem: any): string {
     return `<div id="country-iso-name" class=${countryItem.isoName}>
                <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
