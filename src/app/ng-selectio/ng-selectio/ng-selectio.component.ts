@@ -1,7 +1,6 @@
 import {
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, QueryList, Renderer,
-  Renderer2,
+  Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, QueryList, Renderer2,
   SimpleChanges,
   ViewChild, ViewChildren
 } from '@angular/core';
@@ -15,12 +14,14 @@ import 'rxjs/add/operator/take';
 import {Subscription} from "rxjs/Subscription";
 import {ItemComponent} from "./item.component";
 
-
 export enum KEY_CODE {
   UP_ARROW = 38,
   DOWN_ARROW = 40,
   ENTER = 13
 }
+
+export const SELECTION_MODE_SINGLE = 'single';
+export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
   selector: 'app-ng-selectio',
@@ -28,18 +29,15 @@ export enum KEY_CODE {
     <div [ngClass]="{'ngs': true, 'ngs-expanded': expanded}" #ngs tabindex="1" (blur)="onBlur($event)"
          (keydown)="onKeyPress($event)">
 
-
-      <selection (click)="onClickSelection($event)">
-        
+      <selection
+        [items]="selection"
+        [itemRenderer]="selectionItemRenderer"
+        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+        [selectionMode]="selectionMode"
+        (click)="onClickSelection($event)"
+      >
       </selection>
-      
-      <div class="ngs-selection" (click)="onClickSelection($event)">
-        <span class="selection" [innerHtml]="bypassSecurityTrustHtml ? ((renderSelection(selection)) | safeHtml) : (renderSelection(selection))"></span>
-        <span class="arrow"></span>
-      </div>
-      
-      
-      
+
       <div [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}" class="ngs-search"
            [formGroup]="textInputGroup">
         <input formControlName="textInput" type="text" #search (blur)="onBlur($event)"/>
@@ -52,7 +50,7 @@ export enum KEY_CODE {
                             [isSelected]="insideSelection(dataItem)"
                             [data]="dataItem"
                             [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-                            [renderItem]="renderItem"
+                            [renderItem]="dropdownItemRenderer"
                             (mouseenter)="activeListItem = dataItem"
                             (click)="selectItem(dataItem)"
           >
@@ -69,20 +67,16 @@ export enum KEY_CODE {
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() maxVisibleItemsCount: number = 5;
-  @Input() expandedOnInit = false;
   @Input() $data: Observable<any> = Observable.empty();
   @Input() selection = [];
-  @Input() defaultSelectionRule;
+  @Input() selectionMode = SELECTION_MODE_SINGLE;
+  @Input() defaultSelectionRule: (item: any[]) => any[] = (items: any[]) => {return []};
   @Input() bypassSecurityTrustHtml: boolean = false;
-  @Input() delayedSettings;
   @Input() delay: number = 0;
   @Input() minLengthForAutocomplete: number = 0;
-  @Input() multiple: boolean = false;
-  @Input() renderItem: (item: any) => string;
-  @Input() renderSelectionItem: (item: any) => string;
+  @Input() dropdownItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
+  @Input() selectionItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
   @Input() showSearch: boolean = false;
-  @Input() hideSelection: boolean = false;
 
   @Output() onSearch = new EventEmitter<any>();
   @Output() onNextPage = new EventEmitter<any>();
@@ -108,6 +102,24 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     this.textInputGroup = new FormGroup({
       textInput: this.textInput
     });
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+
+    if (changes.defaultSelectionRule) {
+      if (this.selectionMode === SELECTION_MODE_SINGLE) {
+
+      }
+    }
+
+    if (changes.$data) {
+      if (this.$data) {
+        this.$data.take(1).subscribe((data) => {
+          this.data = data;
+
+        });
+      }
+    }
   }
 
   ngOnInit() {
@@ -136,25 +148,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
+    if (this.defaultSelectionRule) {
+      this.selection = this.defaultSelectionRule(this.data);
+    }
+
     if (this.selection.length > 0) {
       this.selection.forEach((item) => {
         this.onSelect.emit(item);
       });
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes.$data) {
-      if (this.$data) {
-        this.$data.take(1).subscribe((data) => {
-          this.data = data;
-          if (this.defaultSelectionRule) {
-            this.selection = this.data.filter(dataElem => {
-              return this.defaultSelectionRule(dataElem);
-            });
-          }
-        });
-      }
     }
   }
 
@@ -166,33 +167,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   onClickSelection() {
     this.expandedChanged.emit(!this.expanded);
   }
-  // TODO add cross for delete elem
-  renderSelection(): string {
-    // FIXME
-    let renderFn = this.renderSelectionItem ? this.renderSelectionItem : (item) => {
-      return JSON.stringify(item)
-    };
-
-    if (!this.selection) {
-      return;
-    } else if (this.selection.length === 0) {
-      return `<span>No selection</span>`;
-    } else if (this.isSingleMode()) {
-      if (this.selection.length > 1) {
-        throw new Error('selection length > 1 for single selection mode');
-      }
-      return renderFn(this.selection[0]);
-    } else if (this.isMultipleMode()) {
-      return this.selection.map(item => {
-        return `<span class="test-class">${renderFn(item)}</span>`;
-      }).join('');
-    }
-  }
 
   selectItem(item: any) {
-    if (this.isSingleMode()) {
+    if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [item];
-    } else if (this.isMultipleMode()) {
+    } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
       this.selection.push(item);
     }
     this.expandedChanged.emit(false);
@@ -280,14 +259,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
     return false;
-  }
-
-  private isMultipleMode(): boolean {
-    return this.multiple;
-  }
-
-  private isSingleMode(): boolean {
-    return !this.isMultipleMode();
   }
 
   private hasFocus(): boolean {

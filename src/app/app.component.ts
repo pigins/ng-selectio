@@ -53,25 +53,25 @@ export const COUNTRIES_DATA = {
     <p>Simple select array of objects</p>
     <app-ng-selectio
       [$data]="$objectArray"
-      [renderItem]="renderCountry"
-      [renderSelectionItem]="renderCountry"
-      [defaultSelectionRule]="defaultSelectionRule" 
+      [dropdownItemRenderer]="renderCountry"
+      [selectionItemRenderer]="renderCountry"
+      [defaultSelectionRule]="defaultSelectionRule"
       [bypassSecurityTrustHtml]="true"
       (onSelect)="onSelectCountry($event)"
     ></app-ng-selectio>
-    
+
     <p>Simple select array of strings with search</p>
     <app-ng-selectio
       [$data]="$stringArray"
       [showSearch]="true"
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
-    
+
     <p>remote data select with search</p>
     <app-ng-selectio
       [$data]="$users"
-      [renderItem]="renderItem"
-      [multiple]="true"
+      [dropdownItemRenderer]="renderItem"
+      [selectionMode]="'multiple'"
       [showSearch]="true"
       (onSearch)="onSearch($event)"
 
@@ -92,6 +92,7 @@ export class AppComponent {
   $users: Observable<any>;
 
   constructor(private http: Http) {
+
     this.$objectArray = Observable.of(this.objectArray);
   }
   onSearchString(term: string) {
@@ -107,8 +108,8 @@ export class AppComponent {
   renderItem(item: any) {
     return item.name.first;
   }
-  defaultSelectionRule(item: any) {
-    return item.id === 'fr';
+  defaultSelectionRule(items: any[]): any[] {
+    return [items[0]];
   }
   renderCountry(countryItem: any): string {
     return `<div id="country-iso-name" class=${countryItem.isoName}>
@@ -118,6 +119,6 @@ export class AppComponent {
   }
 
   onSelectCountry(country: any) {
-    console.log(country);
+
   }
 }
