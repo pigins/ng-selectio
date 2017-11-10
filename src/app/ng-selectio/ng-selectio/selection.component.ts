@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, EventEmitter, Input, Output} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
 import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
 
@@ -6,7 +6,17 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
   selector: 'selection',
   template: `
     <div class="ngs-selection">
-      <span class="selection" [innerHtml]="bypassSecurityTrustHtml ? ((renderSelection(items)) | safeHtml) : (renderSelection(items))"></span>
+      <div *ngIf="this.items.length === 0" class="selection">
+        <span>No selection</span>
+      </div>
+      <div *ngIf="singleMode()" class="selection">
+        <div [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(items[0])) | safeHtml) : (itemRenderer(items[0]))">
+        </div>
+      </div>
+      <div *ngIf="multipleMode()" class="selection">
+        <div *ngFor="let item of items" [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))">
+        </div>
+      </div>
       <span class="arrow"></span>
     </div>
   `,
@@ -43,25 +53,18 @@ export class SelectionComponent {
   @Input() itemRenderer = (item: any) => {return JSON.stringify(item);};
   @Input() selectionMode = SELECTION_MODE_SINGLE;
 
+  @Output()
+  onDeleteItem = new EventEmitter<any>();
+
   constructor() {
 
   }
 
-  // TODO add cross for delete elem
-  renderSelection(): string {
-    if (!this.items) {
-      return;
-    } else if (this.items.length === 0) {
-      return `<span>No selection</span>`;
-    } else if (this.selectionMode === SELECTION_MODE_SINGLE) {
-      if (this.items.length > 1) {
-        throw new Error('selection length > 1 for single selection mode');
-      }
-      return this.itemRenderer(this.items[0]);
-    } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-      return this.items.map(item => {
-        return `<span class="test-class">${this.itemRenderer(item)}</span>`;
-      }).join('');
-    }
+  singleMode() {
+    return this.selectionMode === SELECTION_MODE_SINGLE;
+  }
+
+  multipleMode() {
+    return this.selectionMode === SELECTION_MODE_MULTIPLE;
   }
 }
