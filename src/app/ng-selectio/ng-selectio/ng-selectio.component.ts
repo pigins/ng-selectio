@@ -1,4 +1,5 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, QueryList, Renderer2,
   SimpleChanges,
@@ -34,7 +35,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         [itemRenderer]="selectionItemRenderer"
         [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
         [selectionMode]="selectionMode"
+        [deletable]="selectionDeletable"
         (click)="onClickSelection($event)"
+        (onDeleteItem)="onDeleteItem($event)"
       >
       </selection>
 
@@ -44,7 +47,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
       </div>
 
       <div class="ngs-data" #dropdown>
-        <ul #ul>
+        <ul #ul (scroll)="onUlScroll($event)">
           <ng-selectio-item *ngFor="let dataItem of data;" #itemList
                             [isActive]="dataItem === activeListItem"
                             [isSelected]="insideSelection(dataItem)"
@@ -58,6 +61,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           <li *ngIf="data.length === 0">
             No data
           </li>
+          <li *ngIf="loadingMoreResults">
+            Loading more results...
+          </li>
         </ul>
       </div>
 
@@ -68,6 +74,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() $data: Observable<any> = Observable.empty();
+  @Input() $appendData: Observable<any> = Observable.empty();
   @Input() selection = [];
   @Input() selectionMode = SELECTION_MODE_SINGLE;
   @Input() defaultSelectionRule: (item: any[]) => any[] = (items: any[]) => {return []};
@@ -77,10 +84,15 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() dropdownItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
   @Input() selectionItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
   @Input() showSearch: boolean = false;
+  @Input() selectionDeletable: boolean = false;
+  @Input() pagingDelay: number = 0;
+  @Input() paging: boolean = false;
 
   @Output() onSearch = new EventEmitter<any>();
   @Output() onNextPage = new EventEmitter<any>();
   @Output() onSelect = new EventEmitter<any>();
+
+
 
   @ViewChild('dropdown') dropdown: ElementRef;
   @ViewChild('search') search: ElementRef;
@@ -93,9 +105,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   textInput: FormControl;
   activeListItem: any;
   expanded: boolean;
+  loadingMoreResults: boolean = false;
   private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
+
 
   constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef, private renderer: Renderer2) {
     this.textInput = new FormControl();
@@ -105,18 +119,23 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
     if (changes.defaultSelectionRule) {
       if (this.selectionMode === SELECTION_MODE_SINGLE) {
 
       }
     }
-
     if (changes.$data) {
       if (this.$data) {
         this.$data.take(1).subscribe((data) => {
           this.data = data;
-
+        });
+      }
+    }
+    if (changes.$appendData) {
+      if (this.$appendData) {
+        this.$appendData.take(1).subscribe((data) => {
+          this.data = this.data.concat(data);
+          this.loadingMoreResults = false;
         });
       }
     }
@@ -239,6 +258,33 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
         }
       }
     }
+  }
+
+  onUlScroll() {
+    if (!this.paging) {
+      return;
+    }
+    if(this.scrollExhausted() && !this.loadingMoreResults) {
+      this.loadingMoreResults = true;
+      this.changeDetectorRef.detectChanges();
+      this.scrollToTheBottom();
+      setTimeout(() => {
+        this.onNextPage.emit({currentLength: this.data.length, search: this.textInput.value});
+      }, this.pagingDelay);
+    }
+  }
+
+  onDeleteItem(_item: any) {
+    this.selection = this.selection.filter(item => item !== _item);
+  }
+
+  private scrollToTheBottom() {
+    this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
+  }
+
+  private scrollExhausted() {
+    let ul = this.ul.nativeElement;
+    return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
 
   private getActiveItemComponent(): ItemComponent {

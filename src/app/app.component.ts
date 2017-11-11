@@ -67,14 +67,19 @@ export const COUNTRIES_DATA = {
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
 
-    <p>remote data select with search</p>
+    <p>remote data select with search and paging</p>
     <app-ng-selectio
       [$data]="$users"
+      [$appendData]="$appendUsers"
       [dropdownItemRenderer]="renderItem"
+      [selectionItemRenderer]="renderItem"
       [selectionMode]="'multiple'"
       [showSearch]="true"
+      [selectionDeletable]="true"
+      [paging]="true"
+      [pagingDelay]="500"
       (onSearch)="onSearch($event)"
-
+      (onNextPage)="onNextPage($event)"
     ></app-ng-selectio>
   `,
   styleUrls: ['./app.component.css']
@@ -86,10 +91,9 @@ export class AppComponent {
     return Object.assign({id: key}, COUNTRIES_DATA.countries[key]);
   });
   $objectArray: Observable<any>;
-  numberArray: Observable<any> = Observable.of(
-    [1, 12344, 4235, -1, 0.0001, 3553, 99999999999999, -111111111111, -1e17, 1.999999999999]
-  );
+
   $users: Observable<any>;
+  $appendUsers: Observable<any>;
 
   constructor(private http: Http) {
 
@@ -101,7 +105,11 @@ export class AppComponent {
     }));
   }
   onSearch(term: string) {
-    this.$users = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=8&nat=uk`)
+    this.$users = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
+      .map(r => r.json()).map(r => r.results);
+  }
+  onNextPage(paging) {
+    this.$appendUsers = this.http.get(`https://randomuser.me/api?seed=${paging.term}&results=${10}&page=${paging.currentLength/10 + 1}&nat=uk&inc=gender,name,picture`)
       .map(r => r.json()).map(r => r.results);
   }
 
@@ -119,6 +127,8 @@ export class AppComponent {
   }
 
   onSelectCountry(country: any) {
-
+    console.log(country);
   }
+
+
 }

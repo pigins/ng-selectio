@@ -10,17 +10,32 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
         <span>No selection</span>
       </div>
       <div *ngIf="singleMode()" class="selection">
-        <div [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(items[0])) | safeHtml) : (itemRenderer(items[0]))">
+        <div class="single" [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(items[0])) | safeHtml) : (itemRenderer(items[0]))">
+          
         </div>
       </div>
-      <div *ngIf="multipleMode()" class="selection">
-        <div *ngFor="let item of items" [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))">
+      <div *ngIf="multipleMode() && !deletable" class="selection">
+        <div class="multiple" [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))"
+             *ngFor="let item of items" >
+        </div>
+      </div>
+      <div *ngIf="multipleMode() && deletable" class="selection">
+        <div class="multiple" *ngFor="let item of items" >
+          <span class="delete" (click)="onDeleteClick($event, item)">X</span>
+          <span [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))"></span>
         </div>
       </div>
       <span class="arrow"></span>
     </div>
   `,
   styles: [`
+    .selection .multiple {
+      display: inline-block;
+    }
+    .selection .multiple .delete{
+      cursor: pointer;
+    }
+    
     .ngs-selection {
       position: relative;
       border: 1px solid red;
@@ -41,9 +56,6 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
       border-left-color: transparent;
       border-right-color: transparent
     }
-    .selection .test-class {
-      display: inline-block !important;
-    }
   `]
 })
 export class SelectionComponent {
@@ -52,6 +64,7 @@ export class SelectionComponent {
   @Input() bypassSecurityTrustHtml: boolean = false;
   @Input() itemRenderer = (item: any) => {return JSON.stringify(item);};
   @Input() selectionMode = SELECTION_MODE_SINGLE;
+  @Input() deletable = false;
 
   @Output()
   onDeleteItem = new EventEmitter<any>();
@@ -66,5 +79,10 @@ export class SelectionComponent {
 
   multipleMode() {
     return this.selectionMode === SELECTION_MODE_MULTIPLE;
+  }
+
+  onDeleteClick(event: MouseEvent, item: any) {
+    event.stopPropagation();
+    this.onDeleteItem.emit(item);
   }
 }
