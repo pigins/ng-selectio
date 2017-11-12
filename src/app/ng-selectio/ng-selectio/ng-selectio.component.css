@@ -22,26 +22,13 @@
 .ngs-expanded .ngs-data {
   display: block;
 }
-.ngs-selection {
-  position: relative;
-  border: 1px solid red;
-}
-.ngs-selection span.arrow {
-  display: inline-block;
-  position: absolute;
-  right: 10px;
-  top: calc(50% - 8px / 2);
-  border: 8px solid gray;
-  border-bottom-width: 0;
-  border-left-color: transparent;
-  border-right-color: transparent
-}
-.ngs-expanded .ngs-selection span.arrow {
-  border: 8px solid gray;
-  border-top-width: 0;
-  border-left-color: transparent;
-  border-right-color: transparent
-}
-.selection .test-class {
+.autocomplete > * {
   display: inline-block !important;
 }
+.autocomplete input {
+  border: none;
+}
+.autocomplete input:focus {
+  outline: none;
+}
+

@@ -1,24 +1,24 @@
 import {
-  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, QueryList, Renderer2,
   SimpleChanges,
   ViewChild, ViewChildren
 } from '@angular/core';
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/empty';
-import {FormControl, FormGroup} from "@angular/forms";
+import {FormControl, FormGroup} from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
-import {Subscription} from "rxjs/Subscription";
-import {ItemComponent} from "./item.component";
+import {Subscription} from 'rxjs/Subscription';
+import {ItemComponent} from './item.component';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
   DOWN_ARROW = 40,
-  ENTER = 13
+  ENTER = 13,
+  BACKSPACE = 8
 }
 
 export const SELECTION_MODE_SINGLE = 'single';
@@ -30,20 +30,28 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     <div [ngClass]="{'ngs': true, 'ngs-expanded': expanded}" #ngs tabindex="1" (blur)="onBlur($event)"
          (keydown)="onKeyPress($event)">
 
-      <selection
-        [items]="selection"
-        [itemRenderer]="selectionItemRenderer"
-        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-        [selectionMode]="selectionMode"
-        [deletable]="selectionDeletable"
-        (click)="onClickSelection($event)"
-        (onDeleteItem)="onDeleteItem($event)"
-      >
-      </selection>
-
-      <div [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}" class="ngs-search"
-           [formGroup]="textInputGroup">
-        <input formControlName="textInput" type="text" #search (blur)="onBlur($event)"/>
+      <div [ngClass]="{'autocomplete': autocomplete}">
+        <selection #selectionComponent
+                   [items]="selection"
+                   [highlightedItem]="highlightedItem"
+                   [itemRenderer]="selectionItemRenderer"
+                   [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+                   [selectionMode]="selectionMode"
+                   [showArrow]="!autocomplete"
+                   [showEmptySelection]="!autocomplete"
+                   [deletable]="selectionDeletable"
+                   (click)="onClickSelection($event)"
+                   (onDeleteItem)="onDeleteItem($event)"
+                   (onHighlightItem)="onHighlightItem($event)"
+        >
+        </selection>
+        <div [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}" class="ngs-search"
+             [formGroup]="textInputGroup">
+          <input formControlName="textInput" type="text" #search
+                 (blur)="onBlur($event)"
+                 (keydown)="onTextInputKeyDown($event)"
+          />
+        </div>
       </div>
 
       <div class="ngs-data" #dropdown>
@@ -87,6 +95,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() selectionDeletable: boolean = false;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
+  @Input() autocomplete: boolean = false;
 
   @Output() onSearch = new EventEmitter<any>();
   @Output() onNextPage = new EventEmitter<any>();
@@ -101,6 +110,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChildren('itemList') itemList: QueryList<ItemComponent>;
 
   data: any = [];
+  highlightedItem: any = null;
   textInputGroup: FormGroup;
   textInput: FormControl;
   activeListItem: any;
@@ -128,6 +138,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       if (this.$data) {
         this.$data.take(1).subscribe((data) => {
           this.data = data;
+          if (this.autocomplete && changes.$data.previousValue && this.textInput.value) {
+            this.expanded = true;
+          }
         });
       }
     }
@@ -155,16 +168,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
-      if (expanded) {
-        this.textInput.setValue('');
-        this._ngZone.runOutsideAngular(() => {
-          setTimeout(() => this.search.nativeElement.focus(), 0);
-        });
-      } else {
-        this._ngZone.runOutsideAngular(() => {
-          setTimeout(() => this.ngs.nativeElement.focus(), 0);
-        });
-      }
+      this._ngZone.runOutsideAngular(() => {
+        setTimeout(() => this.search.nativeElement.focus(), 0);
+      });
     });
 
     if (this.defaultSelectionRule) {
@@ -176,6 +182,22 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
         this.onSelect.emit(item);
       });
     }
+
+    this.onSelect.subscribe(() => {
+      this.textInput.setValue('');
+      // if (this.autocomplete) {
+      //   this.textInput.setValue('', {onlySelf: true, emitEvent: false});
+      // } else {
+      //   this.textInput.setValue('');
+      // }
+    });
+
+    // if (this.autocomplete) {
+    //   this.textInput.valueChanges.subscribe((value) => {
+    //     console.log(value);
+    //   })
+    // }
+
   }
 
   ngOnDestroy(): void {
@@ -184,7 +206,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onClickSelection() {
-    this.expandedChanged.emit(!this.expanded);
+    if (!this.autocomplete) {
+      this.expandedChanged.emit(!this.expanded);
+    }
   }
 
   selectItem(item: any) {
@@ -276,6 +300,23 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   onDeleteItem(_item: any) {
     this.selection = this.selection.filter(item => item !== _item);
+  }
+
+  onHighlightItem(_item: any) {
+    this.highlightedItem = _item;
+  }
+
+  onTextInputKeyDown(event: KeyboardEvent) {
+    if (this.autocomplete) {
+      if (event.keyCode === KEY_CODE.BACKSPACE && !this.textInput.value) {
+        if (!this.highlightedItem) {
+          this.highlightedItem = this.selection[this.selection.length - 1];
+        } else {
+          this.selection = this.selection.filter(item => item !== this.highlightedItem);
+          this.highlightedItem = null;
+        }
+      }
+    }
   }
 
   private scrollToTheBottom() {

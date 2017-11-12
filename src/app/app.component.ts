@@ -1,7 +1,7 @@
 import {Component} from '@angular/core';
-import {Observable} from "rxjs/Observable";
+import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
-import {Http} from "@angular/http";
+import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 
 export const COUNTRIES_DATA = {
@@ -67,6 +67,14 @@ export const COUNTRIES_DATA = {
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
 
+    <p>Simple select array of strings with search and autocomplete</p>
+    <app-ng-selectio
+      [$data]="$stringArray"
+      [showSearch]="true"
+      [autocomplete]="true"
+      (onSearch)="onSearchString($event)"
+    ></app-ng-selectio>
+    
     <p>remote data select with search and paging</p>
     <app-ng-selectio
       [$data]="$users"
@@ -78,6 +86,7 @@ export const COUNTRIES_DATA = {
       [selectionDeletable]="true"
       [paging]="true"
       [pagingDelay]="500"
+      [autocomplete]="true"
       (onSearch)="onSearch($event)"
       (onNextPage)="onNextPage($event)"
     ></app-ng-selectio>
@@ -127,7 +136,7 @@ export class AppComponent {
   }
 
   onSelectCountry(country: any) {
-    console.log(country);
+    //console.log(country);
   }
 
 
