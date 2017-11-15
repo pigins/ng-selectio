@@ -1,9 +1,7 @@
 import {
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, QueryList, Renderer2,
-  SimpleChanges,
-  ViewChild, ViewChildren
-} from '@angular/core';
+  Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
+  ViewChild} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/empty';
 import {FormControl, FormGroup} from '@angular/forms';
@@ -12,7 +10,7 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {ItemComponent} from './item.component';
+import {ListComponent} from "./list.component";
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -27,8 +25,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 @Component({
   selector: 'app-ng-selectio',
   template: `
-    <div [ngClass]="{'ngs': true, 'ngs-expanded': expanded}" #ngs tabindex="1" (blur)="onBlur($event)"
-         (keydown)="onKeyPress($event)">
+    
+    <div class="ngs" #ngs tabindex="1" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
 
       <div [ngClass]="{'autocomplete': autocomplete}">
         <selection #selectionComponent
@@ -53,31 +51,37 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           />
         </div>
       </div>
-
-      <div class="ngs-data" #dropdown>
-        <ul #ul (scroll)="onUlScroll($event)">
-          <ng-selectio-item *ngFor="let dataItem of data;" #itemList
-                            [isActive]="dataItem === activeListItem"
-                            [isSelected]="insideSelection(dataItem)"
-                            [data]="dataItem"
-                            [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-                            [renderItem]="dropdownItemRenderer"
-                            (mouseenter)="activeListItem = dataItem"
-                            (click)="selectItem(dataItem)"
-          >
-          </ng-selectio-item>
-          <li *ngIf="data.length === 0">
-            No data
-          </li>
-          <li *ngIf="loadingMoreResults">
-            Loading more results...
-          </li>
-        </ul>
-      </div>
+      
+      <ng-selectio-list #listComponent
+        [data]="data"
+        [selection]="selection"
+        [expanded]="expanded"
+        [loadingMoreResults]="loadingMoreResults"
+        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+        [renderItem]="dropdownItemRenderer"
+        [keyEvents]="keyEvents"              
+        [paging]="paging"                         
+        (onSelectItem)="selectItem($event)"
+        (onNextPage)="onNextPageStart()"
+      >
+      </ng-selectio-list>
 
     </div>
   `,
-  styleUrls: ['./ng-selectio.component.css']
+  styles: [`
+    .ngs {
+      border: 1px solid grey;
+    }
+    .autocomplete > * {
+      display: inline-block !important;
+    }
+    .autocomplete input {
+      border: none;
+    }
+    .autocomplete input:focus {
+      outline: none;
+    }
+  `]
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
@@ -101,27 +105,22 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onNextPage = new EventEmitter<any>();
   @Output() onSelect = new EventEmitter<any>();
 
-
-
-  @ViewChild('dropdown') dropdown: ElementRef;
   @ViewChild('search') search: ElementRef;
   @ViewChild('ngs') ngs: ElementRef;
-  @ViewChild('ul') ul: ElementRef;
-  @ViewChildren('itemList') itemList: QueryList<ItemComponent>;
+  @ViewChild('listComponent') listComponent: ListComponent;
 
   data: any = [];
   highlightedItem: any = null;
   textInputGroup: FormGroup;
   textInput: FormControl;
-  activeListItem: any;
   expanded: boolean;
   loadingMoreResults: boolean = false;
   private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
+  keyEvents = new EventEmitter<KeyboardEvent>()
 
-
-  constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef, private renderer: Renderer2) {
+  constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {
     this.textInput = new FormControl();
     this.textInputGroup = new FormGroup({
       textInput: this.textInput
@@ -129,11 +128,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.defaultSelectionRule) {
-      if (this.selectionMode === SELECTION_MODE_SINGLE) {
-
-      }
-    }
     if (changes.$data) {
       if (this.$data) {
         this.$data.take(1).subscribe((data) => {
@@ -168,9 +162,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
-      this._ngZone.runOutsideAngular(() => {
-        setTimeout(() => this.search.nativeElement.focus(), 0);
-      });
+      if (this.expanded) {
+        this._ngZone.runOutsideAngular(() => {
+          setTimeout(() => this.search.nativeElement.focus(), 0);
+        });
+      }
     });
 
     if (this.defaultSelectionRule) {
@@ -185,19 +181,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
     this.onSelect.subscribe(() => {
       this.textInput.setValue('');
-      // if (this.autocomplete) {
-      //   this.textInput.setValue('', {onlySelf: true, emitEvent: false});
-      // } else {
-      //   this.textInput.setValue('');
-      // }
     });
-
-    // if (this.autocomplete) {
-    //   this.textInput.valueChanges.subscribe((value) => {
-    //     console.log(value);
-    //   })
-    // }
-
   }
 
   ngOnDestroy(): void {
@@ -241,61 +225,19 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onKeyPress(event: KeyboardEvent) {
-    if (event.keyCode === KEY_CODE.ENTER) {
-      if (this.expanded) {
-        if (this.activeListItem) {
-          this.selectItem(this.activeListItem);
-        }
-      }
+    if (event.keyCode === KEY_CODE.DOWN_ARROW && !this.expanded && this.hasFocus()) {
+      this.expandedChanged.emit(true);
     }
-    if (event.keyCode === KEY_CODE.UP_ARROW) {
-      if (this.expanded) {
-        let currentIndex = this.data.indexOf(this.activeListItem);
-        if (currentIndex && currentIndex > 0) {
-          this.activeListItem = this.data[currentIndex - 1];
-        }
-        let item = this.getActiveItemComponent();
-        if (item) {
-          let top = item.getTopPosition();
-          if (top < (this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop -= item.getHeight();
-          }
-        }
-      }
-    }
-    if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      if (this.expanded) {
-        let currentIndex = this.data.indexOf(this.activeListItem);
-        if (currentIndex < this.data.length - 1) {
-          this.activeListItem = this.data[currentIndex + 1];
-        }
-        let item = this.getActiveItemComponent();
-        if (item) {
-          let bottom = item.getBottomPosition();
-          if (bottom > (this.ul.nativeElement.offsetHeight + this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop += item.getHeight();
-          }
-        }
-      } else {
-        if (this.hasFocus()) {
-          this.expandedChanged.emit(true);
-        }
-      }
-    }
+    this.keyEvents.emit(event);
   }
 
-  onUlScroll() {
-    if (!this.paging) {
-      return;
-    }
-    if(this.scrollExhausted() && !this.loadingMoreResults) {
-      this.loadingMoreResults = true;
-      this.changeDetectorRef.detectChanges();
-      this.scrollToTheBottom();
-      setTimeout(() => {
-        this.onNextPage.emit({currentLength: this.data.length, search: this.textInput.value});
-      }, this.pagingDelay);
-    }
+  onNextPageStart() {
+    this.loadingMoreResults = true;
+    this.changeDetectorRef.detectChanges();
+    this.listComponent.scrollToTheBottom();
+    setTimeout(() => {
+      this.onNextPage.emit({currentLength: this.data.length, search: this.textInput.value});
+    }, this.pagingDelay);
   }
 
   onDeleteItem(_item: any) {
@@ -317,35 +259,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
         }
       }
     }
-  }
-
-  private scrollToTheBottom() {
-    this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
-  }
-
-  private scrollExhausted() {
-    let ul = this.ul.nativeElement;
-    return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
-  }
-
-  private getActiveItemComponent(): ItemComponent {
-    let activeLis = this.itemList.filter((item: ItemComponent) => {
-      return item.data === this.activeListItem;
-    });
-    if (activeLis.length > 0) {
-      return activeLis[0];
-    } else {
-      return null;
-    }
-  }
-
-  insideSelection(item: any): boolean {
-    for (let i = 0; i < this.selection.length; i++) {
-      if (item === this.selection[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   private hasFocus(): boolean {
