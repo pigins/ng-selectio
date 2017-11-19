@@ -4,7 +4,7 @@ import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
   selector: 'ng-selectio-item',
   template: `
     <li #li
-        [ngClass]="{'active': isActive, 'selected': isSelected}"
+        [ngClass]="{'active': isActive, 'selected': isSelected, 'disabled': disabled}"
         [innerHtml]="bypassSecurityTrustHtml ? (_renderItem() | safeHtml) : (_renderItem())"
     >
     </li>
@@ -16,6 +16,9 @@ import {Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
     .selected {
       background-color: grey;
     }
+    .disabled {
+      color: gray;
+    }
   `]
 })
 export class ItemComponent implements OnInit {
@@ -23,10 +26,13 @@ export class ItemComponent implements OnInit {
   @Input() data: any;
   @Input() isActive: boolean;
   @Input() isSelected: boolean;
-  @Input() renderItem: (item:any) => string;
+  @Input() disabled: boolean;
+  @Input() itemRenderer: (item:any, disabled: boolean) => string;
   @Input() bypassSecurityTrustHtml: boolean = false;
 
-  defaultRenderItem:(item:any) => string = (item) => {
+
+
+  defaultItemRenderer:(item:any, disabled: boolean) => string = (item) => {
     if (typeof item === "string") {
       return item;
     } else if (typeof item === "number") {
@@ -44,7 +50,7 @@ export class ItemComponent implements OnInit {
   }
 
   private _renderItem():string {
-    return this.renderItem ? this.renderItem(this.data): this.defaultRenderItem(this.data);
+    return this.itemRenderer ? this.itemRenderer(this.data, this.disabled): this.defaultItemRenderer(this.data, this.disabled);
   }
 
   public getHeight(): number {

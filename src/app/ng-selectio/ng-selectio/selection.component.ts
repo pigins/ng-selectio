@@ -1,13 +1,13 @@
-import {Component, EventEmitter, Input, Output, QueryList, ViewChildren} from '@angular/core';
+import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
 import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
 
 @Component({
   selector: 'selection',
   template: `
-    <div class="ngs-selection">
+    <div [ngClass]="{'ngs-selection': true, 'disabled': disabled}">
       <div *ngIf="this.items.length === 0" class="selection">
-        <span *ngIf="showEmptySelection">No selection</span>
+        <span *ngIf="emptyRenderer" [innerHtml]="bypassSecurityTrustHtml ? ((emptyRenderer()) | safeHtml) : (emptyRenderer())"></span>
       </div>
       <div *ngIf="singleMode()" class="selection">
         <div
@@ -18,7 +18,7 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
         </div>
       </div>
       <div *ngIf="multipleMode() && !deletable" class="selection">
-        <div *ngFor="let item of items; let i = index" #selItem
+        <div *ngFor="let item of items;"
           [ngClass]="{'multiple': true, 'selected': highlightedItem === item}" 
           [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))" 
           (click)="highlight(item)"
@@ -71,28 +71,24 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
     
   `]
 })
-export class SelectionComponent {
+export class SelectionComponent implements OnInit{
+  ngOnInit(): void {
+  }
 
   @Input() items: any[];
   @Input() highlightedItem: any = null;
   @Input() bypassSecurityTrustHtml: boolean = false;
-  @Input() itemRenderer = (item: any) => {return JSON.stringify(item);};
+  @Input() itemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item);};
+  @Input() emptyRenderer: () => string = () => {return 'no data'};
   @Input() selectionMode = SELECTION_MODE_SINGLE;
   @Input() deletable = false;
   @Input() showArrow = true;
-  @Input() showEmptySelection = true;
+  @Input() disabled = false;
 
+  @Output() onDeleteItem = new EventEmitter<any>();
+  @Output() onHighlightItem = new EventEmitter<any>();
 
-  @Output()
-  onDeleteItem = new EventEmitter<any>();
-  @Output()
-  onHighlightItem = new EventEmitter<any>();
-
-
-
-  constructor() {
-
-  }
+  constructor() {}
 
   singleMode() {
     return this.selectionMode === SELECTION_MODE_SINGLE;
@@ -103,18 +99,21 @@ export class SelectionComponent {
   }
 
   onDeleteClick(event: MouseEvent, item: any) {
+    if (this.disabled) {
+      return;
+    }
     event.stopPropagation();
     this.onDeleteItem.emit(item);
   }
 
   highlight(item: any) {
+    if (this.disabled) {
+      return;
+    }
     if (this.highlightedItem === item) {
       this.onHighlightItem.emit(null);
-      //this.highlightedItem = null;
     } else {
       this.onHighlightItem.emit(item);
-      //this.highlightedItem = item;
     }
-
   }
 }

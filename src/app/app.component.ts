@@ -45,9 +45,19 @@ export const COUNTRIES_DATA = {
 @Component({
   selector: 'app-root',
   template: `
+    <button (click)="disabled = !disabled">{{disabled?'enable':'disable'}}</button>
+    <button (click)="closeOnSelect = !closeOnSelect">{{closeOnSelect?'not close on select':'close on select'}}</button>
+    <div>
+      <label style="display: inline-block">maxSelectionLength</label><input type="number" (change)="maxSelectionLength = $event.srcElement.value" style="display: inline-block"/>
+    </div>
+    
     <p>Simple select array of strings</p>
     <app-ng-selectio
       [$data]="$stringArray"
+      [disabled]="disabled"
+      [closeOnSelect]="closeOnSelect"
+      [selectionEmptyRenderer]="noDataRenderer"
+      [dropdownDisabledItemMapper]="disabledItem"
     ></app-ng-selectio>
 
     <p>Simple select array of objects</p>
@@ -57,12 +67,16 @@ export const COUNTRIES_DATA = {
       [selectionItemRenderer]="renderCountry"
       [defaultSelectionRule]="defaultSelectionRule"
       [bypassSecurityTrustHtml]="true"
+      [disabled]="disabled"
+      [closeOnSelect]="closeOnSelect"
       (onSelect)="onSelectCountry($event)"
     ></app-ng-selectio>
 
     <p>Simple select array of strings with search</p>
     <app-ng-selectio
       [$data]="$stringArray"
+      [disabled]="disabled"
+      [closeOnSelect]="closeOnSelect"
       [showSearch]="true"
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
@@ -70,6 +84,8 @@ export const COUNTRIES_DATA = {
     <p>Simple select array of strings with search and autocomplete</p>
     <app-ng-selectio
       [$data]="$stringArray"
+      [disabled]="disabled"
+      [closeOnSelect]="closeOnSelect"
       [showSearch]="true"
       [autocomplete]="true"
       (onSearch)="onSearchString($event)"
@@ -79,6 +95,9 @@ export const COUNTRIES_DATA = {
     <app-ng-selectio
       [$data]="$users"
       [$appendData]="$appendUsers"
+      [disabled]="disabled"
+      [closeOnSelect]="closeOnSelect"
+      [maxSelectionLength] = "maxSelectionLength"
       [dropdownItemRenderer]="renderItem"
       [selectionItemRenderer]="renderItem"
       [selectionMode]="'multiple'"
@@ -86,7 +105,6 @@ export const COUNTRIES_DATA = {
       [selectionDeletable]="true"
       [paging]="true"
       [pagingDelay]="500"
-      [autocomplete]="true"
       (onSearch)="onSearch($event)"
       (onNextPage)="onNextPage($event)"
     ></app-ng-selectio>
@@ -104,8 +122,11 @@ export class AppComponent {
   $users: Observable<any>;
   $appendUsers: Observable<any>;
 
-  constructor(private http: Http) {
+  disabled = false;
+  closeOnSelect = true;
+  maxSelectionLength: number = -1;
 
+  constructor(private http: Http) {
     this.$objectArray = Observable.of(this.objectArray);
   }
   onSearchString(term: string) {
@@ -122,6 +143,10 @@ export class AppComponent {
       .map(r => r.json()).map(r => r.results);
   }
 
+  disabledItem(item: any) {
+    return item === 'canada'
+  }
+
   renderItem(item: any) {
     return item.name.first;
   }
@@ -134,7 +159,12 @@ export class AppComponent {
                <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
            </div>`
   }
-
+  onChangeMaxSelection(change: Event) {
+    console.log((<any>change.srcElement).value);
+  }
+  noDataRenderer() {
+    return 'Нет данных';
+  }
   onSelectCountry(country: any) {
     //console.log(country);
   }

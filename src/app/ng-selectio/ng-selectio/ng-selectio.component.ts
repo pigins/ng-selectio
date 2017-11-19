@@ -18,14 +18,13 @@ export enum KEY_CODE {
   ENTER = 13,
   BACKSPACE = 8
 }
-
 export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
   selector: 'app-ng-selectio',
   template: `
-    
+
     <div class="ngs" #ngs tabindex="1" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
 
       <div [ngClass]="{'autocomplete': autocomplete}">
@@ -33,36 +32,44 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                    [items]="selection"
                    [highlightedItem]="highlightedItem"
                    [itemRenderer]="selectionItemRenderer"
+                   [emptyRenderer]="autocomplete? null: selectionEmptyRenderer"
                    [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
                    [selectionMode]="selectionMode"
                    [showArrow]="!autocomplete"
-                   [showEmptySelection]="!autocomplete"
                    [deletable]="selectionDeletable"
+                   [disabled]="disabled"
                    (click)="onClickSelection($event)"
                    (onDeleteItem)="onDeleteItem($event)"
                    (onHighlightItem)="onHighlightItem($event)"
         >
         </selection>
-        <div [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}" class="ngs-search"
+        <div class="ngs-search"
+             [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}"
              [formGroup]="textInputGroup">
-          <input formControlName="textInput" type="text" #search
+          <input formControlName="textInput" type="text" #search [attr.placeholder]="placeholder"
                  (blur)="onBlur($event)"
                  (keydown)="onTextInputKeyDown($event)"
           />
         </div>
       </div>
-      
+
       <ng-selectio-list #listComponent
-        [data]="data"
-        [selection]="selection"
-        [expanded]="expanded"
-        [loadingMoreResults]="loadingMoreResults"
-        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-        [renderItem]="dropdownItemRenderer"
-        [keyEvents]="keyEvents"              
-        [paging]="paging"                         
-        (onSelectItem)="selectItem($event)"
-        (onNextPage)="onNextPageStart()"
+                        [data]="data"
+                        [selection]="selection"
+                        [expanded]="expanded"
+                        [loadingMoreResults]="loadingMoreResults"
+                        [searching]="searching"
+                        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+                        [itemRenderer]="dropdownItemRenderer"
+                        [disabledItemMapper]="dropdownDisabledItemMapper" 
+                        [emptyRenderer]="dropdownEmptyRenderer"
+                        [pagingMessageRenderer]="dropdownPagingMessageRenderer"
+                        [searchingRenderer]="dropdownSearchingRenderer"
+                        [keyEvents]="keyEvents"
+                        [paging]="paging"
+                        [disabled]="disabled"
+                        (onSelectItem)="selectItem($event)"
+                        (onNextPage)="onNextPageStart()"
       >
       </ng-selectio-list>
 
@@ -93,13 +100,27 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() bypassSecurityTrustHtml: boolean = false;
   @Input() delay: number = 0;
   @Input() minLengthForAutocomplete: number = 0;
-  @Input() dropdownItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
+
+  // Renderers
+  @Input() dropdownItemRenderer:(item: any, disabled: boolean) => string = (item: any, disabled: boolean) => {return JSON.stringify(item)};
+  @Input() dropdownEmptyRenderer: () => string = () => {return 'Enter 1 or more characters'};
+  @Input() dropdownPagingMessageRenderer: () => string = () => {return 'Loading more results...'};
+  @Input() dropdownSearchingRenderer: () => string = () => {return 'Searching...'};
+  @Input() dropdownDisabledItemMapper: (item: any) => boolean = (item: any) => {return false};
+
   @Input() selectionItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
+  @Input() selectionEmptyRenderer: () => string = () => {return 'No data'};
+  @Input() placeholder: string = '';
+
+
   @Input() showSearch: boolean = false;
   @Input() selectionDeletable: boolean = false;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
   @Input() autocomplete: boolean = false;
+  @Input() disabled = false;
+  @Input() closeOnSelect = true;
+  @Input() maxSelectionLength: number = -1;
 
   @Output() onSearch = new EventEmitter<any>();
   @Output() onNextPage = new EventEmitter<any>();
@@ -115,13 +136,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   textInput: FormControl;
   expanded: boolean;
   loadingMoreResults: boolean = false;
+  searching: boolean = false;
   private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
-  keyEvents = new EventEmitter<KeyboardEvent>()
+  keyEvents = new EventEmitter<KeyboardEvent>();
 
   constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {
-    this.textInput = new FormControl();
+    this.textInput = new FormControl({value: '', disabled: this.disabled});
     this.textInputGroup = new FormGroup({
       textInput: this.textInput
     });
@@ -135,6 +157,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
           if (this.autocomplete && changes.$data.previousValue && this.textInput.value) {
             this.expanded = true;
           }
+          this.searching = false;
         });
       }
     }
@@ -146,6 +169,13 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
         });
       }
     }
+    if (changes.disabled) {
+      if (this.disabled) {
+        this.textInput.disable();
+      } else {
+        this.textInput.enable();
+      }
+    }
   }
 
   ngOnInit() {
@@ -154,6 +184,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       .filter(e => this.textInput.value.length >= this.minLengthForAutocomplete)
       .subscribe(v => {
         this.onSearch.emit(v);
+        this.searching = true;
       });
 
     if (!this.$data) {
@@ -199,9 +230,13 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [item];
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-      this.selection.push(item);
+      if (this.maxSelectionLength < 0 || (this.selection.length + 1 <= this.maxSelectionLength)) {
+        this.selection.push(item);
+      }
     }
-    this.expandedChanged.emit(false);
+    if (this.closeOnSelect) {
+      this.expandedChanged.emit(false);
+    }
     this.onSelect.emit(item);
   }
 
@@ -269,4 +304,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  public getTextInput() {
+    return this.textInput;
+  }
 }

@@ -9,23 +9,27 @@ import {Observable} from "rxjs/Observable";
 @Component({
   selector: 'ng-selectio-list',
   template: `
-    <div [ngClass]="{'ngs-data': true, 'ngs-expanded': expanded}" #dropdown>
+    <div [ngClass]="{'ngs-data': true, 'ngs-expanded': !disabled && expanded}" #dropdown>
       <ul #ul (scroll)="onUlScroll($event)">
         <ng-selectio-item *ngFor="let dataItem of data;" #itemList
-                          [isActive]="dataItem === activeListItem"
+                          [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
                           [isSelected]="insideSelection(dataItem)"
                           [data]="dataItem"
                           [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-                          [renderItem]="renderItem"
+                          [itemRenderer]="itemRenderer"
+                          [disabled]="disabledItemMapper(dataItem)"
                           (mouseenter)="activeListItem = dataItem"
                           (click)="onClickItem(dataItem)"
         >
         </ng-selectio-item>
-        <li *ngIf="data.length === 0">
-          No data
+        <li *ngIf="emptyRenderer && (data.length === 0)"
+            [innerHtml]="bypassSecurityTrustHtml? (emptyRenderer() | safeHtml): (emptyRenderer())">
         </li>
-        <li *ngIf="loadingMoreResults">
-          Loading more results...
+        <li *ngIf="pagingMessageRenderer && loadingMoreResults"
+            [innerHtml]="bypassSecurityTrustHtml? (pagingMessageRenderer() | safeHtml): (pagingMessageRenderer())">
+        </li>
+        <li *ngIf="searchingRenderer && searching"
+            [innerHtml]="bypassSecurityTrustHtml? (searchingRenderer() | safeHtml): (searchingRenderer())">
         </li>
       </ul>
     </div>
@@ -57,17 +61,23 @@ import {Observable} from "rxjs/Observable";
 export class ListComponent implements OnInit, OnChanges {
 
 
-  @Input() data;
+  @Input() data: any[];
   @Input() selection: any[];
   @Input() loadingMoreResults: boolean;
-
-
+  @Input() searching: boolean;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
-  @Input() renderItem;
+
+  @Input() itemRenderer:(item: any, disabled: boolean) => string = (item: any, disabled: boolean) => {return JSON.stringify(item)};
+  @Input() emptyRenderer: () => string = () => {return 'Enter 1 or more characters'};
+  @Input() pagingMessageRenderer: () => string = () => {return 'Loading more results...'};
+  @Input() searchingRenderer:() => string = () => {return 'Searching...'};
+  @Input() disabledItemMapper: (item: any) => boolean = (item: any) => {return false};
+
   @Input() bypassSecurityTrustHtml: false;
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
+  @Input() disabled: false;
 
   @Output() onNextPage = new EventEmitter<any>();
   @Output() onSelectItem = new EventEmitter<any>();
@@ -76,18 +86,23 @@ export class ListComponent implements OnInit, OnChanges {
   @ViewChildren('itemList') itemList: QueryList<ItemComponent>;
 
   activeListItem: any;
+  enabledData: any[];
 
   constructor() {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-
+    if (changes.data) {
+      this.enabledData = this.data.filter((dataElem) => {
+        return !this.disabledItemMapper(dataElem);
+      });
+    }
   }
 
   ngOnInit() {
     this.keyEvents.subscribe((event) => {
       this.onKeyPress(event);
-    })
+    });
   }
 
   onUlScroll() {
@@ -100,6 +115,9 @@ export class ListComponent implements OnInit, OnChanges {
   }
 
   onClickItem(dataItem: any) {
+    if (this.disabledItemMapper(dataItem)) {
+      return;
+    }
     this.onSelectItem.emit(dataItem);
   }
   onKeyPress(event: KeyboardEvent) {
@@ -108,9 +126,10 @@ export class ListComponent implements OnInit, OnChanges {
     }
     if (event.keyCode === KEY_CODE.UP_ARROW) {
       if (this.expanded) {
-        let currentIndex = this.data.indexOf(this.activeListItem);
+        let currentIndex = this.enabledData.indexOf(this.activeListItem);
+
         if (currentIndex && currentIndex > 0) {
-          this.activeListItem = this.data[currentIndex - 1];
+          this.activeListItem = this.enabledData[currentIndex - 1];
         }
         let item = this.getActiveItemComponent();
         if (item) {
@@ -123,9 +142,9 @@ export class ListComponent implements OnInit, OnChanges {
     }
     if (event.keyCode === KEY_CODE.DOWN_ARROW) {
       if (this.expanded) {
-        let currentIndex = this.data.indexOf(this.activeListItem);
-        if (currentIndex < this.data.length - 1) {
-          this.activeListItem = this.data[currentIndex + 1];
+        let currentIndex = this.enabledData.indexOf(this.activeListItem);
+        if (currentIndex < this.enabledData.length - 1) {
+          this.activeListItem = this.enabledData[currentIndex + 1];
         }
         let item = this.getActiveItemComponent();
         if (item) {
