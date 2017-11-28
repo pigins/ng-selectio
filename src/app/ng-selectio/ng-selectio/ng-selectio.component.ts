@@ -12,6 +12,7 @@ import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
 import {DropdownComponent} from "./dropdown.component";
 import {Template} from "./template";
+import {Item} from "./item";
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -93,8 +94,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() $data: Observable<any> = Observable.empty();
-  @Input() $appendData: Observable<any> = Observable.empty();
+  @Input() $data: Observable<Item[]> = Observable.empty();
+  @Input() $appendData: Observable<Item[]> = Observable.empty();
   @Input() selection = [];
   @Input() selectionMode = SELECTION_MODE_SINGLE;
   @Input() bypassSecurityTrustHtml: boolean = false;
@@ -107,12 +108,12 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() disabled = false;
   @Input() closeOnSelect = true;
   @Input() maxSelectionLength: number = -1;
-  @Input() defaultSelectionRule: (item: any[]) => any[] = (items: any[]) => {return []};
+  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]) => {return []};
   @Input() selectionDeletable: boolean;
-  @Input() dropdownDisabledItemMapper: (item: any) => boolean = (item: any) => {return false};
+  @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => {return false};
 
   // templates
-  static defaultItemRenderer = (item: any) => {
+  static defaultItemRenderer = (item: Item) => {
     if (typeof item === "string") {
       return item;
     } else if (typeof item === "number") {
@@ -121,8 +122,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       return JSON.stringify(item);
     }
   };
-  @Input() dropdownItemRenderer: Template<(countryItem: any, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
-  @Input() selectionItemRenderer: Template<(item: any) => string> = NgSelectioComponent.defaultItemRenderer;
+  @Input() dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
+  @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() dropdownMaxHeight: '100px';
   @Input() placeholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
@@ -130,16 +131,16 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
-  @Output() onSearch = new EventEmitter<any>();
-  @Output() onNextPage = new EventEmitter<any>();
-  @Output() onSelect = new EventEmitter<any>();
+  @Output() onSearch = new EventEmitter<string>();
+  @Output() onNextPage = new EventEmitter<{currentLength: number, search: string}>();
+  @Output() onSelect = new EventEmitter<Item>();
 
   @ViewChild('search') search: ElementRef;
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('dropdownComponent') dropdownComponent: DropdownComponent;
 
-  data: any = [];
-  highlightedItem: any = null;
+  data: Item[] = [];
+  highlightedItem: Item = null;
   textInputGroup: FormGroup;
   textInput: FormControl;
   expanded: boolean;
@@ -190,7 +191,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     this.searchTextChangeSubscription = this.textInput.valueChanges
       .debounceTime(this.searchDelay)
       .filter(e => this.textInput.value.length >= this.minLengthForAutocomplete)
-      .subscribe(v => {
+      .subscribe((v: string) => {
         this.onSearch.emit(v);
         this.searching = true;
       });
@@ -213,7 +214,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (this.selection.length > 0) {
-      this.selection.forEach((item) => {
+      this.selection.forEach((item: Item) => {
         this.onSelect.emit(item);
       });
     }
@@ -234,7 +235,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  selectItem(item: any) {
+  selectItem(item: Item) {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [item];
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
@@ -283,11 +284,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }, this.pagingDelay);
   }
 
-  onDeleteItem(_item: any) {
+  onDeleteItem(_item: Item) {
     this.selection = this.selection.filter(item => item !== _item);
   }
 
-  onHighlightItem(_item: any) {
+  onHighlightItem(_item: Item) {
     this.highlightedItem = _item;
   }
 

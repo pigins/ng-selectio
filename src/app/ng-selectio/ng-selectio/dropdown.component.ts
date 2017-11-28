@@ -6,6 +6,7 @@ import {KEY_CODE} from "./ng-selectio.component";
 import {ItemComponent} from "./item.component";
 import {Observable} from "rxjs/Observable";
 import {Template} from "./template";
+import {Item} from "./item";
 
 
 @Component({
@@ -59,8 +60,8 @@ import {Template} from "./template";
 })
 export class DropdownComponent implements OnInit, OnChanges {
   // self inputs
-  @Input() data: any[];
-  @Input() selection: any[];
+  @Input() data: Item[];
+  @Input() selection: Item[];
   @Input() loadingMoreResults: boolean;
   @Input() searching: boolean;
   @Input() pagingDelay: number;
@@ -69,25 +70,25 @@ export class DropdownComponent implements OnInit, OnChanges {
   // transport inputs
   @Input() maxHeight: string;
   @Input() maxItemsCount: number;
-  @Input() itemRenderer: Template<(countryItem: any, disabled: boolean) => string>;
+  @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
   @Input() emptyRenderer: Template<() => string>;
   @Input() pagingMessageRenderer: Template<() => string>;
   @Input() searchingRenderer: Template<() => string>;
-  @Input() disabledItemMapper: (item: any) => boolean;
+  @Input() disabledItemMapper: (item: Item) => boolean;
 
   @Input() bypassSecurityTrustHtml: false;
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
   @Input() disabled: false;
 
-  @Output() onNextPage = new EventEmitter<any>();
-  @Output() onSelectItem = new EventEmitter<any>();
+  @Output() onNextPage = new EventEmitter<void>();
+  @Output() onSelectItem = new EventEmitter<Item>();
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList') itemList: QueryList<ItemComponent>;
 
-  activeListItem: any;
-  enabledData: any[];
+  activeListItem: Item;
+  enabledData: Item[];
 
   constructor() {
   }
@@ -115,7 +116,7 @@ export class DropdownComponent implements OnInit, OnChanges {
     }
   }
 
-  onClickItem(dataItem: any) {
+  onClickItem(dataItem: Item) {
     if (this.disabledItemMapper(dataItem)) {
       return;
     }
@@ -178,7 +179,7 @@ export class DropdownComponent implements OnInit, OnChanges {
     }
   }
 
-  insideSelection(item: any): boolean {
+  insideSelection(item: Item): boolean {
     for (let i = 0; i < this.selection.length; i++) {
       if (item === this.selection[i]) {
         return true;

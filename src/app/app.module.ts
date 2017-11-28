@@ -6,7 +6,6 @@ import {NgSelectioComponent} from './ng-selectio/ng-selectio/ng-selectio.compone
 import {ReactiveFormsModule} from "@angular/forms";
 import {HttpModule} from "@angular/http";
 import {ItemComponent} from './ng-selectio/ng-selectio/item.component';
-import {SafeHtmlPipe} from "./ng-selectio/ng-selectio/safe-html.pipe";
 import {SelectionComponent} from "./ng-selectio/ng-selectio/selection.component";
 import {DropdownComponent} from "./ng-selectio/ng-selectio/dropdown.component";
 import {TemplatePipe} from "./ng-selectio/ng-selectio/template.pipe";
@@ -18,8 +17,7 @@ import {TemplatePipe} from "./ng-selectio/ng-selectio/template.pipe";
     ItemComponent,
     SelectionComponent,
     DropdownComponent,
-    TemplatePipe,
-    SafeHtmlPipe
+    TemplatePipe
   ],
   imports: [
     BrowserModule,

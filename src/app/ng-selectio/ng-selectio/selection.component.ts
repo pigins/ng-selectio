@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
 import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
 import {Template} from "./template";
+import {Item} from "./item";
 
 @Component({
   selector: 'selection',
@@ -76,17 +77,17 @@ export class SelectionComponent implements OnInit{
   ngOnInit(): void {
   }
 
-  @Input() items: any[];
-  @Input() highlightedItem: any;
-  @Input() itemRenderer: Template<(item: any) => string>;
+  @Input() items: Item[];
+  @Input() highlightedItem: Item;
+  @Input() itemRenderer: Template<(item: Item) => string>;
   @Input() emptyRenderer: () => string;
   @Input() selectionMode;
   @Input() deletable;
   @Input() showArrow;
   @Input() disabled;
 
-  @Output() onDeleteItem = new EventEmitter<any>();
-  @Output() onHighlightItem = new EventEmitter<any>();
+  @Output() onDeleteItem = new EventEmitter<Item>();
+  @Output() onHighlightItem = new EventEmitter<Item>();
 
   constructor() {}
 
@@ -98,7 +99,7 @@ export class SelectionComponent implements OnInit{
     return this.selectionMode === SELECTION_MODE_MULTIPLE;
   }
 
-  onDeleteClick(event: MouseEvent, item: any) {
+  onDeleteClick(event: MouseEvent, item: Item) {
     if (this.disabled) {
       return;
     }
@@ -106,7 +107,7 @@ export class SelectionComponent implements OnInit{
     this.onDeleteItem.emit(item);
   }
 
-  highlight(item: any) {
+  highlight(item: Item) {
     if (this.disabled) {
       return;
     }

@@ -1,5 +1,6 @@
 import {AfterViewChecked, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
 import {Template} from "./template";
+import {Item} from "./item";
 
 @Component({
   selector: 'ng-selectio-item',
@@ -24,11 +25,11 @@ import {Template} from "./template";
 })
 export class ItemComponent implements OnInit, AfterViewChecked {
 
-  @Input() data: any;
+  @Input() data: Item;
   @Input() isActive: boolean;
   @Input() isSelected: boolean;
   @Input() disabled: boolean;
-  @Input() itemRenderer: Template<(countryItem: any, disabled: boolean) => string>;
+  @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
 
   @ViewChild('li') li: ElementRef;
   constructor() {
