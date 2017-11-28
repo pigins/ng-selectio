@@ -1,26 +1,27 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
 import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
+import {Template} from "./template";
 
 @Component({
   selector: 'selection',
   template: `
     <div [ngClass]="{'ngs-selection': true, 'disabled': disabled}">
       <div *ngIf="this.items.length === 0" class="selection">
-        <span *ngIf="emptyRenderer" [innerHtml]="bypassSecurityTrustHtml ? ((emptyRenderer()) | safeHtml) : (emptyRenderer())"></span>
+        <span [innerHtml]="emptyRenderer | template"></span>
       </div>
       <div *ngIf="singleMode()" class="selection">
         <div
           [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}" 
-          [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(items[0])) | safeHtml) : (itemRenderer(items[0]))"
+          [innerHtml]="itemRenderer | template:items[0]"
           (click)="highlight(items[0])"
         >
         </div>
       </div>
       <div *ngIf="multipleMode() && !deletable" class="selection">
         <div *ngFor="let item of items;"
-          [ngClass]="{'multiple': true, 'selected': highlightedItem === item}" 
-          [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))" 
+          [ngClass]="{'multiple': true, 'selected': highlightedItem === item}"
+          [innerHtml]="itemRenderer | template:item" 
           (click)="highlight(item)"
         >
         </div>
@@ -31,7 +32,7 @@ import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
           (click)="highlight(item)"
         >
           <span class="delete" (click)="onDeleteClick($event, item)">X</span>
-          <span [innerHtml]="bypassSecurityTrustHtml ? ((itemRenderer(item)) | safeHtml) : (itemRenderer(item))"></span>
+          <span [innerHtml]="itemRenderer | template:item"></span>
         </div>
       </div>
       <span *ngIf="showArrow" class="arrow"></span>
@@ -76,14 +77,13 @@ export class SelectionComponent implements OnInit{
   }
 
   @Input() items: any[];
-  @Input() highlightedItem: any = null;
-  @Input() bypassSecurityTrustHtml: boolean = false;
-  @Input() itemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item);};
-  @Input() emptyRenderer: () => string = () => {return 'no data'};
-  @Input() selectionMode = SELECTION_MODE_SINGLE;
-  @Input() deletable = false;
-  @Input() showArrow = true;
-  @Input() disabled = false;
+  @Input() highlightedItem: any;
+  @Input() itemRenderer: Template<(item: any) => string>;
+  @Input() emptyRenderer: () => string;
+  @Input() selectionMode;
+  @Input() deletable;
+  @Input() showArrow;
+  @Input() disabled;
 
   @Output() onDeleteItem = new EventEmitter<any>();
   @Output() onHighlightItem = new EventEmitter<any>();

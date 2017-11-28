@@ -5,31 +5,32 @@ import {
 import {KEY_CODE} from "./ng-selectio.component";
 import {ItemComponent} from "./item.component";
 import {Observable} from "rxjs/Observable";
+import {Template} from "./template";
+
 
 @Component({
-  selector: 'ng-selectio-list',
+  selector: 'ng-selectio-dropdown',
   template: `
     <div [ngClass]="{'ngs-data': true, 'ngs-expanded': !disabled && expanded}" #dropdown>
-      <ul #ul (scroll)="onUlScroll($event)">
-        <ng-selectio-item *ngFor="let dataItem of data;" #itemList
+      <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
+        <ng-selectio-item *ngFor="let dataItem of data;" #itemList 
                           [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
                           [isSelected]="insideSelection(dataItem)"
                           [data]="dataItem"
-                          [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
                           [itemRenderer]="itemRenderer"
                           [disabled]="disabledItemMapper(dataItem)"
                           (mouseenter)="activeListItem = dataItem"
                           (click)="onClickItem(dataItem)"
         >
         </ng-selectio-item>
-        <li *ngIf="emptyRenderer && (data.length === 0)"
-            [innerHtml]="bypassSecurityTrustHtml? (emptyRenderer() | safeHtml): (emptyRenderer())">
+        <li *ngIf="(data.length === 0)"
+            [innerHtml]="emptyRenderer | template">
         </li>
-        <li *ngIf="pagingMessageRenderer && loadingMoreResults"
-            [innerHtml]="bypassSecurityTrustHtml? (pagingMessageRenderer() | safeHtml): (pagingMessageRenderer())">
+        <li *ngIf="loadingMoreResults"
+            [innerHtml]="pagingMessageRenderer | template">
         </li>
-        <li *ngIf="searchingRenderer && searching"
-            [innerHtml]="bypassSecurityTrustHtml? (searchingRenderer() | safeHtml): (searchingRenderer())">
+        <li *ngIf="searching"
+            [innerHtml]="searchingRenderer | template">
         </li>
       </ul>
     </div>
@@ -37,8 +38,10 @@ import {Observable} from "rxjs/Observable";
   styles: [`
     .ngs-data {
       display: none;
-      cursor: pointer;
       position: relative;
+    }
+    .ngs-data.ngs-expanded {
+      display: block;
     }
     .ngs-data ul {
       position: absolute;
@@ -50,29 +53,27 @@ import {Observable} from "rxjs/Observable";
       margin: 0;
       padding: 0;
       width: 100%;
-      max-height: 100px;
       overflow-y: auto;
     }
-    .ngs-data.ngs-expanded {
-      display: block;
-    }
-  `]
+   `]
 })
-export class ListComponent implements OnInit, OnChanges {
-
-
+export class DropdownComponent implements OnInit, OnChanges {
+  // self inputs
   @Input() data: any[];
   @Input() selection: any[];
   @Input() loadingMoreResults: boolean;
   @Input() searching: boolean;
-  @Input() pagingDelay: number = 0;
+  @Input() pagingDelay: number;
   @Input() paging: boolean = false;
 
-  @Input() itemRenderer:(item: any, disabled: boolean) => string = (item: any, disabled: boolean) => {return JSON.stringify(item)};
-  @Input() emptyRenderer: () => string = () => {return 'Enter 1 or more characters'};
-  @Input() pagingMessageRenderer: () => string = () => {return 'Loading more results...'};
-  @Input() searchingRenderer:() => string = () => {return 'Searching...'};
-  @Input() disabledItemMapper: (item: any) => boolean = (item: any) => {return false};
+  // transport inputs
+  @Input() maxHeight: string;
+  @Input() maxItemsCount: number;
+  @Input() itemRenderer: Template<(countryItem: any, disabled: boolean) => string>;
+  @Input() emptyRenderer: Template<() => string>;
+  @Input() pagingMessageRenderer: Template<() => string>;
+  @Input() searchingRenderer: Template<() => string>;
+  @Input() disabledItemMapper: (item: any) => boolean;
 
   @Input() bypassSecurityTrustHtml: false;
   @Input() expanded: boolean;

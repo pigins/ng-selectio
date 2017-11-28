@@ -10,7 +10,8 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {ListComponent} from "./list.component";
+import {DropdownComponent} from "./dropdown.component";
+import {Template} from "./template";
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -32,8 +33,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                    [items]="selection"
                    [highlightedItem]="highlightedItem"
                    [itemRenderer]="selectionItemRenderer"
-                   [emptyRenderer]="autocomplete? null: selectionEmptyRenderer"
-                   [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+                   [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
                    [selectionMode]="selectionMode"
                    [showArrow]="!autocomplete"
                    [deletable]="selectionDeletable"
@@ -53,25 +53,26 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         </div>
       </div>
 
-      <ng-selectio-list #listComponent
-                        [data]="data"
-                        [selection]="selection"
-                        [expanded]="expanded"
-                        [loadingMoreResults]="loadingMoreResults"
-                        [searching]="searching"
-                        [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
-                        [itemRenderer]="dropdownItemRenderer"
-                        [disabledItemMapper]="dropdownDisabledItemMapper" 
-                        [emptyRenderer]="dropdownEmptyRenderer"
-                        [pagingMessageRenderer]="dropdownPagingMessageRenderer"
-                        [searchingRenderer]="dropdownSearchingRenderer"
-                        [keyEvents]="keyEvents"
-                        [paging]="paging"
-                        [disabled]="disabled"
-                        (onSelectItem)="selectItem($event)"
-                        (onNextPage)="onNextPageStart()"
+      <ng-selectio-dropdown #dropdownComponent
+                            [data]="data"
+                            [selection]="selection"
+                            [expanded]="expanded"
+                            [loadingMoreResults]="loadingMoreResults"
+                            [searching]="searching"
+                            [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
+                            [maxHeight] = "dropdownMaxHeight"
+                            [itemRenderer]="dropdownItemRenderer"
+                            [disabledItemMapper]="dropdownDisabledItemMapper"
+                            [emptyRenderer]="dropdownEmptyRenderer"
+                            [pagingMessageRenderer]="dropdownPagingMessageRenderer"
+                            [searchingRenderer]="dropdownSearchingRenderer"
+                            [keyEvents]="keyEvents"
+                            [paging]="paging"
+                            [disabled]="disabled"
+                            (onSelectItem)="selectItem($event)"
+                            (onNextPage)="onNextPageStart()"
       >
-      </ng-selectio-list>
+      </ng-selectio-dropdown>
 
     </div>
   `,
@@ -96,31 +97,38 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() $appendData: Observable<any> = Observable.empty();
   @Input() selection = [];
   @Input() selectionMode = SELECTION_MODE_SINGLE;
-  @Input() defaultSelectionRule: (item: any[]) => any[] = (items: any[]) => {return []};
   @Input() bypassSecurityTrustHtml: boolean = false;
-  @Input() delay: number = 0;
+  @Input() searchDelay: number = 0;
   @Input() minLengthForAutocomplete: number = 0;
-
-  // Renderers
-  @Input() dropdownItemRenderer:(item: any, disabled: boolean) => string = (item: any, disabled: boolean) => {return JSON.stringify(item)};
-  @Input() dropdownEmptyRenderer: () => string = () => {return 'Enter 1 or more characters'};
-  @Input() dropdownPagingMessageRenderer: () => string = () => {return 'Loading more results...'};
-  @Input() dropdownSearchingRenderer: () => string = () => {return 'Searching...'};
-  @Input() dropdownDisabledItemMapper: (item: any) => boolean = (item: any) => {return false};
-
-  @Input() selectionItemRenderer: (item: any) => string = (item: any) => {return JSON.stringify(item)};
-  @Input() selectionEmptyRenderer: () => string = () => {return 'No data'};
-  @Input() placeholder: string = '';
-
-
   @Input() showSearch: boolean = false;
-  @Input() selectionDeletable: boolean = false;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
   @Input() autocomplete: boolean = false;
   @Input() disabled = false;
   @Input() closeOnSelect = true;
   @Input() maxSelectionLength: number = -1;
+  @Input() defaultSelectionRule: (item: any[]) => any[] = (items: any[]) => {return []};
+  @Input() selectionDeletable: boolean;
+  @Input() dropdownDisabledItemMapper: (item: any) => boolean = (item: any) => {return false};
+
+  // templates
+  static defaultItemRenderer = (item: any) => {
+    if (typeof item === "string") {
+      return item;
+    } else if (typeof item === "number") {
+      return item + '';
+    } else {
+      return JSON.stringify(item);
+    }
+  };
+  @Input() dropdownItemRenderer: Template<(countryItem: any, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
+  @Input() selectionItemRenderer: Template<(item: any) => string> = NgSelectioComponent.defaultItemRenderer;
+  @Input() dropdownMaxHeight: '100px';
+  @Input() placeholder: string = '';
+  @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
+  @Input() dropdownPagingMessageRenderer: Template<() => string> = 'Loading more results...';
+  @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
+  @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
   @Output() onSearch = new EventEmitter<any>();
   @Output() onNextPage = new EventEmitter<any>();
@@ -128,7 +136,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   @ViewChild('search') search: ElementRef;
   @ViewChild('ngs') ngs: ElementRef;
-  @ViewChild('listComponent') listComponent: ListComponent;
+  @ViewChild('dropdownComponent') dropdownComponent: DropdownComponent;
 
   data: any = [];
   highlightedItem: any = null;
@@ -137,10 +145,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   expanded: boolean;
   loadingMoreResults: boolean = false;
   searching: boolean = false;
+  keyEvents = new EventEmitter<KeyboardEvent>();
   private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
-  keyEvents = new EventEmitter<KeyboardEvent>();
 
   constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {
     this.textInput = new FormControl({value: '', disabled: this.disabled});
@@ -180,7 +188,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit() {
     this.searchTextChangeSubscription = this.textInput.valueChanges
-      .debounceTime(this.delay)
+      .debounceTime(this.searchDelay)
       .filter(e => this.textInput.value.length >= this.minLengthForAutocomplete)
       .subscribe(v => {
         this.onSearch.emit(v);
@@ -269,7 +277,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   onNextPageStart() {
     this.loadingMoreResults = true;
     this.changeDetectorRef.detectChanges();
-    this.listComponent.scrollToTheBottom();
+    this.dropdownComponent.scrollToTheBottom();
     setTimeout(() => {
       this.onNextPage.emit({currentLength: this.data.length, search: this.textInput.value});
     }, this.pagingDelay);
@@ -302,6 +310,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       return false;
     }
+  }
+
+  private templateToFunction() {
+
   }
 
   public getTextInput() {

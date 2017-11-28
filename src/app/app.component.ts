@@ -41,7 +41,7 @@ export const COUNTRIES_DATA = {
   }
 };
 
-
+// open on top rule
 @Component({
   selector: 'app-root',
   template: `
@@ -50,6 +50,15 @@ export const COUNTRIES_DATA = {
     <div>
       <label style="display: inline-block">maxSelectionLength</label><input type="number" (change)="maxSelectionLength = $event.srcElement.value" style="display: inline-block"/>
     </div>
+    <div>
+      <label style="display: inline-block">max-dropdown-height</label>
+      <select (change)="maxDropdownHeight = $event.srcElement.value" style="display: inline-block">
+        <option value="100px">100px</option>
+        <option value="200px">200px</option>
+      </select>
+    </div>
+    
+    
     
     <p>Simple select array of strings</p>
     <app-ng-selectio
@@ -57,15 +66,17 @@ export const COUNTRIES_DATA = {
       [disabled]="disabled"
       [closeOnSelect]="closeOnSelect"
       [selectionEmptyRenderer]="noDataRenderer"
+      [dropdownMaxHeight]="maxDropdownHeight" 
       [dropdownDisabledItemMapper]="disabledItem"
     ></app-ng-selectio>
 
     <p>Simple select array of objects</p>
     <app-ng-selectio
       [$data]="$objectArray"
-      [dropdownItemRenderer]="renderCountry"
-      [selectionItemRenderer]="renderCountry"
+      [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
+      [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
       [defaultSelectionRule]="defaultSelectionRule"
+      [dropdownMaxHeight]="maxDropdownHeight"
       [bypassSecurityTrustHtml]="true"
       [disabled]="disabled"
       [closeOnSelect]="closeOnSelect"
@@ -77,6 +88,7 @@ export const COUNTRIES_DATA = {
       [$data]="$stringArray"
       [disabled]="disabled"
       [closeOnSelect]="closeOnSelect"
+      [dropdownMaxHeight]="maxDropdownHeight"
       [showSearch]="true"
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
@@ -86,6 +98,7 @@ export const COUNTRIES_DATA = {
       [$data]="$stringArray"
       [disabled]="disabled"
       [closeOnSelect]="closeOnSelect"
+      [dropdownMaxHeight]="maxDropdownHeight"
       [showSearch]="true"
       [autocomplete]="true"
       (onSearch)="onSearchString($event)"
@@ -99,6 +112,7 @@ export const COUNTRIES_DATA = {
       [closeOnSelect]="closeOnSelect"
       [maxSelectionLength] = "maxSelectionLength"
       [dropdownItemRenderer]="renderItem"
+      [dropdownMaxHeight]="maxDropdownHeight"
       [selectionItemRenderer]="renderItem"
       [selectionMode]="'multiple'"
       [showSearch]="true"
@@ -125,6 +139,7 @@ export class AppComponent {
   disabled = false;
   closeOnSelect = true;
   maxSelectionLength: number = -1;
+  maxDropdownHeight: string = '100px';
 
   constructor(private http: Http) {
     this.$objectArray = Observable.of(this.objectArray);
@@ -135,8 +150,13 @@ export class AppComponent {
     }));
   }
   onSearch(term: string) {
-    this.$users = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
-      .map(r => r.json()).map(r => r.results);
+    if (term === '') {
+      this.$users = Observable.of([]);
+    } else {
+      this.$users = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
+        .map(r => r.json()).map(r => r.results);
+    }
+
   }
   onNextPage(paging) {
     this.$appendUsers = this.http.get(`https://randomuser.me/api?seed=${paging.term}&results=${10}&page=${paging.currentLength/10 + 1}&nat=uk&inc=gender,name,picture`)
@@ -154,13 +174,14 @@ export class AppComponent {
     return [items[0]];
   }
   renderCountry(countryItem: any): string {
+    //console.log(countryItem);
     return `<div id="country-iso-name" class=${countryItem.isoName}>
                <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
                <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
            </div>`
   }
   onChangeMaxSelection(change: Event) {
-    console.log((<any>change.srcElement).value);
+    //console.log((<any>change.srcElement).value);
   }
   noDataRenderer() {
     return 'Нет данных';

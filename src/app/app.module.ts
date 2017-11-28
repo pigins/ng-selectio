@@ -8,7 +8,8 @@ import {HttpModule} from "@angular/http";
 import {ItemComponent} from './ng-selectio/ng-selectio/item.component';
 import {SafeHtmlPipe} from "./ng-selectio/ng-selectio/safe-html.pipe";
 import {SelectionComponent} from "./ng-selectio/ng-selectio/selection.component";
-import {ListComponent} from "./ng-selectio/ng-selectio/list.component";
+import {DropdownComponent} from "./ng-selectio/ng-selectio/dropdown.component";
+import {TemplatePipe} from "./ng-selectio/ng-selectio/template.pipe";
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {ListComponent} from "./ng-selectio/ng-selectio/list.component";
     NgSelectioComponent,
     ItemComponent,
     SelectionComponent,
-    ListComponent,
+    DropdownComponent,
+    TemplatePipe,
     SafeHtmlPipe
   ],
   imports: [
