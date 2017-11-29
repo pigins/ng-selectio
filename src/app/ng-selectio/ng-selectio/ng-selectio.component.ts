@@ -1,7 +1,9 @@
 import {
+  ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
-  ViewChild} from '@angular/core';
+  ViewChild
+} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/empty';
 import {FormControl, FormGroup} from '@angular/forms';
@@ -24,10 +26,11 @@ export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
+  changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-ng-selectio',
   template: `
 
-    <div class="ngs" #ngs tabindex="1" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
+    <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
 
       <div [ngClass]="{'autocomplete': autocomplete}">
         <selection #selectionComponent
@@ -60,7 +63,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                             [expanded]="expanded"
                             [loadingMoreResults]="loadingMoreResults"
                             [searching]="searching"
-                            [bypassSecurityTrustHtml]="bypassSecurityTrustHtml"
                             [maxHeight] = "dropdownMaxHeight"
                             [itemRenderer]="dropdownItemRenderer"
                             [disabledItemMapper]="dropdownDisabledItemMapper"
@@ -98,7 +100,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() $appendData: Observable<Item[]> = Observable.empty();
   @Input() selection = [];
   @Input() selectionMode = SELECTION_MODE_SINGLE;
-  @Input() bypassSecurityTrustHtml: boolean = false;
   @Input() searchDelay: number = 0;
   @Input() minLengthForAutocomplete: number = 0;
   @Input() showSearch: boolean = false;
@@ -109,8 +110,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() closeOnSelect = true;
   @Input() maxSelectionLength: number = -1;
   @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]) => {return []};
-  @Input() selectionDeletable: boolean;
+  @Input() selectionDeletable: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => {return false};
+  @Input() tabIndex: number = 1;
 
   // templates
   static defaultItemRenderer = (item: Item) => {
@@ -159,24 +161,21 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.$data) {
-      if (this.$data) {
-        this.$data.take(1).subscribe((data) => {
-          this.data = data;
-          if (this.autocomplete && changes.$data.previousValue && this.textInput.value) {
-            this.expanded = true;
-          }
-          this.searching = false;
-        });
-      }
+    if (changes.$data && this.$data) {
+      this.$data.take(1).subscribe((data) => {
+        this.data = data;
+        if (this.autocomplete && changes.$data.previousValue && this.textInput.value) {
+          this.expanded = true;
+        }
+        this.searching = false;
+      });
     }
-    if (changes.$appendData) {
-      if (this.$appendData) {
-        this.$appendData.take(1).subscribe((data) => {
-          this.data = this.data.concat(data);
-          this.loadingMoreResults = false;
-        });
-      }
+    if (changes.$appendData && this.$appendData) {
+      this.$appendData.take(1).subscribe((data) => {
+        this.data = this.data.concat(data);
+        this.changeDetectorRef.detectChanges();
+        this.loadingMoreResults = false;
+      });
     }
     if (changes.disabled) {
       if (this.disabled) {
@@ -311,10 +310,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       return false;
     }
-  }
-
-  private templateToFunction() {
-
   }
 
   public getTextInput() {

@@ -76,7 +76,6 @@ export class DropdownComponent implements OnInit, OnChanges {
   @Input() searchingRenderer: Template<() => string>;
   @Input() disabledItemMapper: (item: Item) => boolean;
 
-  @Input() bypassSecurityTrustHtml: false;
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
   @Input() disabled: false;
