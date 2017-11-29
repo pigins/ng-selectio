@@ -57,7 +57,10 @@ export const COUNTRIES_DATA = {
         <option value="200px">200px</option>
       </select>
     </div>
-    
+    <div>
+      <label>Open on top</label>
+      <input (change)="openOnTop = $event.target.checked" type="checkbox"/>
+    </div>
     
     
     <p>Simple select array of strings</p>
@@ -70,6 +73,7 @@ export const COUNTRIES_DATA = {
       [dropdownDisabledItemMapper]="disabledItem"
       [tabIndex]="-1"
       [selectionDeletable]="true"
+      [openOnTop]="openOnTop"
     ></app-ng-selectio>
 
     <p>Simple select array of objects</p>
@@ -80,8 +84,10 @@ export const COUNTRIES_DATA = {
       [defaultSelectionRule]="defaultSelectionRule"
       [dropdownMaxHeight]="maxDropdownHeight"
       [disabled]="disabled"
+      [openOnTop]="openOnTop" 
       [closeOnSelect]="closeOnSelect"
       (onSelect)="onSelectCountry($event)"
+      
     ></app-ng-selectio>
 
     <p>Simple select array of strings with search</p>
@@ -91,6 +97,7 @@ export const COUNTRIES_DATA = {
       [closeOnSelect]="closeOnSelect"
       [dropdownMaxHeight]="maxDropdownHeight"
       [showSearch]="true"
+      [openOnTop]="openOnTop"
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
 
@@ -102,6 +109,7 @@ export const COUNTRIES_DATA = {
       [dropdownMaxHeight]="maxDropdownHeight"
       [showSearch]="true"
       [autocomplete]="true"
+      [openOnTop]="openOnTop"
       (onSearch)="onSearchString($event)"
     ></app-ng-selectio>
     
@@ -120,6 +128,7 @@ export const COUNTRIES_DATA = {
       [selectionDeletable]="true"
       [paging]="true"
       [pagingDelay]="500"
+      [openOnTop]="openOnTop"
       (onSearch)="onSearch($event)"
       (onNextPage)="onNextPage($event)"
     ></app-ng-selectio>
@@ -141,6 +150,7 @@ export class AppComponent {
   closeOnSelect = true;
   maxSelectionLength: number = -1;
   maxDropdownHeight: string = '100px';
+  openOnTop = false;
 
   constructor(private http: Http) {
     this.$objectArray = Observable.of(this.objectArray);

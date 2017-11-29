@@ -24,60 +24,68 @@ export enum KEY_CODE {
 }
 export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
-
+// TODO извлечь ngs-search в отдельный компонент, и добавить его над ng-selectio-dropdown и после selection в зависимости от autocomplete!
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-ng-selectio',
   template: `
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
-
-      <div [ngClass]="{'autocomplete': autocomplete}">
-        <selection #selectionComponent
-                   [items]="selection"
-                   [highlightedItem]="highlightedItem"
-                   [itemRenderer]="selectionItemRenderer"
-                   [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
-                   [selectionMode]="selectionMode"
-                   [showArrow]="!autocomplete"
-                   [deletable]="selectionDeletable"
-                   [disabled]="disabled"
-                   (click)="onClickSelection($event)"
-                   (onDeleteItem)="onDeleteItem($event)"
-                   (onHighlightItem)="onHighlightItem($event)"
-        >
-        </selection>
-        <div class="ngs-search"
-             [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}"
-             [formGroup]="textInputGroup">
-          <input formControlName="textInput" type="text" #search [attr.placeholder]="placeholder"
-                 (blur)="onBlur($event)"
-                 (keydown)="onTextInputKeyDown($event)"
-          />
+      <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
+        <div *ngIf="order===1" [ngClass]="{'autocomplete': autocomplete}">
+          <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
+            <ng-container *ngIf="order===1">
+              <selection #selectionComponent
+                         [items]="selection"
+                         [highlightedItem]="highlightedItem"
+                         [itemRenderer]="selectionItemRenderer"
+                         [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
+                         [selectionMode]="selectionMode"
+                         [showArrow]="!autocomplete"
+                         [deletable]="selectionDeletable"
+                         [disabled]="disabled"
+                         (click)="onClickSelection($event)"
+                         (onDeleteItem)="onDeleteItem($event)"
+                         (onHighlightItem)="onHighlightItem($event)"
+              >
+              </selection>  
+            </ng-container>
+            <ng-container *ngIf="order===2">
+              <div class="ngs-search"
+                   [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}"
+                   [formGroup]="textInputGroup">
+                <input formControlName="textInput" type="text" #search [attr.placeholder]="placeholder"
+                       (blur)="onBlur($event)"
+                       (keydown)="onTextInputKeyDown($event)"
+                />
+              </div>  
+            </ng-container>
+          </ng-container>
         </div>
-      </div>
-
-      <ng-selectio-dropdown #dropdownComponent
-                            [data]="data"
-                            [selection]="selection"
-                            [expanded]="expanded"
-                            [loadingMoreResults]="loadingMoreResults"
-                            [searching]="searching"
-                            [maxHeight] = "dropdownMaxHeight"
-                            [itemRenderer]="dropdownItemRenderer"
-                            [disabledItemMapper]="dropdownDisabledItemMapper"
-                            [emptyRenderer]="dropdownEmptyRenderer"
-                            [pagingMessageRenderer]="dropdownPagingMessageRenderer"
-                            [searchingRenderer]="dropdownSearchingRenderer"
-                            [keyEvents]="keyEvents"
-                            [paging]="paging"
-                            [disabled]="disabled"
-                            [trackByFn]="trackByFn"
-                            (onSelectItem)="selectItem($event)"
-                            (onNextPage)="onNextPageStart()"
-      >
-      </ng-selectio-dropdown>
-
+        <div *ngIf="order===2">
+          <ng-selectio-dropdown #dropdownComponent
+                                [data]="data"
+                                [selection]="selection"
+                                [expanded]="expanded"
+                                [loadingMoreResults]="loadingMoreResults"
+                                [searching]="searching"
+                                [maxHeight] = "dropdownMaxHeight"
+                                [itemRenderer]="dropdownItemRenderer"
+                                [disabledItemMapper]="dropdownDisabledItemMapper"
+                                [emptyRenderer]="dropdownEmptyRenderer"
+                                [pagingMessageRenderer]="dropdownPagingMessageRenderer"
+                                [searchingRenderer]="dropdownSearchingRenderer"
+                                [keyEvents]="keyEvents"
+                                [paging]="paging"
+                                [disabled]="disabled"
+                                [trackByFn]="trackByFn"
+                                [openOnTop]="openOnTop" 
+                                (onSelectItem)="selectItem($event)"
+                                (onNextPage)="onNextPageStart()"
+          >
+          </ng-selectio-dropdown>
+        </div>
+      </ng-container>
     </div>
   `,
   styles: [`
@@ -115,7 +123,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => {return false};
   @Input() tabIndex: number = 1;
   @Input() trackByFn: (index: number, item:Item) => any = null;
-
+  @Input() openOnTop = false;
 
   // templates
   static defaultItemRenderer = (item: Item) => {
@@ -152,6 +160,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   loadingMoreResults: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
+  verticalOrder = [1,2];
   private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
@@ -185,6 +194,13 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
         this.textInput.disable();
       } else {
         this.textInput.enable();
+      }
+    }
+    if (changes.openOnTop) {
+      if (this.openOnTop) {
+        this.verticalOrder = [2,1];
+      } else {
+        this.verticalOrder = [1,2];
       }
     }
   }
@@ -306,7 +322,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
   }
-
+  trackByOpenOnTop(index, item) {
+    return item;
+  }
   private hasFocus(): boolean {
     if (document.activeElement) {
       return document.activeElement === this.ngs.nativeElement || document.activeElement === this.search.nativeElement;
