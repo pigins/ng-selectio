@@ -72,6 +72,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                             [keyEvents]="keyEvents"
                             [paging]="paging"
                             [disabled]="disabled"
+                            [trackByFn]="trackByFn"
                             (onSelectItem)="selectItem($event)"
                             (onNextPage)="onNextPageStart()"
       >
@@ -113,6 +114,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() selectionDeletable: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => {return false};
   @Input() tabIndex: number = 1;
+  @Input() trackByFn: (index: number, item:Item) => any = null;
+
 
   // templates
   static defaultItemRenderer = (item: Item) => {

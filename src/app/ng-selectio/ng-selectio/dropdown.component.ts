@@ -14,7 +14,7 @@ import {Item} from "./item";
   template: `
     <div [ngClass]="{'ngs-data': true, 'ngs-expanded': !disabled && expanded}" #dropdown>
       <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
-        <ng-selectio-item *ngFor="let dataItem of data;" #itemList 
+        <ng-selectio-item *ngFor="let dataItem of data; trackBy: trackByFn" #itemList 
                           [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
                           [isSelected]="insideSelection(dataItem)"
                           [data]="dataItem"
@@ -41,9 +41,13 @@ import {Item} from "./item";
       display: none;
       position: relative;
     }
+    /*.ngs-data.ngs-expanded {*/
+      /*display: block;*/
+    /*}*/
     .ngs-data.ngs-expanded {
       display: block;
     }
+    
     .ngs-data ul {
       position: absolute;
       top: 0;
@@ -65,7 +69,8 @@ export class DropdownComponent implements OnInit, OnChanges {
   @Input() loadingMoreResults: boolean;
   @Input() searching: boolean;
   @Input() pagingDelay: number;
-  @Input() paging: boolean = false;
+  @Input() paging: boolean;
+  @Input() trackByFn: (index: number, item:Item) => any;
 
   // transport inputs
   @Input() maxHeight: string;

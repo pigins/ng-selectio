@@ -3,7 +3,7 @@ import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
 import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
 import {Template} from "./template";
 import {Item} from "./item";
-// TODO refactor template!!
+
 @Component({
   selector: 'selection',
   template: `
@@ -11,7 +11,6 @@ import {Item} from "./item";
       <div *ngIf="this.items.length === 0" class="selection">
         <span [innerHtml]="emptyRenderer | template"></span>
       </div>
-      
       <div *ngIf="singleMode() && !deletable" class="selection">
         <div
           [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}" 

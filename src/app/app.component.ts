@@ -68,6 +68,8 @@ export const COUNTRIES_DATA = {
       [selectionEmptyRenderer]="noDataRenderer"
       [dropdownMaxHeight]="maxDropdownHeight" 
       [dropdownDisabledItemMapper]="disabledItem"
+      [tabIndex]="-1"
+      [selectionDeletable]="true"
     ></app-ng-selectio>
 
     <p>Simple select array of objects</p>
@@ -77,7 +79,6 @@ export const COUNTRIES_DATA = {
       [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
       [defaultSelectionRule]="defaultSelectionRule"
       [dropdownMaxHeight]="maxDropdownHeight"
-      [bypassSecurityTrustHtml]="true"
       [disabled]="disabled"
       [closeOnSelect]="closeOnSelect"
       (onSelect)="onSelectCountry($event)"
