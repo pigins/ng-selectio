@@ -15,6 +15,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {DropdownComponent} from "./dropdown.component";
 import {Template} from "./template";
 import {Item} from "./item";
+import {SearchComponent} from "./search.component";
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -24,7 +25,6 @@ export enum KEY_CODE {
 }
 export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
-// TODO извлечь ngs-search в отдельный компонент, и добавить его над ng-selectio-dropdown и после selection в зависимости от autocomplete!
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-ng-selectio',
@@ -32,38 +32,42 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
-        <div *ngIf="order===1" [ngClass]="{'autocomplete': autocomplete}">
-          <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
-            <ng-container *ngIf="order===1">
-              <selection #selectionComponent
-                         [items]="selection"
-                         [highlightedItem]="highlightedItem"
-                         [itemRenderer]="selectionItemRenderer"
-                         [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
-                         [selectionMode]="selectionMode"
-                         [showArrow]="!autocomplete"
-                         [deletable]="selectionDeletable"
-                         [disabled]="disabled"
-                         (click)="onClickSelection($event)"
-                         (onDeleteItem)="onDeleteItem($event)"
-                         (onHighlightItem)="onHighlightItem($event)"
-              >
-              </selection>  
-            </ng-container>
-            <ng-container *ngIf="order===2">
-              <div class="ngs-search"
-                   [ngStyle]="{'display': showSearch && expanded ? 'block' : 'none'}"
-                   [formGroup]="textInputGroup">
-                <input formControlName="textInput" type="text" #search [attr.placeholder]="placeholder"
-                       (blur)="onBlur($event)"
-                       (keydown)="onTextInputKeyDown($event)"
-                />
-              </div>  
-            </ng-container>
-          </ng-container>
+        <div *ngIf="order===1">
+          <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
+                     [items]="selection"
+                     [highlightedItem]="highlightedItem"
+                     [itemRenderer]="selectionItemRenderer"
+                     [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
+                     [selectionMode]="selectionMode"
+                     [showArrow]="!autocomplete"
+                     [deletable]="selectionDeletable"
+                     [disabled]="disabled"
+                     (click)="onClickSelection($event)"
+                     (onDeleteItem)="onDeleteItem($event)"
+                     (onHighlightItem)="onHighlightItem($event)"
+          >
+          </selection>  
+          <ng-selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
+            [autocomplete]="autocomplete"                  
+            [placeholder]="placeholder"
+            [disabled]="disabled"
+            (onSearchBlur)="onBlur($event)"
+            (onSearchKeyDown)="onTextInputKeyDown($event)"
+            (onSearchValueChanges)="onSearchValueChanges($event)"
+          ></ng-selectio-search>
         </div>
-        <div *ngIf="order===2">
-          <ng-selectio-dropdown #dropdownComponent
+        <div *ngIf="order===2" [ngClass]="{'ngs-dropdown': true, 'ngs-expanded': expanded && !disabled}">
+          <div class="dropdown-cont" [ngStyle]="{'bottom': openOnTop ? 0: 'auto', 'top': !openOnTop ? 0: 'auto'}">
+            <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
+              <ng-selectio-search #searchComponent *ngIf="order===1 && !autocomplete && showSearch"
+                                  [autocomplete]="autocomplete"
+                                  [placeholder]="placeholder"
+                                  [disabled]="disabled"
+                                  (onSearchBlur)="onBlur($event)"
+                                  (onSearchKeyDown)="onTextInputKeyDown($event)"
+                                  (onSearchValueChanges)="onSearchValueChanges($event)"
+              ></ng-selectio-search>
+              <ng-selectio-list #listComponent *ngIf="order===2"
                                 [data]="data"
                                 [selection]="selection"
                                 [expanded]="expanded"
@@ -79,11 +83,13 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [paging]="paging"
                                 [disabled]="disabled"
                                 [trackByFn]="trackByFn"
-                                [openOnTop]="openOnTop" 
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
-          >
-          </ng-selectio-dropdown>
+              >
+              </ng-selectio-list>  
+            </ng-container>
+              
+          </div>
         </div>
       </ng-container>
     </div>
@@ -92,14 +98,18 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     .ngs {
       border: 1px solid grey;
     }
-    .autocomplete > * {
-      display: inline-block !important;
+    .ngs-dropdown {
+      display: none;
+      position: relative;
     }
-    .autocomplete input {
-      border: none;
+    .ngs-dropdown.ngs-expanded {
+      display: block;
     }
-    .autocomplete input:focus {
-      outline: none;
+    .dropdown-cont {
+      position: absolute;
+      z-index: 9999999;
+      width: 100%;
+      background-color: aliceblue;
     }
   `]
 })
@@ -148,53 +158,40 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onNextPage = new EventEmitter<{currentLength: number, search: string}>();
   @Output() onSelect = new EventEmitter<Item>();
 
-  @ViewChild('search') search: ElementRef;
   @ViewChild('ngs') ngs: ElementRef;
-  @ViewChild('dropdownComponent') dropdownComponent: DropdownComponent;
+  @ViewChild('searchComponent') searchComponent: SearchComponent;
+  @ViewChild('listComponent') listComponent: DropdownComponent;
 
   data: Item[] = [];
   highlightedItem: Item = null;
-  textInputGroup: FormGroup;
-  textInput: FormControl;
   expanded: boolean;
   loadingMoreResults: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
   verticalOrder = [1,2];
-  private searchTextChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
-  constructor(private _ngZone: NgZone, private changeDetectorRef: ChangeDetectorRef) {
-    this.textInput = new FormControl({value: '', disabled: this.disabled});
-    this.textInputGroup = new FormGroup({
-      textInput: this.textInput
-    });
+  constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.$data && this.$data) {
       this.$data.take(1).subscribe((data) => {
         this.data = data;
-        if (this.autocomplete && changes.$data.previousValue && this.textInput.value) {
+        if (this.autocomplete && changes.$data.previousValue && this.searchComponent.notEmpty()) {
           this.expanded = true;
         }
         this.searching = false;
+        this.changeDetectorRef.markForCheck();
       });
     }
     if (changes.$appendData && this.$appendData) {
       this.$appendData.take(1).subscribe((data) => {
         this.data = this.data.concat(data);
-        this.changeDetectorRef.detectChanges();
+        this.changeDetectorRef.markForCheck();
         this.loadingMoreResults = false;
       });
-    }
-    if (changes.disabled) {
-      if (this.disabled) {
-        this.textInput.disable();
-      } else {
-        this.textInput.enable();
-      }
     }
     if (changes.openOnTop) {
       if (this.openOnTop) {
@@ -206,24 +203,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnInit() {
-    this.searchTextChangeSubscription = this.textInput.valueChanges
-      .debounceTime(this.searchDelay)
-      .filter(e => this.textInput.value.length >= this.minLengthForAutocomplete)
-      .subscribe((v: string) => {
-        this.onSearch.emit(v);
-        this.searching = true;
-      });
-
     if (!this.$data) {
       this.$data = Observable.empty();
     }
 
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
-      if (this.expanded) {
-        this._ngZone.runOutsideAngular(() => {
-          setTimeout(() => this.search.nativeElement.focus(), 0);
-        });
+      if (this.expanded && this.searchComponent) {
+        this.searchComponent.focus();
       }
     });
 
@@ -238,13 +225,19 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.onSelect.subscribe(() => {
-      this.textInput.setValue('');
+      if (this.searchComponent) {
+        this.searchComponent.empty();
+      }
     });
   }
 
   ngOnDestroy(): void {
     this.expandedChangedSubscription.unsubscribe();
-    this.searchTextChangeSubscription.unsubscribe();
+  }
+
+  onSearchValueChanges(value: string) {
+    this.onSearch.emit(value);
+    this.searching = true;
   }
 
   onClickSelection() {
@@ -268,20 +261,23 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onBlur($event: Event) {
-    if ($event) {
-      let e = (<any>$event);
-      if (e.relatedTarget) {
-        if (e.relatedTarget === this.search.nativeElement || e.relatedTarget === this.ngs.nativeElement) {
-          /*NOPE*/
-        } else {
-          if (this.expanded) {
-            this.expandedChanged.emit(false);
-          }
-        }
-      } else {
-        if (this.expanded) {
-          this.expandedChanged.emit(false);
-        }
+    let e = (<any>$event);
+    if (!this.expanded) {
+      return;
+    }
+    if (!e.relatedTarget) {
+      this.expandedChanged.emit(false);
+      return;
+    }
+    if (this.searchComponent) {
+      if (e.relatedTarget !== this.searchComponent.getNativeElement() && e.relatedTarget !== this.ngs.nativeElement) {
+        this.expandedChanged.emit(false);
+        return;
+      }
+    } else {
+      if (e.relatedTarget !== this.ngs.nativeElement) {
+        this.expandedChanged.emit(false);
+        return;
       }
     }
   }
@@ -296,9 +292,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   onNextPageStart() {
     this.loadingMoreResults = true;
     this.changeDetectorRef.detectChanges();
-    this.dropdownComponent.scrollToTheBottom();
+    this.listComponent.scrollToTheBottom();
     setTimeout(() => {
-      this.onNextPage.emit({currentLength: this.data.length, search: this.textInput.value});
+      this.onNextPage.emit({currentLength: this.data.length, search: this.searchComponent.getValue()});
     }, this.pagingDelay);
   }
 
@@ -312,7 +308,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   onTextInputKeyDown(event: KeyboardEvent) {
     if (this.autocomplete) {
-      if (event.keyCode === KEY_CODE.BACKSPACE && !this.textInput.value) {
+      if (event.keyCode === KEY_CODE.BACKSPACE && !this.searchComponent.getValue()) {
         if (!this.highlightedItem) {
           this.highlightedItem = this.selection[this.selection.length - 1];
         } else {
@@ -327,13 +323,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
   private hasFocus(): boolean {
     if (document.activeElement) {
-      return document.activeElement === this.ngs.nativeElement || document.activeElement === this.search.nativeElement;
+      return document.activeElement === this.ngs.nativeElement || document.activeElement === this.searchComponent.getNativeElement();
     } else {
       return false;
     }
-  }
-
-  public getTextInput() {
-    return this.textInput;
   }
 }
