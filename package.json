@@ -5,7 +5,7 @@
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
-    "build": "ng build --prod --output-hashing=none --no-delete-output-path",
+    "build": "ng build --prod --output-hashing=none --no-delete-output-path --base-href=https://pigins.github.io/ng-selectio",
     "test": "ng test",
     "lint": "ng lint",
     "publish": "cd ./src/app/ng-selectio && npm publish",
