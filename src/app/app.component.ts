@@ -62,7 +62,7 @@ export const COUNTRIES_DATA = {
       <input (change)="openOnTop = $event.target.checked" type="checkbox"/>
     </div>
     
-    
+     
     <p>Simple select array of strings</p>
     <app-ng-selectio
       [$data]="$stringArray"
