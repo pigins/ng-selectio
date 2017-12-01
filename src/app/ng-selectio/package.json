@@ -1,0 +1,24 @@
+{
+  "name": "ng-selectio",
+  "version": "1.0.0-beta",
+  "description": "Full-featured select component for angular 2/4/5.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pigins/ng-selectio.git"
+  },
+  "keywords": [
+    "angular",
+    "select",
+    "selectio"
+  ],
+  "author": " <ask_sergey@inbox.ru>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/pigins/ng-selectio/issues"
+  },
+  "homepage": "https://github.com/pigins/ng-selectio#readme"
+}
