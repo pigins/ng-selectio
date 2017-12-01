@@ -1,21 +1,20 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, Input, NgZone, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
+  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
   ViewChild
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/empty';
-import {FormControl, FormGroup} from '@angular/forms';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {DropdownComponent} from "./dropdown.component";
-import {Template} from "./template";
-import {Item} from "./item";
-import {SearchComponent} from "./search.component";
+import {DropdownComponent} from './dropdown.component';
+import {Template} from './template';
+import {Item} from './item';
+import {SearchComponent} from './search.component';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -46,11 +45,13 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      (onDeleteItem)="onDeleteItem($event)"
                      (onHighlightItem)="onHighlightItem($event)"
           >
-          </selection>  
+          </selection>
           <ng-selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
-            [autocomplete]="autocomplete"                  
+            [autocomplete]="autocomplete"
             [placeholder]="placeholder"
             [disabled]="disabled"
+            [searchDelay]="searchDelay"
+            [minLengthForAutocomplete]="minLengthForAutocomplete"
             (onSearchBlur)="onBlur($event)"
             (onSearchKeyDown)="onTextInputKeyDown($event)"
             (onSearchValueChanges)="onSearchValueChanges($event)"
@@ -63,6 +64,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                   [autocomplete]="autocomplete"
                                   [placeholder]="placeholder"
                                   [disabled]="disabled"
+                                  [searchDelay]="searchDelay"
+                                  [minLengthForAutocomplete]="minLengthForAutocomplete"
                                   (onSearchBlur)="onBlur($event)"
                                   (onSearchKeyDown)="onTextInputKeyDown($event)"
                                   (onSearchValueChanges)="onSearchValueChanges($event)"
@@ -86,9 +89,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
               >
-              </ng-selectio-list>  
+              </ng-selectio-list>
             </ng-container>
-              
           </div>
         </div>
       </ng-container>
@@ -128,18 +130,17 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() disabled = false;
   @Input() closeOnSelect = true;
   @Input() maxSelectionLength: number = -1;
-  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]) => {return []};
+  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]) => [];
   @Input() selectionDeletable: boolean = false;
-  @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => {return false};
+  @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
   @Input() trackByFn: (index: number, item:Item) => any = null;
   @Input() openOnTop = false;
-
   // templates
   static defaultItemRenderer = (item: Item) => {
-    if (typeof item === "string") {
+    if (typeof item === 'string') {
       return item;
-    } else if (typeof item === "number") {
+    } else if (typeof item === 'number') {
       return item + '';
     } else {
       return JSON.stringify(item);
@@ -261,7 +262,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onBlur($event: Event) {
-    let e = (<any>$event);
+    const e = (<any>$event);
     if (!this.expanded) {
       return;
     }

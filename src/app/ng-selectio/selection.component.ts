@@ -1,8 +1,8 @@
-import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {SELECTION_MODE_SINGLE} from "./ng-selectio.component";
-import {SELECTION_MODE_MULTIPLE} from "./ng-selectio.component";
-import {Template} from "./template";
-import {Item} from "./item";
+import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {SELECTION_MODE_SINGLE} from './ng-selectio.component';
+import {SELECTION_MODE_MULTIPLE} from './ng-selectio.component';
+import {Template} from './template';
+import {Item} from './item';
 
 @Component({
   selector: 'selection',
@@ -13,7 +13,7 @@ import {Item} from "./item";
       </div>
       <div *ngIf="singleMode() && !deletable" class="selection">
         <div
-          [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}" 
+          [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}"
           [innerHtml]="itemRenderer | template:items[0]"
         >
         </div>
@@ -27,13 +27,13 @@ import {Item} from "./item";
       <div *ngIf="multipleMode() && !deletable" class="selection">
         <div *ngFor="let item of items;"
           [ngClass]="{'multiple': true, 'selected': highlightedItem === item}"
-          [innerHtml]="itemRenderer | template:item" 
+          [innerHtml]="itemRenderer | template:item"
           (click)="highlight(item)"
         >
         </div>
       </div>
       <div *ngIf="multipleMode() && deletable" class="selection">
-        <div *ngFor="let item of items" 
+        <div *ngFor="let item of items"
           [ngClass]="{'multiple': true, 'selected': highlightedItem === item}"
           (click)="highlight(item)"
         >
@@ -51,7 +51,6 @@ import {Item} from "./item";
     .selection .multiple .delete{
       cursor: pointer;
     }
-  
     .ngs-selection {
       position: relative;
     }
@@ -71,17 +70,12 @@ import {Item} from "./item";
       border-left-color: transparent;
       border-right-color: transparent
     }
-    
     .selected {
       background-color: blueviolet;
     }
-    
   `]
 })
-export class SelectionComponent implements OnInit{
-  ngOnInit(): void {
-  }
-
+export class SelectionComponent {
   @Input() items: Item[];
   @Input() highlightedItem: Item;
   @Input() itemRenderer: Template<(item: Item) => string>;

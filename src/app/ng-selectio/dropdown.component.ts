@@ -2,19 +2,18 @@ import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges,
   ViewChild, ViewChildren
 } from '@angular/core';
-import {KEY_CODE} from "./ng-selectio.component";
-import {ItemComponent} from "./item.component";
-import {Observable} from "rxjs/Observable";
-import {Template} from "./template";
-import {Item} from "./item";
-
+import {KEY_CODE} from './ng-selectio.component';
+import {ItemComponent} from './item.component';
+import {Observable} from 'rxjs/Observable';
+import {Template} from './template';
+import {Item} from './item';
 
 @Component({
   selector: 'ng-selectio-list',
   template: `
     <div #dropdown>
       <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
-        <ng-selectio-item *ngFor="let dataItem of data; trackBy: trackByFn" #itemList 
+        <ng-selectio-item *ngFor="let dataItem of data; trackBy: trackByFn" #itemList
                           [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
                           [isSelected]="insideSelection(dataItem)"
                           [data]="dataItem"
@@ -46,14 +45,14 @@ import {Item} from "./item";
    `]
 })
 export class DropdownComponent implements OnInit, OnChanges {
-  // self inputs
+  // self  inputs
   @Input() data: Item[];
   @Input() selection: Item[];
   @Input() loadingMoreResults: boolean;
   @Input() searching: boolean;
   @Input() pagingDelay: number;
   @Input() paging: boolean;
-  @Input() trackByFn: (index: number, item:Item) => any;
+  @Input() trackByFn: (index: number, item: Item) => any;
 
   // transport inputs
   @Input() maxHeight: string;
@@ -82,7 +81,7 @@ export class DropdownComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.data) {
-      this.enabledData = this.data.filter((dataElem) => {
+      this.enabledData = this.data.filter((dataElem: Item) => {
         return !this.disabledItemMapper(dataElem);
       });
     }
@@ -94,11 +93,11 @@ export class DropdownComponent implements OnInit, OnChanges {
     });
   }
 
-  onUlScroll() {
+  onUlScroll(event: Event) {
     if (!this.paging) {
       return;
     }
-    if(this.scrollExhausted() && !this.loadingMoreResults) {
+    if (this.scrollExhausted() && !this.loadingMoreResults) {
       this.onNextPage.emit();
     }
   }
@@ -109,20 +108,20 @@ export class DropdownComponent implements OnInit, OnChanges {
     }
     this.onSelectItem.emit(dataItem);
   }
+
   onKeyPress(event: KeyboardEvent) {
     if (event.keyCode === KEY_CODE.ENTER && this.expanded && this.activeListItem) {
       this.onSelectItem.emit(this.activeListItem);
     }
     if (event.keyCode === KEY_CODE.UP_ARROW) {
       if (this.expanded) {
-        let currentIndex = this.enabledData.indexOf(this.activeListItem);
-
+        const currentIndex = this.enabledData.indexOf(this.activeListItem);
         if (currentIndex && currentIndex > 0) {
           this.activeListItem = this.enabledData[currentIndex - 1];
         }
-        let item = this.getActiveItemComponent();
+        const item = this.getActiveItemComponent();
         if (item) {
-          let top = item.getTopPosition();
+          const top = item.getTopPosition();
           if (top < (this.ul.nativeElement.scrollTop)) {
             this.ul.nativeElement.scrollTop -= item.getHeight();
           }
@@ -131,13 +130,13 @@ export class DropdownComponent implements OnInit, OnChanges {
     }
     if (event.keyCode === KEY_CODE.DOWN_ARROW) {
       if (this.expanded) {
-        let currentIndex = this.enabledData.indexOf(this.activeListItem);
+        const currentIndex = this.enabledData.indexOf(this.activeListItem);
         if (currentIndex < this.enabledData.length - 1) {
           this.activeListItem = this.enabledData[currentIndex + 1];
         }
-        let item = this.getActiveItemComponent();
+        const item = this.getActiveItemComponent();
         if (item) {
-          let bottom = item.getBottomPosition();
+          const bottom = item.getBottomPosition();
           if (bottom > (this.ul.nativeElement.offsetHeight + this.ul.nativeElement.scrollTop)) {
             this.ul.nativeElement.scrollTop += item.getHeight();
           }
@@ -151,12 +150,12 @@ export class DropdownComponent implements OnInit, OnChanges {
   }
 
   private scrollExhausted() {
-    let ul = this.ul.nativeElement;
+    const ul = this.ul.nativeElement;
     return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
 
   private getActiveItemComponent(): ItemComponent {
-    let activeLis = this.itemList.filter((item: ItemComponent) => {
+    const activeLis = this.itemList.filter((item: ItemComponent) => {
       return item.data === this.activeListItem;
     });
     if (activeLis.length > 0) {

@@ -2,8 +2,8 @@ import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
   ViewChild, NgZone,
 } from '@angular/core';
-import {FormControl, FormGroup} from "@angular/forms";
-import {Subscription} from "rxjs/Subscription";
+import {FormControl, FormGroup} from '@angular/forms';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'ng-selectio-search',
@@ -30,8 +30,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   @Input() autocomplete: boolean;
   @Input() placeholder: string;
   @Input() disabled: boolean;
-  @Input() searchDelay: number = 0;
-  @Input() minLengthForAutocomplete: number = 0;
+  @Input() searchDelay: number;
+  @Input() minLengthForAutocomplete: number;
 
   @Output() onSearchBlur = new EventEmitter<Event>();
   @Output() onSearchKeyDown = new EventEmitter<KeyboardEvent>();
@@ -77,7 +77,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
     return !!this.textInput.value;
   }
 
-  public focus():void {
+  public focus(): void {
     this._ngZone.runOutsideAngular(() => {
       setTimeout(() => this.search.nativeElement.focus(), 0);
     });
@@ -86,7 +86,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   public empty(): void {
     this.textInput.setValue('');
   }
-  // TODO FIX
+
   public getNativeElement() {
     return this.search.nativeElement;
   }

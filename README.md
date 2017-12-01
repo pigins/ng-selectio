@@ -18,5 +18,6 @@ The project is under active development. Do not use it now.
      ...
    })
 
-
+# Examples
+https://pigins.github.io/ng-selectio
 

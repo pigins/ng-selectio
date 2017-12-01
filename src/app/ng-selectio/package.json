@@ -15,10 +15,10 @@
     "select",
     "selectio"
   ],
-  "author": " <ask_sergey@inbox.ru>",
+  "author": "Pigin Sergey <ask_sergey@inbox.ru>",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/pigins/ng-selectio/issues"
   },
-  "homepage": "https://github.com/pigins/ng-selectio#readme"
+  "homepage": "https://pigins.github.io/ng-selectio"
 }

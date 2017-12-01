@@ -1,6 +1,6 @@
-import {AfterViewChecked, Component, ElementRef, Input, OnInit, ViewChild} from '@angular/core';
-import {Template} from "./template";
-import {Item} from "./item";
+import {Component, ElementRef, Input, ViewChild} from '@angular/core';
+import {Template} from './template';
+import {Item} from './item';
 
 @Component({
   selector: 'ng-selectio-item',
@@ -23,8 +23,7 @@ import {Item} from "./item";
     }
   `]
 })
-export class ItemComponent implements OnInit, AfterViewChecked {
-
+export class ItemComponent {
   @Input() data: Item;
   @Input() isActive: boolean;
   @Input() isSelected: boolean;
@@ -32,14 +31,8 @@ export class ItemComponent implements OnInit, AfterViewChecked {
   @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
 
   @ViewChild('li') li: ElementRef;
-  constructor() {
-  }
 
-  ngOnInit() {
-  }
-
-  ngAfterViewChecked(): void {
-  }
+  constructor() {}
 
   public getHeight(): number {
     return this.li.nativeElement.offsetHeight;

@@ -1,8 +1,8 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
-import {HttpModule} from "@angular/http";
-import {NgSelectioModule} from "./ng-selectio/ng-selectio.module";
+import {HttpModule} from '@angular/http';
+import {NgSelectioModule} from './ng-selectio/ng-selectio.module';
 
 @NgModule({
   declarations: [
