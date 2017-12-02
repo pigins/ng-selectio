@@ -1,0 +1,43 @@
+<p>Simple select array of strings</p>
+<app-ng-selectio
+  [$data]="$stringArray"
+  [selectionEmptyRenderer]="noDataRenderer"
+  [dropdownDisabledItemMapper]="disabledItem"
+  [tabIndex]="-1"
+  [selectionDeletable]="true"
+></app-ng-selectio>
+<p>Simple select array of objects</p>
+<app-ng-selectio
+  [$data]="$objectArray"
+  [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
+  [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
+  [defaultSelectionRule]="defaultSelectionRule"
+  (onSelect)="onSelectCountry($event)"
+></app-ng-selectio>
+<p>Simple select array of strings with search</p>
+<app-ng-selectio
+  [$data]="$stringArray"
+  [showSearch]="true"
+  (onSearch)="onSearchString($event)"
+></app-ng-selectio>
+<p>Simple select array of strings with search and autocomplete</p>
+<app-ng-selectio
+  [$data]="$stringArray"
+  [showSearch]="true"
+  [autocomplete]="true"
+  (onSearch)="onSearchString($event)"
+></app-ng-selectio>
+<p>remote data select with search and paging</p>
+<app-ng-selectio
+  [$data]="$users"
+  [$appendData]="$appendUsers"
+  [dropdownItemRenderer]="renderItem"
+  [selectionItemRenderer]="renderItem"
+  [selectionMode]="'multiple'"
+  [showSearch]="true"
+  [selectionDeletable]="true"
+  [paging]="true"
+  [pagingDelay]="500"
+  (onSearch)="onSearch($event)"
+  (onNextPage)="onNextPage($event)"
+></app-ng-selectio>
