@@ -10,6 +10,9 @@ import {HomePageComponent} from './home-page/home-page.component';
 import {routes} from './routes';
 import {RouterModule} from '@angular/router';
 import {DataService} from './service/data.service';
+import { NumberInputComponent } from './builder-page/number-input.component';
+import {SelectInputComponent} from './builder-page/select-input.component';
+import {CheckboxInputComponent} from './builder-page/checkbox-input.component';
 
 @NgModule({
   declarations: [
@@ -17,7 +20,10 @@ import {DataService} from './service/data.service';
     HomePageComponent,
     ExamplesPageComponent,
     DocsPageComponent,
-    BuilderPageComponent
+    BuilderPageComponent,
+    NumberInputComponent,
+    SelectInputComponent,
+    CheckboxInputComponent
   ],
   imports: [
     BrowserModule,

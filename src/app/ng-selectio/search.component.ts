@@ -31,7 +31,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   @Input() placeholder: string;
   @Input() disabled: boolean;
   @Input() searchDelay: number;
-  @Input() minLengthForAutocomplete: number;
+  @Input() searchStartLength: number;
 
   @Output() onSearchBlur = new EventEmitter<Event>();
   @Output() onSearchKeyDown = new EventEmitter<KeyboardEvent>();
@@ -61,9 +61,10 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    console.log(this.searchStartLength);
     this.searchTextChangeSubscription = this.textInput.valueChanges
       .debounceTime(this.searchDelay)
-      .filter(e => this.textInput.value.length >= this.minLengthForAutocomplete)
+      .filter(e => this.textInput.value.length >= this.searchStartLength)
       .subscribe((v: string) => {
         this.onSearchValueChanges.emit(v);
       });

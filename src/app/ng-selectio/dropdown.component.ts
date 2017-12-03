@@ -154,7 +154,7 @@ export class DropdownComponent implements OnInit, OnChanges {
     return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
 
-  private getActiveItemComponent(): ItemComponent {
+  private getActiveItemComponent(): ItemComponent|null {
     const activeLis = this.itemList.filter((item: ItemComponent) => {
       return item.data === this.activeListItem;
     });

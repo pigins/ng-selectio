@@ -22,8 +22,10 @@ export enum KEY_CODE {
   ENTER = 13,
   BACKSPACE = 8
 }
+
 export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
+
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-ng-selectio',
@@ -47,14 +49,14 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           >
           </selection>
           <ng-selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
-            [autocomplete]="autocomplete"
-            [placeholder]="placeholder"
-            [disabled]="disabled"
-            [searchDelay]="searchDelay"
-            [minLengthForAutocomplete]="minLengthForAutocomplete"
-            (onSearchBlur)="onBlur($event)"
-            (onSearchKeyDown)="onTextInputKeyDown($event)"
-            (onSearchValueChanges)="onSearchValueChanges($event)"
+                              [autocomplete]="autocomplete"
+                              [placeholder]="placeholder"
+                              [disabled]="disabled"
+                              [searchDelay]="searchDelay"
+                              [searchStartLength]="searchStartLength"
+                              (onSearchBlur)="onBlur($event)"
+                              (onSearchKeyDown)="onTextInputKeyDown($event)"
+                              (onSearchValueChanges)="onSearchValueChanges($event)"
           ></ng-selectio-search>
         </div>
         <div *ngIf="order===2" [ngClass]="{'ngs-dropdown': true, 'ngs-expanded': expanded && !disabled}">
@@ -65,7 +67,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                   [placeholder]="placeholder"
                                   [disabled]="disabled"
                                   [searchDelay]="searchDelay"
-                                  [minLengthForAutocomplete]="minLengthForAutocomplete"
+                                  [searchStartLength]="searchStartLength"
                                   (onSearchBlur)="onBlur($event)"
                                   (onSearchKeyDown)="onTextInputKeyDown($event)"
                                   (onSearchValueChanges)="onSearchValueChanges($event)"
@@ -76,7 +78,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [expanded]="expanded"
                                 [loadingMoreResults]="loadingMoreResults"
                                 [searching]="searching"
-                                [maxHeight] = "dropdownMaxHeight"
+                                [maxHeight]="dropdownMaxHeight"
                                 [itemRenderer]="dropdownItemRenderer"
                                 [disabledItemMapper]="dropdownDisabledItemMapper"
                                 [emptyRenderer]="dropdownEmptyRenderer"
@@ -100,13 +102,16 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     .ngs {
       border: 1px solid grey;
     }
+
     .ngs-dropdown {
       display: none;
       position: relative;
     }
+
     .ngs-dropdown.ngs-expanded {
       display: block;
     }
+
     .dropdown-cont {
       position: absolute;
       z-index: 9999999;
@@ -119,22 +124,23 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() $data: Observable<Item[]> = Observable.empty();
   @Input() $appendData: Observable<Item[]> = Observable.empty();
-  @Input() selection = [];
+  @Input() selection: Item[] = [];
+
   @Input() selectionMode = SELECTION_MODE_SINGLE;
   @Input() searchDelay: number = 0;
-  @Input() minLengthForAutocomplete: number = 0;
+  @Input() searchStartLength: number = 0;
   @Input() showSearch: boolean = false;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
   @Input() autocomplete: boolean = false;
-  @Input() disabled = false;
-  @Input() closeOnSelect = true;
+  @Input() disabled: boolean = false;
+  @Input() closeOnSelect: boolean = true;
   @Input() maxSelectionLength: number = -1;
-  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]) => [];
+  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() selectionDeletable: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
-  @Input() trackByFn: (index: number, item:Item) => any = null;
+  @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
   @Input() openOnTop = false;
   // templates
   static defaultItemRenderer = (item: Item) => {
@@ -156,7 +162,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
   @Output() onSearch = new EventEmitter<string>();
-  @Output() onNextPage = new EventEmitter<{currentLength: number, search: string}>();
+  @Output() onNextPage = new EventEmitter<{ currentLength: number, search: string }>();
   @Output() onSelect = new EventEmitter<Item>();
 
   @ViewChild('ngs') ngs: ElementRef;
@@ -164,12 +170,12 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('listComponent') listComponent: DropdownComponent;
 
   data: Item[] = [];
-  highlightedItem: Item = null;
+  highlightedItem: Item | null = null;
   expanded: boolean;
   loadingMoreResults: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
-  verticalOrder = [1,2];
+  verticalOrder = [1, 2];
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
@@ -196,14 +202,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
     if (changes.openOnTop) {
       if (this.openOnTop) {
-        this.verticalOrder = [2,1];
+        this.verticalOrder = [2, 1];
       } else {
-        this.verticalOrder = [1,2];
+        this.verticalOrder = [1, 2];
       }
     }
   }
 
-  ngOnInit() {
+  ngOnInit(): void {
     if (!this.$data) {
       this.$data = Observable.empty();
     }
@@ -236,18 +242,18 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     this.expandedChangedSubscription.unsubscribe();
   }
 
-  onSearchValueChanges(value: string) {
+  onSearchValueChanges(value: string): void {
     this.onSearch.emit(value);
     this.searching = true;
   }
 
-  onClickSelection() {
+  onClickSelection(): void {
     if (!this.autocomplete) {
       this.expandedChanged.emit(!this.expanded);
     }
   }
 
-  selectItem(item: Item) {
+  selectItem(item: Item): void {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [item];
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
@@ -319,9 +325,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
   }
+
   trackByOpenOnTop(index, item) {
     return item;
   }
+
   private hasFocus(): boolean {
     if (document.activeElement) {
       return document.activeElement === this.ngs.nativeElement || document.activeElement === this.searchComponent.getNativeElement();

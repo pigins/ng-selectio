@@ -111,7 +111,7 @@ export class SelectionComponent {
       return;
     }
     if (this.highlightedItem === item) {
-      this.onHighlightItem.emit(null);
+      //this.onHighlightItem.emit(null);
     } else {
       this.onHighlightItem.emit(item);
     }
