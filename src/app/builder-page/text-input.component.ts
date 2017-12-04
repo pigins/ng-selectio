@@ -3,21 +3,21 @@ import {NG_VALUE_ACCESSOR} from '@angular/forms';
 import {ValueAccessorBase} from './value-accessor-base';
 
 @Component({
-  selector: 'app-number-input',
+  selector: 'app-text-input',
   template: `
-    <div>
+    <div> 
       <label style="display: inline-block">{{label}}</label>
-      <input type="number" [(ngModel)]="value"/>
+      <input [(ngModel)]="value" type="text"/>
     </div>
   `,
   providers: [
-    {provide: NG_VALUE_ACCESSOR, useExisting: NumberInputComponent, multi: true}
+    {provide: NG_VALUE_ACCESSOR, useExisting: TextInputComponent, multi: true}
   ],
   styles: [`
     
   `]
 })
-export class NumberInputComponent extends ValueAccessorBase<number> {
+export class TextInputComponent extends ValueAccessorBase<string> {
   @Input() label: string;
   constructor() {
     super();

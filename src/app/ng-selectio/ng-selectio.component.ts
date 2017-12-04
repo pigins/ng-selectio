@@ -126,7 +126,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() $appendData: Observable<Item[]> = Observable.empty();
   @Input() selection: Item[] = [];
 
-  @Input() selectionMode = SELECTION_MODE_SINGLE;
+  @Input() selectionMode: string = SELECTION_MODE_SINGLE;
   @Input() searchDelay: number = 0;
   @Input() searchStartLength: number = 0;
   @Input() showSearch: boolean = false;
@@ -141,7 +141,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
   @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
-  @Input() openOnTop = false;
+  @Input() openOnTop: boolean = false;
   // templates
   static defaultItemRenderer = (item: Item) => {
     if (typeof item === 'string') {
@@ -154,7 +154,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   };
   @Input() dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
-  @Input() dropdownMaxHeight: '100px';
+  @Input() dropdownMaxHeight: string = '100px';
   @Input() placeholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
   @Input() dropdownPagingMessageRenderer: Template<() => string> = 'Loading more results...';

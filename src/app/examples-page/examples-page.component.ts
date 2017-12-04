@@ -11,18 +11,18 @@ import {DataService} from '../service/data.service';
   styleUrls: ['./examples-page.component.css']
 })
 export class ExamplesPageComponent {
-  $stringArray: Observable<any> = Observable.of(this.dataService.countriesStrings);
+  $stringArray: Observable<any> = this.dataService.countriesStrings;
   $objectArray: Observable<any>;
   $users: Observable<any>;
   $appendUsers: Observable<any>;
 
   constructor(private http: Http, private dataService: DataService ) {
-    this.$objectArray = Observable.of(this.dataService.countriesData);
+    this.$objectArray = this.dataService.countriesData;
   }
   onSearchString(term: string) {
-    this.$stringArray = Observable.of(this.dataService.countriesStrings.filter((elem) => {
+    this.$stringArray = this.dataService.countriesStrings.filter((elem) => {
       return elem.includes(term);
-    }));
+    });
   }
   onSearch(term: string) {
     if (term === '') {

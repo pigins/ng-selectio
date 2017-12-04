@@ -13,6 +13,9 @@ import {DataService} from './service/data.service';
 import { NumberInputComponent } from './builder-page/number-input.component';
 import {SelectInputComponent} from './builder-page/select-input.component';
 import {CheckboxInputComponent} from './builder-page/checkbox-input.component';
+import {FormsModule} from '@angular/forms';
+import {TextInputComponent} from './builder-page/text-input.component';
+
 
 @NgModule({
   declarations: [
@@ -23,10 +26,12 @@ import {CheckboxInputComponent} from './builder-page/checkbox-input.component';
     BuilderPageComponent,
     NumberInputComponent,
     SelectInputComponent,
+    TextInputComponent,
     CheckboxInputComponent
   ],
   imports: [
     BrowserModule,
+    FormsModule,
     HttpModule,
     NgSelectioModule,
     RouterModule.forRoot(routes, {useHash: true})
