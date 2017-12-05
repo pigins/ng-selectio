@@ -35,7 +35,7 @@ export class SelectInputComponent extends ValueAccessorBase<any> implements OnCh
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.options && this.options) {
       if (this.options.length > 0) {
-        if (typeof this.options[0] === 'string') {
+        if (typeof this.options[0] === 'string' || typeof this.options[0] === 'number') {
           this.elements = this.options.map((option) => {
             return {label: option, value: option};
           });

@@ -12,50 +12,57 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
   selector: 'app-builder-page',
   template: `
     <div>
-      <label for="arrds">Simple array of strings</label><input type="radio" name="mode" value="strings" id="arrds" [ngModel]="datasourceId" (ngModelChange)="onChangeRadioDatasource($event)"/>
-      <label for="objds">Array of objects</label><input type="radio" name="mode" value="objects" id="objds" [ngModel]="datasourceId" (ngModelChange)="onChangeRadioDatasource($event)"/>
-      <label for="asyncds">Async datasource</label><input type="radio" name="mode" value="remote_objects" id="asyncds" [ngModel]="datasourceId" (ngModelChange)="onChangeRadioDatasource($event)"/>
+      <label for="arrds">Simple array of strings</label><input type="radio" name="mode" value="strings" id="arrds" [ngModel]="datasourceId"
+                                                               (ngModelChange)="onChangeRadioDatasource($event)"/>
+      <label for="objds">Array of objects</label><input type="radio" name="mode" value="objects" id="objds" [ngModel]="datasourceId"
+                                                        (ngModelChange)="onChangeRadioDatasource($event)"/>
+      <label for="asyncds">Async datasource</label><input type="radio" name="mode" value="remote_objects" id="asyncds"
+                                                          [ngModel]="datasourceId" (ngModelChange)="onChangeRadioDatasource($event)"/>
     </div>
 
     <app-checkbox-input
       [label]="'disabled'"
-      [(ngModel)] = "disabled">
+      [(ngModel)]="disabled">
     </app-checkbox-input>
     <app-checkbox-input
       [label]="'closeOnSelect'"
-      [(ngModel)] = "closeOnSelect">
+      [(ngModel)]="closeOnSelect">
     </app-checkbox-input>
     <app-checkbox-input
       [label]="'openOnTop'"
-      [(ngModel)] = "openOnTop">
+      [(ngModel)]="openOnTop">
     </app-checkbox-input>
     <app-checkbox-input
       [label]="'showSearch'"
-      [(ngModel)] = "showSearch">
+      [(ngModel)]="showSearch">
     </app-checkbox-input>
     <app-checkbox-input
       [label]="'autocomplete'"
-      [(ngModel)] = "autocomplete">
+      [(ngModel)]="autocomplete">
     </app-checkbox-input>
     <app-checkbox-input
       [label]="'selectionDeletable'"
-      [(ngModel)] = "selectionDeletable">
+      [(ngModel)]="selectionDeletable">
+    </app-checkbox-input>
+    <app-checkbox-input
+      [label]="'paging'"
+      [(ngModel)]="paging">
     </app-checkbox-input>
     <app-number-input
       [label]="'searchStartLength'"
-      [(ngModel)] = "searchStartLength">
+      [(ngModel)]="searchStartLength">
     </app-number-input>
     <app-number-input
       [label]="'searchDelay'"
-      [(ngModel)] = "searchDelay">
+      [(ngModel)]="searchDelay">
     </app-number-input>
     <app-number-input
       [label]="'pagingDelay'"
-      [(ngModel)] = "pagingDelay">
+      [(ngModel)]="pagingDelay">
     </app-number-input>
     <app-number-input
       [label]="'tabIndex'"
-      [(ngModel)] = "tabIndex">
+      [(ngModel)]="tabIndex">
     </app-number-input>
     <app-text-input
       [label]="'dropdownMaxHeight'"
@@ -67,7 +74,7 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
     </app-text-input>
     <app-select-input
       [label]="'maxSelectionLength'"
-      [options]="['-1', '1', '2']"
+      [options]="[-1, 1, 2]"
       [(ngModel)]="maxSelectionLength">
     </app-select-input>
     <app-select-input
@@ -76,51 +83,51 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
       [(ngModel)]="selectionMode">
     </app-select-input>
     <app-select-input
-      [label]="'Default Selection Rule'"
+      [label]="'defaultSelectionRule'"
       [options]="[{label: 'none', value: defaultSelectionRule_none}, {label: 'select first', value: defaultSelectionRule_selectFirst}]"
-      [(ngModel)] = defaultSelectionRule>
+      [(ngModel)]=defaultSelectionRule>
     </app-select-input>
     <app-select-input
-      [label]="'Dropdown disabled item mappers'"
-      [options]="['disable all', 'none']"
-      (valueChange)="onChangeDropdownDisabledItemMapper($event)">
+      [label]="'dropdownDisabledItemMapper'"
+      [options]="[{label: 'all disabled', value: dropdownDisabledItemMapper_allDisabled}, {label: 'all enabled', value: dropdownDisabledItemMapper_allEnabled}]"
+      [(ngModel)]=dropdownDisabledItemMapper>
     </app-select-input>
     <app-select-input
-      [label]="'Track by function'"
-      [options]="['none', 'by index']"
-      (valueChange)="onChangeTrackByFunction($event)">
+      [label]="'trackByFn'"
+      [options]="[{label: 'none', value: null}, {label: 'by index', value: trackByFn_byIndex}]"
+      [(ngModel)]=trackByFn>
     </app-select-input>
     <app-select-input
-      [label]="'Dropdown item renderer'"
-      [options]="['default', 'country', 'user']"
-      (valueChange)="onChangeDropdownItemRenderer($event)">
+      [label]="'dropdownItemRenderer'"
+      [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
+      [(ngModel)]=dropdownItemRenderer>
     </app-select-input>
     <app-select-input
-      [label]="'Selection item renderer'"
-      [options]="['default', 'country', 'user']"
-      (valueChange)="onChangeSelectionItemRenderer($event)">
+      [label]="'selectionItemRenderer'"
+      [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
+      [(ngModel)]="selectionItemRenderer">
     </app-select-input>
     <app-select-input
       [label]="'dropdownEmptyRenderer'"
-      [options]="['default', 'null', 'empty']"
-      (valueChange)="onChangeDropdownEmptyRenderer($event)">
+      [options]="[{label: 'default', value: dropdownEmptyRenderer_default}, {label: 'null', value: null}, {label: 'user', value: dropdownEmptyRenderer_empty}]"
+      [(ngModel)]="dropdownEmptyRenderer">
     </app-select-input>
     <app-select-input
       [label]="'dropdownPagingMessageRenderer'"
-      [options]="['default', 'null']"
-      (valueChange)="onChangeDropdownPagingMessageRenderer($event)">
+      [options]="[{label: 'default', value: dropdownPagingMessageRenderer_default}, {label: 'null', value: null}]"
+      [(ngModel)]="dropdownPagingMessageRenderer">
     </app-select-input>
     <app-select-input
       [label]="'dropdownSearchingRenderer'"
-      [options]="['default', 'null']"
-      (valueChange)="onChangeDropdownSearchingRenderer($event)">
+      [options]="[{label: 'default', value: dropdownSearchingRenderer_default}, {label: 'null', value: null}]"
+      [(ngModel)]="dropdownSearchingRenderer">
     </app-select-input>
     <app-select-input
       [label]="'selectionEmptyRenderer'"
-      [options]="['default', 'null']"
-      (valueChange)="onChangeSelectionEmptyRenderer($event)">
+      [options]="[{label: 'default', value: selectionEmptyRenderer_default}, {label: 'null', value: null}]"
+      [(ngModel)]="selectionEmptyRenderer">
     </app-select-input>
-    
+
     <div>
       <p>Select</p>
       <app-ng-selectio
@@ -158,8 +165,50 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
   styleUrls: ['./builder-page.component.css']
 })
 export class BuilderPageComponent {
-  $data: Observable<Item[]> = Observable.empty();
-  $appendData: Observable<Item[]> = Observable.empty();
+  // defaults
+  defaultSelectionRule_selectFirst(items: Item[]): Item[] {
+    return [items[0]];
+  }
+
+  defaultSelectionRule_none(items: Item[]): Item[] {
+    return [];
+  }
+
+  dropdownDisabledItemMapper_allDisabled(item: Item): boolean {
+    return true;
+  }
+
+  dropdownDisabledItemMapper_allEnabled(item: Item): boolean {
+    return false;
+  }
+
+  trackByFn_byIndex(index: number, item: Item): any {
+    return index;
+  }
+
+  itemRenderer_default(item: any): string {
+    return NgSelectioComponent.defaultItemRenderer(item);
+  }
+
+  itemRenderer_renderUser(item: any): string {
+    return item.name.first;
+  }
+
+  itemRenderer_renderCountry(countryItem: any): string {
+    return `<div id="country-iso-name" class=${countryItem.isoName}>
+               <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
+               <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
+           </div>`;
+  }
+
+  dropdownEmptyRenderer_default = 'Enter 1 or more characters';
+  dropdownEmptyRenderer_empty = 'empty';
+  dropdownPagingMessageRenderer_default = 'Loading more results...';
+  dropdownSearchingRenderer_default = 'Searching...';
+  selectionEmptyRenderer_default = 'No data';
+
+  $data: Observable<Item[]> = this.dataService.countriesStrings;
+  $appendData: Observable<Item[]> = Observable.of([]);
   selection: Item[] = [];
 
   selectionMode: string = SELECTION_MODE_SINGLE;
@@ -174,122 +223,23 @@ export class BuilderPageComponent {
   maxSelectionLength: number = -1;
   defaultSelectionRule: (items: Item[]) => Item[] = this.defaultSelectionRule_none;
   selectionDeletable: boolean = false;
-  dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
+  dropdownDisabledItemMapper: (item: Item) => boolean = this.dropdownDisabledItemMapper_allEnabled;
   tabIndex: number = 1;
   trackByFn: ((index: number, item: Item) => any) | null = null;
   openOnTop: boolean = false;
 
-  dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
-  selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
+  dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = this.itemRenderer_default;
+  selectionItemRenderer: Template<(item: Item) => string> = this.itemRenderer_default;
   dropdownMaxHeight: string = '100px';
   placeholder: string = '';
-  dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
-  dropdownPagingMessageRenderer: Template<() => string> = 'Loading more results...';
-  dropdownSearchingRenderer: Template<() => string> = 'Searching...';
-  selectionEmptyRenderer: Template<() => string> = 'No data';
+  dropdownEmptyRenderer: Template<() => string> = this.dropdownEmptyRenderer_default;
+  dropdownPagingMessageRenderer: Template<() => string> = this.dropdownPagingMessageRenderer_default;
+  dropdownSearchingRenderer: Template<() => string> = this.dropdownSearchingRenderer_default;
+  selectionEmptyRenderer: Template<() => string> = this.selectionEmptyRenderer_default;
 
   datasourceId: string = 'strings';
 
   constructor(private http: Http, private dataService: DataService) {
-  }
-
-  defaultSelectionRule_selectFirst(items: Item[]): Item[] {
-    return [items[0]];
-  }
-  defaultSelectionRule_none(items: Item[]): Item[] {
-    return [];
-  }
-
-  onChangeDefaultSelectionRule(ruleId: string): void {
-    if (ruleId === 'select first') {
-      this.defaultSelectionRule = (items: Item[]): Item[] => [items[0]];
-    } else if (ruleId === 'none') {
-      this.defaultSelectionRule = (items: Item[]): Item[] => [];
-    }
-  }
-
-  onChangeDropdownDisabledItemMapper(mapperId: string) {
-    // TODO add index into function
-    if (mapperId === 'disable all') {
-      this.dropdownDisabledItemMapper = (item: Item) => false;
-    } else if (mapperId === 'none') {
-      this.dropdownDisabledItemMapper = (item: Item) => true;
-    }
-  }
-
-  onChangeTrackByFunction(id: string) {
-    if (id === 'by index') {
-      this.trackByFn = (index: number, item: Item) => {
-        return index;
-      };
-    } else if (id === 'none') {
-      this.trackByFn = null;
-    }
-  }
-
-  renderUser(item: any) {
-    return item.name.first;
-  }
-
-  renderCountry(countryItem: any): string {
-    return `<div id="country-iso-name" class=${countryItem.isoName}>
-               <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
-               <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
-           </div>`;
-  }
-
-  onChangeDropdownItemRenderer(id: string) {
-    if (id === 'default') {
-      this.dropdownItemRenderer = NgSelectioComponent.defaultItemRenderer;
-    } else if (id === 'country') {
-      this.dropdownItemRenderer = this.renderCountry;
-    } else if (id === 'user') {
-      this.dropdownItemRenderer = this.renderUser;
-    }
-  }
-
-  onChangeSelectionItemRenderer(id: string) {
-    if (id === 'default') {
-      this.selectionItemRenderer = NgSelectioComponent.defaultItemRenderer;
-    } else if (id === 'country') {
-      this.selectionItemRenderer = this.renderCountry;
-    } else if (id === 'user') {
-      this.selectionItemRenderer = this.renderUser;
-    }
-  }
-
-  onChangeDropdownEmptyRenderer(id: string) {
-    if (id === 'default') {
-      this.dropdownEmptyRenderer = 'Enter 1 or more characters';
-    } else if (id === 'null') {
-      this.dropdownEmptyRenderer = null;
-    } else if (id === 'empty') {
-      this.dropdownEmptyRenderer = 'empty';
-    }
-  }
-
-  onChangeDropdownPagingMessageRenderer(id: string) {
-    if (id === 'default') {
-      this.dropdownEmptyRenderer = 'Loading more results...';
-    } else if (id === 'null') {
-      this.dropdownEmptyRenderer = null;
-    }
-  }
-
-  onChangeDropdownSearchingRenderer(id: string) {
-    if (id === 'default') {
-      this.dropdownSearchingRenderer = 'Searching...';
-    } else if (id === 'null') {
-      this.dropdownSearchingRenderer = null;
-    }
-  }
-
-  onChangeSelectionEmptyRenderer(id: string) {
-    if (id === 'default') {
-      this.selectionEmptyRenderer = 'No data';
-    } else if (id === 'null') {
-      this.selectionEmptyRenderer = null;
-    }
   }
 
   onChangeRadioDatasource(id: string) {
@@ -302,8 +252,7 @@ export class BuilderPageComponent {
       this.$data = this.dataService.countriesData;
     } else if (id === 'remote_objects') {
       this.datasourceId = id;
-      // TODO
-      //this.dropdownEmptyRenderer = 'empty';
+      this.$data = Observable.of([]);
     }
   }
 
@@ -316,11 +265,17 @@ export class BuilderPageComponent {
           .map(r => r.json()).map(r => r.results);
       }
     } else if (this.datasourceId === 'strings') {
-        this.$data = this.dataService.countriesStrings.filter((elem) => {
-          return elem.includes(term);
-        });
+      this.$data = this.dataService.countriesStrings.mergeMap((arr) => {
+        return Observable.of(arr.filter((elem) => {
+          return (<string>elem).includes(term);
+        }));
+      });
     } else if (this.datasourceId === 'objects') {
-      // TODO
+      this.$data = this.dataService.countriesData.mergeMap((arr) => {
+        return Observable.of(arr.filter((elem) => {
+          return ((<any>elem).name).includes(term);
+        }));
+      });
     }
   }
 

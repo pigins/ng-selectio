@@ -4,7 +4,7 @@
   "license": "MIT",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
+    "start": "ng serve --no-delete-output-path",
     "build": "ng build --prod --output-hashing=none --no-delete-output-path --base-href=https://pigins.github.io/ng-selectio/",
     "test": "ng test",
     "lint": "ng lint",

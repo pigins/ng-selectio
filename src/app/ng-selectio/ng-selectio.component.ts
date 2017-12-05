@@ -5,7 +5,6 @@ import {
   ViewChild
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import 'rxjs/add/observable/empty';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
@@ -122,8 +121,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
-  @Input() $data: Observable<Item[]> = Observable.empty();
-  @Input() $appendData: Observable<Item[]> = Observable.empty();
+  @Input() $data: Observable<Item[]> = Observable.of([]);
+  @Input() $appendData: Observable<Item[]> = Observable.of([]);
   @Input() selection: Item[] = [];
 
   @Input() selectionMode: string = SELECTION_MODE_SINGLE;
@@ -211,7 +210,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnInit(): void {
     if (!this.$data) {
-      this.$data = Observable.empty();
+      this.$data = Observable.of([]);
     }
 
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
