@@ -14,7 +14,6 @@ import {DropdownComponent} from './dropdown.component';
 import {Template} from './template';
 import {Item} from './item';
 import {SearchComponent} from './search.component';
-import {ValueAccessorBase} from '../builder-page/value-accessor-base';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 export enum KEY_CODE {
@@ -36,7 +35,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   template: `
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
-      <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
+      <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div *ngIf="order===1">
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                      [items]="selection"
@@ -45,8 +44,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
                      [selectionMode]="selectionMode"
                      [showArrow]="!autocomplete"
-                     [arrowDirection]="openOnTop ? !expanded : expanded"
-                     [deletable]="selectionDeletable"
+                     [arrowDirection]="openUp ? !expanded : expanded"
+                     [deletable]="allowClear"
                      [disabled]="disabled"
                      (click)="onClickSelection($event)"
                      (onDeleteItem)="onDeleteItem($event)"
@@ -58,21 +57,21 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               [placeholder]="placeholder"
                               [disabled]="disabled"
                               [searchDelay]="searchDelay"
-                              [searchStartLength]="searchStartLength"
+                              [searchMinLength]="searchMinLength"
                               (onSearchBlur)="onBlur($event)"
                               (onSearchKeyDown)="onTextInputKeyDown($event)"
                               (onSearchValueChanges)="onSearchValueChanges($event)"
           ></ng-selectio-search>
         </div>
         <div *ngIf="order===2" [ngClass]="{'ngs-dropdown': true, 'ngs-expanded': expanded && !disabled}">
-          <div class="dropdown-cont" [ngStyle]="{'bottom': openOnTop ? 0: 'auto', 'top': !openOnTop ? 0: 'auto'}">
-            <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenOnTop">
-              <ng-selectio-search #searchComponent *ngIf="order===1 && !autocomplete && showSearch"
+          <div class="dropdown-cont" [ngStyle]="{'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
+            <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
+              <ng-selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
                                   [autocomplete]="autocomplete"
                                   [placeholder]="placeholder"
                                   [disabled]="disabled"
                                   [searchDelay]="searchDelay"
-                                  [searchStartLength]="searchStartLength"
+                                  [searchMinLength]="searchMinLength"
                                   (onSearchBlur)="onBlur($event)"
                                   (onSearchKeyDown)="onTextInputKeyDown($event)"
                                   (onSearchValueChanges)="onSearchValueChanges($event)"
@@ -135,19 +134,19 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() defaultSelection: Item | Item[] | null = null;
   @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() searchDelay: number = 0;
-  @Input() searchStartLength: number = 0;
-  @Input() showSearch: boolean = false;
+  @Input() searchMinLength: number = 0;
+  @Input() search: boolean = false;
   @Input() pagingDelay: number = 0;
   @Input() paging: boolean = false;
   @Input() autocomplete: boolean = false;
   @Input() disabled: boolean = false;
-  @Input() closeOnSelect: boolean = true;
+  @Input() closeAfterSelect: boolean = true;
   @Input() maxSelectionLength: number = -1;
-  @Input() selectionDeletable: boolean = false;
+  @Input() allowClear: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
   @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
-  @Input() openOnTop: boolean = false;
+  @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
 
   // templates
@@ -188,15 +187,17 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   verticalOrder = [1, 2];
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
-  private changed = new Array<(value: Item[]) => void>();
-  private touched = new Array<() => void>();
+  private changed: Array<(value: Item[]) => void> = [];
+  private touched: Array<() => void> = [];
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
+
   // control value accessor
   touch() {
     this.touched.forEach(f => f());
   }
+
   modelChange() {
     this.changed.forEach(f => f(this.selection));
   }
@@ -241,8 +242,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
         this.loadingMoreResults = false;
       });
     }
-    if (changes.openOnTop) {
-      if (this.openOnTop) {
+    if (changes.openUp) {
+      if (this.openUp) {
         this.verticalOrder = [2, 1];
       } else {
         this.verticalOrder = [1, 2];
@@ -310,7 +311,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
         this.modelChange();
       }
     }
-    if (this.closeOnSelect) {
+    if (this.closeAfterSelect) {
       this.expandedChanged.emit(false);
     }
     this.onSelect.emit(item);
@@ -377,7 +378,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   }
 
-  trackByOpenOnTop(index, item) {
+  trackByOpenUp(index, item) {
     return item;
   }
 

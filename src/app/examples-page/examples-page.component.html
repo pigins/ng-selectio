@@ -3,7 +3,7 @@
   [$data]="$stringArray"
   [selectionEmptyRenderer]="noDataRenderer"
   [dropdownDisabledItemMapper]="disabledItem"
-  [selectionDeletable]="true"
+  [allowClear]="true"
 ></app-ng-selectio>
 <p>Simple select array of objects</p>
 <app-ng-selectio
@@ -16,13 +16,13 @@
 <p>Simple select array of strings with search</p>
 <app-ng-selectio
   [$data]="$stringArray"
-  [showSearch]="true"
+  [search]="true"
   (onSearch)="onSearchString($event)"
 ></app-ng-selectio>
 <p>Simple select array of strings with search and autocomplete</p>
 <app-ng-selectio
   [$data]="$stringArray"
-  [showSearch]="true"
+  [search]="true"
   [autocomplete]="true"
   (onSearch)="onSearchString($event)"
 ></app-ng-selectio>
@@ -33,8 +33,8 @@
   [dropdownItemRenderer]="renderItem"
   [selectionItemRenderer]="renderItem"
   [selectionMode]="'multiple'"
-  [showSearch]="true"
-  [selectionDeletable]="true"
+  [search]="true"
+  [allowClear]="true"
   [paging]="true"
   [pagingDelay]="500"
   (onSearch)="onSearch($event)"
@@ -47,7 +47,7 @@
       [$data]="$stringArray"
       [selectionEmptyRenderer]="noDataRenderer"
       [dropdownDisabledItemMapper]="disabledItem"
-      [selectionDeletable]="true"
+      [allowClear]="true"
     >
     </app-ng-selectio>
   <div>{{itemArray}}</div>
