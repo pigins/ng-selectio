@@ -61,13 +61,13 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [(ngModel)]="allowClear">
       </app-checkbox-input>
       <app-checkbox-input
-        [label]="'paging'"
-        [(ngModel)]="paging">
+        [label]="'pagination'"
+        [(ngModel)]="pagination">
       </app-checkbox-input>
       
       <app-number-input
-        [label]="'pagingDelay'"
-        [(ngModel)]="pagingDelay">
+        [label]="'paginationDelay'"
+        [(ngModel)]="paginationDelay">
       </app-number-input>
       <app-number-input
         [label]="'tabIndex'"
@@ -134,14 +134,14 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [(ngModel)]="dropdownEmptyRenderer">
       </app-select-input>
       <app-select-input
-        [label]="'dropdownPagingMessageRenderer'"
-        [options]="[{label: 'default', value: dropdownPagingMessageRenderer_default}, {label: 'null', value: null}]"
-        [(ngModel)]="dropdownPagingMessageRenderer">
+        [label]="'dropdownpaginationMessageRenderer'"
+        [options]="[{label: 'default', value: dropdownpaginationMessageRenderer_default}, {label: 'null', value: null}]"
+        [(ngModel)]="dropdownpaginationMessageRenderer">
       </app-select-input>
       <app-select-input
-        [label]="'dropdownPagingButtonRenderer'"
-        [options]="[{label: 'default', value: dropdownPagingButtonRenderer_default}, {label: 'null', value: null}]"
-        [(ngModel)]="dropdownPagingButtonRenderer">
+        [label]="'dropdownpaginationButtonRenderer'"
+        [options]="[{label: 'default', value: dropdownpaginationButtonRenderer_default}, {label: 'null', value: null}]"
+        [(ngModel)]="dropdownpaginationButtonRenderer">
       </app-select-input>
       <app-select-input
         [label]="'dropdownSearchingRenderer'"
@@ -168,9 +168,9 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [searchDelay]="searchDelay"
         [searchMinLength]="searchMinLength"
         [search]="search"
-        [paging]="paging"
+        [pagination]="pagination"
         [autocomplete]="autocomplete"
-        [pagingDelay]="pagingDelay"
+        [paginationDelay]="paginationDelay"
         [disabled]="disabled"
         [closeAfterSelect]="closeAfterSelect"
         [maxSelectionLength]="maxSelectionLength"
@@ -182,8 +182,8 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [placeholder]="placeholder"
         [dropdownMaxHeight]="dropdownMaxHeight"
         [dropdownEmptyRenderer]="dropdownEmptyRenderer"
-        [dropdownPagingMessageRenderer]="dropdownPagingMessageRenderer" 
-        [dropdownPagingButtonRenderer]="dropdownPagingButtonRenderer"
+        [dropdownpaginationMessageRenderer]="dropdownpaginationMessageRenderer" 
+        [dropdownpaginationButtonRenderer]="dropdownpaginationButtonRenderer"
         [dropdownSearchingRenderer]="dropdownSearchingRenderer"
         [selectionEmptyRenderer]="selectionEmptyRenderer"
         [tabIndex]="tabIndex"
@@ -228,8 +228,8 @@ export class BuilderPageComponent {
   }
   dropdownEmptyRenderer_default = 'Enter 1 or more characters';
   dropdownEmptyRenderer_empty = 'empty';
-  dropdownPagingMessageRenderer_default = 'Loading more results...';
-  dropdownPagingButtonRenderer_default = 'Get more...';
+  dropdownpaginationMessageRenderer_default = 'Loading more results...';
+  dropdownpaginationButtonRenderer_default = 'Get more...';
   dropdownSearchingRenderer_default = 'Searching...';
   selectionEmptyRenderer_default = 'No data';
 
@@ -244,8 +244,8 @@ export class BuilderPageComponent {
   searchDelay: number = 0;
   searchMinLength: number = 0;
   search: boolean = false;
-  pagingDelay: number = 0;
-  paging: boolean = false;
+  paginationDelay: number = 0;
+  pagination: boolean = false;
   autocomplete: boolean = false;
   disabled: boolean = false;
   closeAfterSelect: boolean = true;
@@ -262,8 +262,8 @@ export class BuilderPageComponent {
   dropdownMaxHeight: string = '100px';
   placeholder: string = '';
   dropdownEmptyRenderer: Template<() => string> = this.dropdownEmptyRenderer_default;
-  dropdownPagingMessageRenderer: Template<() => string> = this.dropdownPagingMessageRenderer_default;
-  dropdownPagingButtonRenderer: Template<() => string> = this.dropdownPagingButtonRenderer_default;
+  dropdownpaginationMessageRenderer: Template<() => string> = this.dropdownpaginationMessageRenderer_default;
+  dropdownpaginationButtonRenderer: Template<() => string> = this.dropdownpaginationButtonRenderer_default;
   dropdownSearchingRenderer: Template<() => string> = this.dropdownSearchingRenderer_default;
   selectionEmptyRenderer: Template<() => string> = this.selectionEmptyRenderer_default;
 
@@ -317,9 +317,9 @@ export class BuilderPageComponent {
     }
   }
 
-  onNextPage(paging) {
+  onNextPage(pagination) {
     if (this.datasourceId === 'remote_objects') {
-      this.$appendData = this.http.get(`https://randomuser.me/api?seed=${paging.term}&results=${10}&page=${paging.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
+      this.$appendData = this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
         .map(r => r.json()).map(r => r.results);
     }
   }

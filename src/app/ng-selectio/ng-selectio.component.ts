@@ -86,11 +86,11 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [itemRenderer]="dropdownItemRenderer"
                                 [disabledItemMapper]="dropdownDisabledItemMapper"
                                 [emptyRenderer]="dropdownEmptyRenderer"
-                                [pagingMessageRenderer]="dropdownPagingMessageRenderer"
-                                [pagingButtonRenderer]="dropdownPagingButtonRenderer"
+                                [paginationMessageRenderer]="dropdownpaginationMessageRenderer"
+                                [paginationButtonRenderer]="dropdownpaginationButtonRenderer"
                                 [searchingRenderer]="dropdownSearchingRenderer"
                                 [keyEvents]="keyEvents"
-                                [paging]="paging"
+                                [pagination]="pagination"
                                 [disabled]="disabled"
                                 [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                                 [trackByFn]="trackByFn"
@@ -136,8 +136,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;
   @Input() search: boolean = false;
-  @Input() pagingDelay: number = 0;
-  @Input() paging: boolean = false;
+  @Input() paginationDelay: number = 0;
+  @Input() pagination: boolean = false;
   @Input() autocomplete: boolean = false;
   @Input() disabled: boolean = false;
   @Input() closeAfterSelect: boolean = true;
@@ -164,8 +164,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() dropdownMaxHeight: string = '100px';
   @Input() placeholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
-  @Input() dropdownPagingMessageRenderer: Template<() => string> = 'Loading more results...';
-  @Input() dropdownPagingButtonRenderer: Template<() => string> = 'Get more...';
+  @Input() dropdownpaginationMessageRenderer: Template<() => string> = 'Loading more results...';
+  @Input() dropdownpaginationButtonRenderer: Template<() => string> = 'Get more...';
   @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
@@ -352,7 +352,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     this.listComponent.scrollToTheBottom();
     setTimeout(() => {
       this.onNextPage.emit({currentLength: this.data.length, search: this.searchComponent.getValue()});
-    }, this.pagingDelay);
+    }, this.paginationDelay);
   }
 
   onDeleteItem(_item: Item) {

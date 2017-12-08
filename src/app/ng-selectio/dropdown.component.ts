@@ -28,16 +28,16 @@ import {Subscription} from 'rxjs/Subscription';
         <li *ngIf="(data.length === 0)"
             [innerHtml]="emptyRenderer | template">
         </li>
-        <li *ngIf="paging && loadingMoreResults"
-            [innerHtml]="pagingMessageRenderer | template">
+        <li *ngIf="pagination && loadingMoreResults"
+            [innerHtml]="paginationMessageRenderer | template">
         </li>
         <li *ngIf="searching"
             [innerHtml]="searchingRenderer | template">
         </li>
       </ul>
-      <span *ngIf="paging && data.length > 0 && !this.hasScroll()"
-            [innerHtml]="pagingButtonRenderer | template"
-            (mousedown)="onPagingClick($event)" 
+      <span *ngIf="pagination && data.length > 0 && !this.hasScroll()"
+            [innerHtml]="paginationButtonRenderer | template"
+            (mousedown)="onpaginationClick($event)" 
       >
       </span>
     </div>
@@ -57,16 +57,16 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   @Input() selection: Item[];
   @Input() loadingMoreResults: boolean;
   @Input() searching: boolean;
-  @Input() pagingDelay: number;
-  @Input() paging: boolean;
+  @Input() paginationDelay: number;
+  @Input() pagination: boolean;
   @Input() trackByFn: (index: number, item: Item) => any;
 
   @Input() maxHeight: string;
   @Input() maxItemsCount: number;
   @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
   @Input() emptyRenderer: Template<() => string>;
-  @Input() pagingMessageRenderer: Template<() => string>;
-  @Input() pagingButtonRenderer: Template<() => string>;
+  @Input() paginationMessageRenderer: Template<() => string>;
+  @Input() paginationButtonRenderer: Template<() => string>;
   @Input() searchingRenderer: Template<() => string>;
   @Input() disabledItemMapper: (item: Item) => boolean;
   @Input() scrollToSelectionAfterOpen: boolean;
@@ -112,7 +112,7 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onUlScroll(event: Event) {
-    if (!this.paging) {
+    if (!this.pagination) {
       return;
     }
     if (this.scrollExhausted() && !this.loadingMoreResults) {
@@ -127,7 +127,7 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
     this.onSelectItem.emit(dataItem);
   }
 
-  onPagingClick($event: MouseEvent): void {
+  onpaginationClick($event: MouseEvent): void {
     $event.preventDefault();
     this.onNextPage.emit();
   }

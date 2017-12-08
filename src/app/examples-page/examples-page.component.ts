@@ -35,8 +35,8 @@ export class ExamplesPageComponent {
         .map(r => r.json()).map(r => r.results);
     }
   }
-  onNextPage(paging) {
-    this.$appendUsers = this.http.get(`https://randomuser.me/api?seed=${paging.term}&results=${10}&page=${paging.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
+  onNextPage(pagination) {
+    this.$appendUsers = this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
       .map(r => r.json()).map(r => r.results);
   }
 

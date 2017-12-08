@@ -26,7 +26,7 @@
   [autocomplete]="true"
   (onSearch)="onSearchString($event)"
 ></app-ng-selectio>
-<p>remote data select with search and paging</p>
+<p>remote data select with search and pagination</p>
 <app-ng-selectio
   [$data]="$users"
   [$appendData]="$appendUsers"
@@ -35,8 +35,8 @@
   [selectionMode]="'multiple'"
   [search]="true"
   [allowClear]="true"
-  [paging]="true"
-  [pagingDelay]="500"
+  [pagination]="true"
+  [paginationDelay]="500"
   (onSearch)="onSearch($event)"
   (onNextPage)="onNextPage($event)"
 ></app-ng-selectio>
