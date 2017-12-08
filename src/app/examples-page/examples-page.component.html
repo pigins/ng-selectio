@@ -3,7 +3,6 @@
   [$data]="$stringArray"
   [selectionEmptyRenderer]="noDataRenderer"
   [dropdownDisabledItemMapper]="disabledItem"
-  [tabIndex]="-1"
   [selectionDeletable]="true"
 ></app-ng-selectio>
 <p>Simple select array of objects</p>
@@ -41,3 +40,15 @@
   (onSearch)="onSearch($event)"
   (onNextPage)="onNextPage($event)"
 ></app-ng-selectio>
+
+<p>inside form</p>
+<div>
+    <app-ng-selectio [(ngModel)]="itemArray"
+      [$data]="$stringArray"
+      [selectionEmptyRenderer]="noDataRenderer"
+      [dropdownDisabledItemMapper]="disabledItem"
+      [selectionDeletable]="true"
+    >
+    </app-ng-selectio>
+  <div>{{itemArray}}</div>
+</div>

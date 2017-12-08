@@ -1,5 +1,6 @@
 import {
-  Component, ElementRef, EventEmitter, Input, OnChanges, OnInit, Output, QueryList, SimpleChanges,
+  AfterViewChecked, AfterViewInit,
+  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges,
   ViewChild, ViewChildren
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
@@ -7,6 +8,7 @@ import {ItemComponent} from './item.component';
 import {Observable} from 'rxjs/Observable';
 import {Template} from './template';
 import {Item} from './item';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'ng-selectio-list',
@@ -26,13 +28,18 @@ import {Item} from './item';
         <li *ngIf="(data.length === 0)"
             [innerHtml]="emptyRenderer | template">
         </li>
-        <li *ngIf="loadingMoreResults"
+        <li *ngIf="paging && loadingMoreResults"
             [innerHtml]="pagingMessageRenderer | template">
         </li>
         <li *ngIf="searching"
             [innerHtml]="searchingRenderer | template">
         </li>
       </ul>
+      <span *ngIf="paging && data.length > 0 && !this.hasScroll()"
+            [innerHtml]="pagingButtonRenderer | template"
+            (mousedown)="onPagingClick($event)" 
+      >
+      </span>
     </div>
   `,
   styles: [`
@@ -44,8 +51,8 @@ import {Item} from './item';
     }
    `]
 })
-export class DropdownComponent implements OnInit, OnChanges {
-  // self  inputs
+export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
+
   @Input() data: Item[];
   @Input() selection: Item[];
   @Input() loadingMoreResults: boolean;
@@ -54,14 +61,15 @@ export class DropdownComponent implements OnInit, OnChanges {
   @Input() paging: boolean;
   @Input() trackByFn: (index: number, item: Item) => any;
 
-  // transport inputs
   @Input() maxHeight: string;
   @Input() maxItemsCount: number;
   @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
   @Input() emptyRenderer: Template<() => string>;
   @Input() pagingMessageRenderer: Template<() => string>;
+  @Input() pagingButtonRenderer: Template<() => string>;
   @Input() searchingRenderer: Template<() => string>;
   @Input() disabledItemMapper: (item: Item) => boolean;
+  @Input() scrollToSelectionAfterOpen: boolean;
 
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
@@ -75,6 +83,7 @@ export class DropdownComponent implements OnInit, OnChanges {
 
   activeListItem: Item;
   enabledData: Item[];
+  keyEventsSubscription: Subscription;
 
   constructor() {
   }
@@ -85,12 +94,21 @@ export class DropdownComponent implements OnInit, OnChanges {
         return !this.disabledItemMapper(dataElem);
       });
     }
+    if (changes.expanded && this.itemList) {
+      if (this.scrollToSelectionAfterOpen) {
+        this.scrollToSelection();
+      }
+    }
   }
 
   ngOnInit() {
-    this.keyEvents.subscribe((event) => {
+    this.keyEventsSubscription = this.keyEvents.subscribe((event) => {
       this.onKeyPress(event);
     });
+  }
+
+  ngOnDestroy(): void {
+    this.keyEventsSubscription.unsubscribe();
   }
 
   onUlScroll(event: Event) {
@@ -107,6 +125,11 @@ export class DropdownComponent implements OnInit, OnChanges {
       return;
     }
     this.onSelectItem.emit(dataItem);
+  }
+
+  onPagingClick($event: MouseEvent): void {
+    $event.preventDefault();
+    this.onNextPage.emit();
   }
 
   onKeyPress(event: KeyboardEvent) {
@@ -144,27 +167,6 @@ export class DropdownComponent implements OnInit, OnChanges {
       }
     }
   }
-
-  public scrollToTheBottom() {
-    this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
-  }
-
-  private scrollExhausted() {
-    const ul = this.ul.nativeElement;
-    return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
-  }
-
-  private getActiveItemComponent(): ItemComponent|null {
-    const activeLis = this.itemList.filter((item: ItemComponent) => {
-      return item.data === this.activeListItem;
-    });
-    if (activeLis.length > 0) {
-      return activeLis[0];
-    } else {
-      return null;
-    }
-  }
-
   insideSelection(item: Item): boolean {
     for (let i = 0; i < this.selection.length; i++) {
       if (item === this.selection[i]) {
@@ -173,4 +175,38 @@ export class DropdownComponent implements OnInit, OnChanges {
     }
     return false;
   }
+  hasScroll(): boolean {
+    const ul = this.ul.nativeElement;
+    return ul.scrollHeight > ul.clientHeight;
+  }
+
+  public scrollToSelection(): void {
+    const selections = this.itemList.filter((item: ItemComponent) => {
+      return this.selection.indexOf(item.data) >= 0;
+    });
+
+    if (selections.length > 0) {
+      let lastItemComponent = selections[selections.length - 1];
+      this.ul.nativeElement.scrollTop = lastItemComponent.getTopPosition();
+    }
+  }
+
+  public scrollToTheBottom(): void {
+    this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
+  }
+  private scrollExhausted(): boolean {
+    const ul = this.ul.nativeElement;
+    return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
+  }
+  private getActiveItemComponent(): ItemComponent|null {
+    const activeList = this.itemList.filter((item: ItemComponent) => {
+      return item.data === this.activeListItem;
+    });
+    if (activeList.length > 0) {
+      return activeList[0];
+    } else {
+      return null;
+    }
+  }
+
 }

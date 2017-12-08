@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
+  Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
   ViewChild
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
@@ -14,6 +14,8 @@ import {DropdownComponent} from './dropdown.component';
 import {Template} from './template';
 import {Item} from './item';
 import {SearchComponent} from './search.component';
+import {ValueAccessorBase} from '../builder-page/value-accessor-base';
+import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -28,6 +30,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'app-ng-selectio',
+  providers: [
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgSelectioComponent), multi: true}
+  ],
   template: `
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
@@ -40,6 +45,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
                      [selectionMode]="selectionMode"
                      [showArrow]="!autocomplete"
+                     [arrowDirection]="openOnTop ? !expanded : expanded"
                      [deletable]="selectionDeletable"
                      [disabled]="disabled"
                      (click)="onClickSelection($event)"
@@ -82,10 +88,12 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [disabledItemMapper]="dropdownDisabledItemMapper"
                                 [emptyRenderer]="dropdownEmptyRenderer"
                                 [pagingMessageRenderer]="dropdownPagingMessageRenderer"
+                                [pagingButtonRenderer]="dropdownPagingButtonRenderer"
                                 [searchingRenderer]="dropdownSearchingRenderer"
                                 [keyEvents]="keyEvents"
                                 [paging]="paging"
                                 [disabled]="disabled"
+                                [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                                 [trackByFn]="trackByFn"
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
@@ -119,13 +127,13 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     }
   `]
 })
-export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
+export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
   @Input() $data: Observable<Item[]> = Observable.of([]);
   @Input() $appendData: Observable<Item[]> = Observable.of([]);
-  @Input() selection: Item[] = [];
-
   @Input() selectionMode: string = SELECTION_MODE_SINGLE;
+  @Input() defaultSelection: Item | Item[] | null = null;
+  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() searchDelay: number = 0;
   @Input() searchStartLength: number = 0;
   @Input() showSearch: boolean = false;
@@ -135,12 +143,13 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() disabled: boolean = false;
   @Input() closeOnSelect: boolean = true;
   @Input() maxSelectionLength: number = -1;
-  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() selectionDeletable: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
   @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
   @Input() openOnTop: boolean = false;
+  @Input() scrollToSelectionAfterOpen: boolean = true;
+
   // templates
   static defaultItemRenderer = (item: Item) => {
     if (typeof item === 'string') {
@@ -157,6 +166,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @Input() placeholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
   @Input() dropdownPagingMessageRenderer: Template<() => string> = 'Loading more results...';
+  @Input() dropdownPagingButtonRenderer: Template<() => string> = 'Get more...';
   @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
@@ -169,6 +179,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   @ViewChild('listComponent') listComponent: DropdownComponent;
 
   data: Item[] = [];
+  selection: Item[] = [];
   highlightedItem: Item | null = null;
   expanded: boolean;
   loadingMoreResults: boolean = false;
@@ -177,8 +188,39 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   verticalOrder = [1, 2];
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
+  private changed = new Array<(value: Item[]) => void>();
+  private touched = new Array<() => void>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
+  }
+  // control value accessor
+  touch() {
+    this.touched.forEach(f => f());
+  }
+  modelChange() {
+    this.changed.forEach(f => f(this.selection));
+  }
+
+  writeValue(obj: Item[]): void {
+    if (obj === null) {
+      this.selection = [];
+      this.modelChange();
+    } else {
+      this.selection = obj;
+      this.modelChange();
+    }
+  }
+
+  registerOnChange(fn: (value: Item[]) => void): void {
+    this.changed.push(fn);
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.touched.push(fn);
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -220,8 +262,17 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
       }
     });
 
-    if (this.defaultSelectionRule) {
+    if (this.defaultSelection) {
+      if (Array.isArray(this.defaultSelection)) {
+        this.selection = this.defaultSelection;
+        this.modelChange();
+      } else {
+        this.selection = [this.defaultSelection];
+        this.modelChange();
+      }
+    } else if (this.defaultSelectionRule) {
       this.selection = this.defaultSelectionRule(this.data);
+      this.modelChange();
     }
 
     if (this.selection.length > 0) {
@@ -231,9 +282,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     this.onSelect.subscribe(() => {
-      if (this.searchComponent) {
-        this.searchComponent.empty();
-      }
     });
   }
 
@@ -255,9 +303,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
   selectItem(item: Item): void {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [item];
+      this.modelChange();
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
       if (this.maxSelectionLength < 0 || (this.selection.length + 1 <= this.maxSelectionLength)) {
         this.selection.push(item);
+        this.modelChange();
       }
     }
     if (this.closeOnSelect) {
@@ -306,6 +356,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
 
   onDeleteItem(_item: Item) {
     this.selection = this.selection.filter(item => item !== _item);
+    this.modelChange();
   }
 
   onHighlightItem(_item: Item) {
@@ -319,6 +370,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy {
           this.highlightedItem = this.selection[this.selection.length - 1];
         } else {
           this.selection = this.selection.filter(item => item !== this.highlightedItem);
+          this.modelChange();
           this.highlightedItem = null;
         }
       }

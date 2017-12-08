@@ -61,7 +61,6 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    console.log(this.searchStartLength);
     this.searchTextChangeSubscription = this.textInput.valueChanges
       .debounceTime(this.searchDelay)
       .filter(e => this.textInput.value.length >= this.searchStartLength)

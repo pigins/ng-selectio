@@ -4,6 +4,7 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
+import {Item} from '../ng-selectio/item';
 
 @Component({
   selector: 'app-examples-page',
@@ -15,6 +16,8 @@ export class ExamplesPageComponent {
   $objectArray: Observable<any>;
   $users: Observable<any>;
   $appendUsers: Observable<any>;
+  itemArray: Item[] = ['russia'];
+
 
   constructor(private http: Http, private dataService: DataService ) {
     this.$objectArray = this.dataService.countriesData;
