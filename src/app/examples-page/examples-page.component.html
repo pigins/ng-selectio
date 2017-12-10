@@ -10,7 +10,7 @@
   [$data]="$objectArray"
   [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
   [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
-  [defaultSelectionRule]="defaultSelectionRule"
+  [selectionDefaultMapper]="selectionDefaultMapper"
   (onSelect)="onSelectCountry($event)"
 ></app-ng-selectio>
 <p>Simple select array of strings with search</p>

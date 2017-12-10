@@ -47,7 +47,7 @@ export class ExamplesPageComponent {
   renderItem(item: any) {
     return item.name.first;
   }
-  defaultSelectionRule(items: any[]): any[] {
+  selectionDefaultMapper(items: any[]): any[] {
     return [items[0]];
   }
   renderCountry(countryItem: any): string {

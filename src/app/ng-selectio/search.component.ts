@@ -10,7 +10,7 @@ import {Subscription} from 'rxjs/Subscription';
   template: `
     <div [ngClass]="{'ngs-search': true, 'autocomplete': autocomplete}"
          [formGroup]="textInputGroup">
-      <input formControlName="textInput" type="text" #search [attr.placeholder]="placeholder"
+      <input formControlName="textInput" type="text" #search [attr.placeholder]="searchPlaceholder"
              (blur)="onSearchBlur.emit($event)"
              (keydown)="onSearchKeyDown.emit($event)"
       />
@@ -28,7 +28,7 @@ import {Subscription} from 'rxjs/Subscription';
 export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 
   @Input() autocomplete: boolean;
-  @Input() placeholder: string;
+  @Input() searchPlaceholder: string;
   @Input() disabled: boolean;
   @Input() searchDelay: number;
   @Input() searchMinLength: number;

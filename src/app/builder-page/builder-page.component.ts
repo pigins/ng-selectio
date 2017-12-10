@@ -23,16 +23,41 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
     <div>
       <h3>Behavior</h3>
       <app-checkbox-input
-        [label]="'disabled'"
-        [(ngModel)]="disabled">
+        [label]="'allowClear'"
+        [(ngModel)]="allowClear">
+      </app-checkbox-input>
+      <app-checkbox-input
+        [label]="'autocomplete'"
+        [(ngModel)]="autocomplete">
       </app-checkbox-input>
       <app-checkbox-input
         [label]="'closeAfterSelect'"
         [(ngModel)]="closeAfterSelect">
       </app-checkbox-input>
       <app-checkbox-input
+        [label]="'disabled'"
+        [(ngModel)]="disabled">
+      </app-checkbox-input>
+      <app-select-input
+        [label]="'dropdownDisabledItemMapper'"
+        [options]="[{label: 'all disabled', value: dropdownDisabledItemMapper_allDisabled}, {label: 'all enabled', value: dropdownDisabledItemMapper_allEnabled}]"
+        [(ngModel)]=dropdownDisabledItemMapper>
+      </app-select-input>
+      <app-checkbox-input
         [label]="'openUp'"
         [(ngModel)]="openUp">
+      </app-checkbox-input>
+      <app-checkbox-input
+        [label]="'pagination'"
+        [(ngModel)]="pagination">
+      </app-checkbox-input>
+      <app-number-input
+        [label]="'paginationDelay'"
+        [(ngModel)]="paginationDelay">
+      </app-number-input>
+      <app-checkbox-input
+        [label]="'scrollToSelectionAfterOpen'"
+        [(ngModel)]="scrollToSelectionAfterOpen">
       </app-checkbox-input>
       <app-checkbox-input
         [label]="'search'"
@@ -46,124 +71,94 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [label]="'searchMinLength'"
         [(ngModel)]="searchMinLength">
       </app-number-input>
-      <app-checkbox-input
-        [label]="'autocomplete'"
-        [(ngModel)]="autocomplete">
-      </app-checkbox-input>
-      <app-checkbox-input
-        [label]="'scrollToSelectionAfterOpen'"
-        [(ngModel)]="scrollToSelectionAfterOpen">
-      </app-checkbox-input>
-
-
-      <app-checkbox-input
-        [label]="'allowClear'"
-        [(ngModel)]="allowClear">
-      </app-checkbox-input>
-      <app-checkbox-input
-        [label]="'pagination'"
-        [(ngModel)]="pagination">
-      </app-checkbox-input>
-      
-      <app-number-input
-        [label]="'paginationDelay'"
-        [(ngModel)]="paginationDelay">
-      </app-number-input>
-      <app-number-input
-        [label]="'tabIndex'"
-        [(ngModel)]="tabIndex">
-      </app-number-input>
+      <app-select-input style="display: inline-block"
+                        [label]="'selectionDefault'"
+                        [options]="[{label: 'null', value: null}, {label: 'user', value: selectionDefault_user}]"
+                        [(ngModel)]=selectionDefault>
+      </app-select-input>
+      <div>
+        <app-select-input style="display: inline-block"
+                          [label]="'selectionDefaultMapper'"
+                          [options]="[{label: 'none', value: selectionDefaultMapper_none}, {label: 'select first', value: selectionDefaultMapper_selectFirst}]"
+                          [(ngModel)]=selectionDefaultMapper>
+        </app-select-input>
+        <button (click)="recreateSelectio()" style="display: inline-block">recreate selectio</button>
+      </div>
       <app-select-input
-        [label]="'maxSelectionLength'"
+        [label]="'selectionMaxLength'"
         [options]="[-1, 1, 2]"
-        [(ngModel)]="maxSelectionLength">
+        [(ngModel)]="selectionMaxLength">
       </app-select-input>
       <app-select-input
         [label]="'selectionMode'"
         [options]="['single', 'multiple']"
         [(ngModel)]="selectionMode">
       </app-select-input>
-      <div>
-        <app-select-input style="display: inline-block"
-                          [label]="'defaultSelectionRule'"
-                          [options]="[{label: 'none', value: defaultSelectionRule_none}, {label: 'select first', value: defaultSelectionRule_selectFirst}]"
-                          [(ngModel)]=defaultSelectionRule>
-        </app-select-input>
-        <button (click)="recreateSelectio()" style="display: inline-block">recreate selectio</button>
-      </div>
-      <app-select-input style="display: inline-block"
-                        [label]="'defaultSelection'"
-                        [options]="[{label: 'null', value: null}, {label: 'user', value: defaultSelection_user}]"
-                        [(ngModel)]=defaultSelection>
-      </app-select-input>
+      <app-number-input
+        [label]="'tabIndex'"
+        [(ngModel)]="tabIndex">
+      </app-number-input>
       <app-select-input
-        [label]="'dropdownDisabledItemMapper'"
-        [options]="[{label: 'all disabled', value: dropdownDisabledItemMapper_allDisabled}, {label: 'all enabled', value: dropdownDisabledItemMapper_allEnabled}]"
-        [(ngModel)]=dropdownDisabledItemMapper>
-      </app-select-input>
-      <app-select-input
-        [label]="'trackByFn'"
-        [options]="[{label: 'none', value: null}, {label: 'by index', value: trackByFn_byIndex}]"
-        [(ngModel)]=trackByFn>
+        [label]="'trackBy'"
+        [options]="[{label: 'none', value: null}, {label: 'by index', value: trackBy_byIndex}]"
+        [(ngModel)]=trackBy>
       </app-select-input>
     </div>
-   
+    
     <div class="input-group">
       <h3>View</h3>
-      <app-text-input
-        [label]="'placeholder'"
-        [(ngModel)]="placeholder">
-      </app-text-input>
-      <app-text-input
-        [label]="'dropdownMaxHeight'"
-        [(ngModel)]="dropdownMaxHeight">
-      </app-text-input>
-      <app-select-input
-        [label]="'dropdownItemRenderer'"
-        [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
-        [(ngModel)]=dropdownItemRenderer>
-      </app-select-input>
-      <app-select-input
-        [label]="'selectionItemRenderer'"
-        [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
-        [(ngModel)]="selectionItemRenderer">
-      </app-select-input>
       <app-select-input
         [label]="'dropdownEmptyRenderer'"
         [options]="[{label: 'default', value: dropdownEmptyRenderer_default}, {label: 'null', value: null}, {label: 'user', value: dropdownEmptyRenderer_empty}]"
         [(ngModel)]="dropdownEmptyRenderer">
       </app-select-input>
       <app-select-input
-        [label]="'dropdownpaginationMessageRenderer'"
-        [options]="[{label: 'default', value: dropdownpaginationMessageRenderer_default}, {label: 'null', value: null}]"
-        [(ngModel)]="dropdownpaginationMessageRenderer">
+        [label]="'dropdownItemRenderer'"
+        [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
+        [(ngModel)]=dropdownItemRenderer>
+      </app-select-input>
+      <app-text-input
+        [label]="'dropdownMaxHeight'"
+        [(ngModel)]="dropdownMaxHeight">
+      </app-text-input>
+      <app-select-input
+        [label]="'dropdownPaginationButtonRenderer'"
+        [options]="[{label: 'default', value: dropdownPaginationButtonRenderer_default}, {label: 'null', value: null}]"
+        [(ngModel)]="dropdownPaginationButtonRenderer">
       </app-select-input>
       <app-select-input
-        [label]="'dropdownpaginationButtonRenderer'"
-        [options]="[{label: 'default', value: dropdownpaginationButtonRenderer_default}, {label: 'null', value: null}]"
-        [(ngModel)]="dropdownpaginationButtonRenderer">
+        [label]="'dropdownPaginationMessageRenderer'"
+        [options]="[{label: 'default', value: dropdownPaginationMessageRenderer_default}, {label: 'null', value: null}]"
+        [(ngModel)]="dropdownPaginationMessageRenderer">
       </app-select-input>
       <app-select-input
         [label]="'dropdownSearchingRenderer'"
         [options]="[{label: 'default', value: dropdownSearchingRenderer_default}, {label: 'null', value: null}]"
         [(ngModel)]="dropdownSearchingRenderer">
       </app-select-input>
+      <app-text-input
+        [label]="'searchPlaceholder'"
+        [(ngModel)]="searchPlaceholder">
+      </app-text-input>
       <app-select-input
         [label]="'selectionEmptyRenderer'"
         [options]="[{label: 'default', value: selectionEmptyRenderer_default}, {label: 'null', value: null}]"
         [(ngModel)]="selectionEmptyRenderer">
       </app-select-input>
+      <app-select-input
+        [label]="'selectionItemRenderer'"
+        [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
+        [(ngModel)]="selectionItemRenderer">
+      </app-select-input>
     </div>
-    
-
     <div>
       <p>Select</p>
       <app-ng-selectio *ngIf="showSelectio"
         [$data]="$data"
         [$appendData]="$appendData"
         [selectionMode]="selectionMode" 
-        [defaultSelectionRule]="defaultSelectionRule"
-        [defaultSelection]="defaultSelection" 
+        [selectionDefaultMapper]="selectionDefaultMapper"
+        [selectionDefault]="selectionDefault" 
         [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
         [searchDelay]="searchDelay"
         [searchMinLength]="searchMinLength"
@@ -173,21 +168,21 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [paginationDelay]="paginationDelay"
         [disabled]="disabled"
         [closeAfterSelect]="closeAfterSelect"
-        [maxSelectionLength]="maxSelectionLength"
+        [selectionMaxLength]="selectionMaxLength"
         [allowClear]="allowClear"
         [openUp]="openUp"
         [dropdownDisabledItemMapper]="dropdownDisabledItemMapper"
         [dropdownItemRenderer]="dropdownItemRenderer"
         [selectionItemRenderer]="selectionItemRenderer"
-        [placeholder]="placeholder"
+        [searchPlaceholder]="searchPlaceholder"
         [dropdownMaxHeight]="dropdownMaxHeight"
         [dropdownEmptyRenderer]="dropdownEmptyRenderer"
-        [dropdownpaginationMessageRenderer]="dropdownpaginationMessageRenderer" 
-        [dropdownpaginationButtonRenderer]="dropdownpaginationButtonRenderer"
+        [dropdownPaginationMessageRenderer]="dropdownPaginationMessageRenderer" 
+        [dropdownPaginationButtonRenderer]="dropdownPaginationButtonRenderer"
         [dropdownSearchingRenderer]="dropdownSearchingRenderer"
         [selectionEmptyRenderer]="selectionEmptyRenderer"
         [tabIndex]="tabIndex"
-        [trackByFn]="trackByFn"
+        [trackBy]="trackBy"
         (onSearch)="onSearch($event)"
         (onNextPage)="onNextPage($event)"
       ></app-ng-selectio>
@@ -197,12 +192,12 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
 })
 export class BuilderPageComponent {
 
-  defaultSelection_user = {"gender":"male","name":{"title":"mr","first":"christian","last":"bennett"},"picture":{"large":"https://randomuser.me/api/portraits/men/80.jpg","medium":"https://randomuser.me/api/portraits/med/men/80.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/80.jpg"}}
+  selectionDefault_user = {"gender":"male","name":{"title":"mr","first":"christian","last":"bennett"},"picture":{"large":"https://randomuser.me/api/portraits/men/80.jpg","medium":"https://randomuser.me/api/portraits/med/men/80.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/80.jpg"}}
   // defaults
-  defaultSelectionRule_selectFirst(items: Item[]): Item[] {
+  selectionDefaultMapper_selectFirst(items: Item[]): Item[] {
     return [items[0]];
   }
-  defaultSelectionRule_none(items: Item[]): Item[] {
+  selectionDefaultMapper_none(items: Item[]): Item[] {
     return [];
   }
   dropdownDisabledItemMapper_allDisabled(item: Item): boolean {
@@ -211,7 +206,7 @@ export class BuilderPageComponent {
   dropdownDisabledItemMapper_allEnabled(item: Item): boolean {
     return false;
   }
-  trackByFn_byIndex(index: number, item: Item): any {
+  trackBy_byIndex(index: number, item: Item): any {
     return index;
   }
   itemRenderer_default(item: any): string {
@@ -228,8 +223,8 @@ export class BuilderPageComponent {
   }
   dropdownEmptyRenderer_default = 'Enter 1 or more characters';
   dropdownEmptyRenderer_empty = 'empty';
-  dropdownpaginationMessageRenderer_default = 'Loading more results...';
-  dropdownpaginationButtonRenderer_default = 'Get more...';
+  dropdownPaginationMessageRenderer_default = 'Loading more results...';
+  dropdownPaginationButtonRenderer_default = 'Get more...';
   dropdownSearchingRenderer_default = 'Searching...';
   selectionEmptyRenderer_default = 'No data';
 
@@ -237,8 +232,8 @@ export class BuilderPageComponent {
   $appendData: Observable<Item[]> = Observable.of([]);
 
   selectionMode: string = SELECTION_MODE_SINGLE;
-  defaultSelection: Item | Item[] | null = null;
-  defaultSelectionRule: (items: Item[]) => Item[] = this.defaultSelectionRule_none;
+  selectionDefault: Item | Item[] | null = null;
+  selectionDefaultMapper: (items: Item[]) => Item[] = this.selectionDefaultMapper_none;
   allowClear: boolean = false;
 
   searchDelay: number = 0;
@@ -249,21 +244,21 @@ export class BuilderPageComponent {
   autocomplete: boolean = false;
   disabled: boolean = false;
   closeAfterSelect: boolean = true;
-  maxSelectionLength: number = -1;
+  selectionMaxLength: number = -1;
 
   dropdownDisabledItemMapper: (item: Item) => boolean = this.dropdownDisabledItemMapper_allEnabled;
   tabIndex: number = 1;
-  trackByFn: ((index: number, item: Item) => any) | null = null;
+  trackBy: ((index: number, item: Item) => any) | null = null;
   openUp: boolean = false;
   scrollToSelectionAfterOpen: boolean = true;
 
   dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = this.itemRenderer_default;
   selectionItemRenderer: Template<(item: Item) => string> = this.itemRenderer_default;
   dropdownMaxHeight: string = '100px';
-  placeholder: string = '';
+  searchPlaceholder: string = '';
   dropdownEmptyRenderer: Template<() => string> = this.dropdownEmptyRenderer_default;
-  dropdownpaginationMessageRenderer: Template<() => string> = this.dropdownpaginationMessageRenderer_default;
-  dropdownpaginationButtonRenderer: Template<() => string> = this.dropdownpaginationButtonRenderer_default;
+  dropdownPaginationMessageRenderer: Template<() => string> = this.dropdownPaginationMessageRenderer_default;
+  dropdownPaginationButtonRenderer: Template<() => string> = this.dropdownPaginationButtonRenderer_default;
   dropdownSearchingRenderer: Template<() => string> = this.dropdownSearchingRenderer_default;
   selectionEmptyRenderer: Template<() => string> = this.selectionEmptyRenderer_default;
 

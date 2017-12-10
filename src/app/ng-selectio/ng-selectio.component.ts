@@ -54,7 +54,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           </selection>
           <ng-selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
                               [autocomplete]="autocomplete"
-                              [placeholder]="placeholder"
+                              [searchPlaceholder]="searchPlaceholder"
                               [disabled]="disabled"
                               [searchDelay]="searchDelay"
                               [searchMinLength]="searchMinLength"
@@ -68,7 +68,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
             <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
               <ng-selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
                                   [autocomplete]="autocomplete"
-                                  [placeholder]="placeholder"
+                                  [searchPlaceholder]="searchPlaceholder"
                                   [disabled]="disabled"
                                   [searchDelay]="searchDelay"
                                   [searchMinLength]="searchMinLength"
@@ -86,14 +86,14 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [itemRenderer]="dropdownItemRenderer"
                                 [disabledItemMapper]="dropdownDisabledItemMapper"
                                 [emptyRenderer]="dropdownEmptyRenderer"
-                                [paginationMessageRenderer]="dropdownpaginationMessageRenderer"
-                                [paginationButtonRenderer]="dropdownpaginationButtonRenderer"
+                                [paginationMessageRenderer]="dropdownPaginationMessageRenderer"
+                                [paginationButtonRenderer]="dropdownPaginationButtonRenderer"
                                 [searchingRenderer]="dropdownSearchingRenderer"
                                 [keyEvents]="keyEvents"
                                 [pagination]="pagination"
                                 [disabled]="disabled"
                                 [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
-                                [trackByFn]="trackByFn"
+                                [trackByFn]="trackBy"
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
               >
@@ -131,8 +131,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() $data: Observable<Item[]> = Observable.of([]);
   @Input() $appendData: Observable<Item[]> = Observable.of([]);
   @Input() selectionMode: string = SELECTION_MODE_SINGLE;
-  @Input() defaultSelection: Item | Item[] | null = null;
-  @Input() defaultSelectionRule: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
+  @Input() selectionDefault: Item | Item[] | null = null;
+  @Input() selectionDefaultMapper: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;
   @Input() search: boolean = false;
@@ -141,11 +141,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() autocomplete: boolean = false;
   @Input() disabled: boolean = false;
   @Input() closeAfterSelect: boolean = true;
-  @Input() maxSelectionLength: number = -1;
+  @Input() selectionMaxLength: number = -1;
   @Input() allowClear: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
-  @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
+  @Input() trackBy: ((index: number, item: Item) => any) | null = null;
   @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
 
@@ -162,10 +162,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() dropdownMaxHeight: string = '100px';
-  @Input() placeholder: string = '';
+  @Input() searchPlaceholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
-  @Input() dropdownpaginationMessageRenderer: Template<() => string> = 'Loading more results...';
-  @Input() dropdownpaginationButtonRenderer: Template<() => string> = 'Get more...';
+  @Input() dropdownPaginationMessageRenderer: Template<() => string> = 'Loading more results...';
+  @Input() dropdownPaginationButtonRenderer: Template<() => string> = 'Get more...';
   @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
 
@@ -263,16 +263,16 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       }
     });
 
-    if (this.defaultSelection) {
-      if (Array.isArray(this.defaultSelection)) {
-        this.selection = this.defaultSelection;
+    if (this.selectionDefault) {
+      if (Array.isArray(this.selectionDefault)) {
+        this.selection = this.selectionDefault;
         this.modelChange();
       } else {
-        this.selection = [this.defaultSelection];
+        this.selection = [this.selectionDefault];
         this.modelChange();
       }
-    } else if (this.defaultSelectionRule) {
-      this.selection = this.defaultSelectionRule(this.data);
+    } else if (this.selectionDefaultMapper) {
+      this.selection = this.selectionDefaultMapper(this.data);
       this.modelChange();
     }
 
@@ -306,7 +306,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       this.selection = [item];
       this.modelChange();
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-      if (this.maxSelectionLength < 0 || (this.selection.length + 1 <= this.maxSelectionLength)) {
+      if (this.selectionMaxLength < 0 || (this.selection.length + 1 <= this.selectionMaxLength)) {
         this.selection.push(item);
         this.modelChange();
       }
