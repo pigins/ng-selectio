@@ -153,7 +153,7 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
     </div>
     <div>
       <p>Select</p>
-      <app-ng-selectio *ngIf="showSelectio"
+      <ng-selectio *ngIf="showSelectio"
         [$data]="$data"
         [$appendData]="$appendData"
         [selectionMode]="selectionMode" 
@@ -185,7 +185,7 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [trackBy]="trackBy"
         (onSearch)="onSearch($event)"
         (onNextPage)="onNextPage($event)"
-      ></app-ng-selectio>
+      ></ng-selectio>
     </div>
   `,
   styleUrls: ['./builder-page.component.css']

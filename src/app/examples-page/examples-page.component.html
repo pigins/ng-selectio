@@ -1,33 +1,33 @@
 <p>Simple select array of strings</p>
-<app-ng-selectio
+<ng-selectio
   [$data]="$stringArray"
   [selectionEmptyRenderer]="noDataRenderer"
   [dropdownDisabledItemMapper]="disabledItem"
   [allowClear]="true"
-></app-ng-selectio>
+></ng-selectio>
 <p>Simple select array of objects</p>
-<app-ng-selectio
+<ng-selectio
   [$data]="$objectArray"
   [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
   [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
   [selectionDefaultMapper]="selectionDefaultMapper"
   (onSelect)="onSelectCountry($event)"
-></app-ng-selectio>
+></ng-selectio>
 <p>Simple select array of strings with search</p>
-<app-ng-selectio
+<ng-selectio
   [$data]="$stringArray"
   [search]="true"
   (onSearch)="onSearchString($event)"
-></app-ng-selectio>
+></ng-selectio>
 <p>Simple select array of strings with search and autocomplete</p>
-<app-ng-selectio
+<ng-selectio
   [$data]="$stringArray"
   [search]="true"
   [autocomplete]="true"
   (onSearch)="onSearchString($event)"
-></app-ng-selectio>
+></ng-selectio>
 <p>remote data select with search and pagination</p>
-<app-ng-selectio
+<ng-selectio
   [$data]="$users"
   [$appendData]="$appendUsers"
   [dropdownItemRenderer]="renderItem"
@@ -39,16 +39,16 @@
   [paginationDelay]="500"
   (onSearch)="onSearch($event)"
   (onNextPage)="onNextPage($event)"
-></app-ng-selectio>
+></ng-selectio>
 
 <p>inside form</p>
 <div>
-    <app-ng-selectio [(ngModel)]="itemArray"
+    <ng-selectio [(ngModel)]="itemArray"
       [$data]="$stringArray"
       [selectionEmptyRenderer]="noDataRenderer"
       [dropdownDisabledItemMapper]="disabledItem"
       [allowClear]="true"
     >
-    </app-ng-selectio>
+    </ng-selectio>
   <div>{{itemArray}}</div>
 </div>

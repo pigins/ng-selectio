@@ -11,10 +11,12 @@ import {Item} from './item';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'ng-selectio-list',
+  selector: 'list',
   template: `
     <div #dropdown>
       <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
+        
+        
         <ng-selectio-item *ngFor="let dataItem of data; trackBy: trackByFn" #itemList
                           [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
                           [isSelected]="insideSelection(dataItem)"
@@ -25,6 +27,9 @@ import {Subscription} from 'rxjs/Subscription';
                           (click)="onClickItem(dataItem)"
         >
         </ng-selectio-item>
+        
+        
+        
         <li *ngIf="(data.length === 0)"
             [innerHtml]="emptyRenderer | template">
         </li>

@@ -6,7 +6,7 @@ import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'ng-selectio-search',
+  selector: 'search',
   template: `
     <div [ngClass]="{'ngs-search': true, 'autocomplete': autocomplete}"
          [formGroup]="textInputGroup">

@@ -28,7 +28,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'app-ng-selectio',
+  selector: 'ng-selectio',
   providers: [
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgSelectioComponent), multi: true}
   ],
@@ -36,7 +36,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
-        <div *ngIf="order===1">
+        <div class="selection-cont" *ngIf="order===1">
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                      [items]="selection"
                      [highlightedItem]="highlightedItem"
@@ -52,7 +52,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      (onHighlightItem)="onHighlightItem($event)"
           >
           </selection>
-          <ng-selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
+          <search #searchComponent *ngIf="autocomplete" style="display: inline-block"
                               [autocomplete]="autocomplete"
                               [searchPlaceholder]="searchPlaceholder"
                               [disabled]="disabled"
@@ -61,12 +61,12 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               (onSearchBlur)="onBlur($event)"
                               (onSearchKeyDown)="onTextInputKeyDown($event)"
                               (onSearchValueChanges)="onSearchValueChanges($event)"
-          ></ng-selectio-search>
+          ></search>
         </div>
-        <div *ngIf="order===2" [ngClass]="{'ngs-dropdown': true, 'ngs-expanded': expanded && !disabled}">
-          <div class="dropdown-cont" [ngStyle]="{'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
+        <div class="dropdown" *ngIf="order===2" [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}" >
+          <div class="body" [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
             <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
-              <ng-selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
+              <search #searchComponent *ngIf="order===1 && !autocomplete && search"
                                   [autocomplete]="autocomplete"
                                   [searchPlaceholder]="searchPlaceholder"
                                   [disabled]="disabled"
@@ -75,8 +75,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                   (onSearchBlur)="onBlur($event)"
                                   (onSearchKeyDown)="onTextInputKeyDown($event)"
                                   (onSearchValueChanges)="onSearchValueChanges($event)"
-              ></ng-selectio-search>
-              <ng-selectio-list #listComponent *ngIf="order===2"
+              ></search>
+              <list #listComponent *ngIf="order===2"
                                 [data]="data"
                                 [selection]="selection"
                                 [expanded]="expanded"
@@ -97,7 +97,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
               >
-              </ng-selectio-list>
+              </list>
             </ng-container>
           </div>
         </div>
@@ -105,25 +105,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     </div>
   `,
   styles: [`
-    .ngs {
-      border: 1px solid grey;
-    }
-
-    .ngs-dropdown {
-      display: none;
-      position: relative;
-    }
-
-    .ngs-dropdown.ngs-expanded {
-      display: block;
-    }
-
-    .dropdown-cont {
-      position: absolute;
-      z-index: 9999999;
-      width: 100%;
-      background-color: aliceblue;
-    }
   `]
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
