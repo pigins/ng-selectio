@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
+import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from './ng-selectio.component';
 import {SELECTION_MODE_MULTIPLE} from './ng-selectio.component';
 import {Template} from './template';
@@ -6,82 +6,64 @@ import {Item} from './item';
 
 @Component({
   selector: 'selection',
+  encapsulation: ViewEncapsulation.None,
   template: `
-    <div [ngClass]="{'ngs-selection': true, 'disabled': disabled}">
-      <div *ngIf="this.items.length === 0" class="selection">
+    <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true, 'disabled': disabled}">
+      
+      <div *ngIf="this.items.length === 0" class="empty">
         <span [innerHtml]="emptyRenderer | template"></span>
       </div>
-      <div *ngIf="singleMode() && !deletable" class="selection">
+      
+      <div *ngIf="singleMode() && !deletable" class="single">
         <div
           [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}"
           [innerHtml]="itemRenderer | template:items[0]">
         </div>
       </div>
-      <div *ngIf="singleMode() && deletable && items.length === 1" class="selection">
+      
+      <div *ngIf="singleMode() && deletable && items.length === 1" class="single deletable">
         <div [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}">
           <span [innerHtml]="itemRenderer | template:items[0]"></span>
-          <span class="delete" (click)="onDeleteClick($event, items[0])">X</span>
+          <span class="delete" 
+                (click)="onDeleteClick($event, items[0])"
+                [innerHtml]="clearRenderer | template"
+          ></span>
         </div>
       </div>
-      <div *ngIf="multipleMode() && !deletable" class="selection">
-        <div *ngFor="let item of items;"
-             [ngClass]="{'multiple': true, 'selected': highlightedItem === item}"
+      
+      <div *ngIf="multipleMode() && !deletable" class="multiple">
+        <div *ngFor="let item of items;" 
+             [ngStyle]="{'display': 'inline-block'}"
+             [ngClass]="{'selected': highlightedItem === item}"
              [innerHtml]="itemRenderer | template:item"
              (click)="highlight(item)">
         </div>
       </div>
-      <div *ngIf="multipleMode() && deletable" class="selection">
-        <div *ngFor="let item of items"
-             [ngClass]="{'multiple': true, 'selected': highlightedItem === item}"
+      
+      <div *ngIf="multipleMode() && deletable" class="multiple deletable">
+        <div *ngFor="let item of items" 
+             [ngStyle]="{'display': 'inline-block'}"
+             [ngClass]="{'selected': highlightedItem === item}"
              (click)="highlight(item)">
-          <span class="delete" (click)="onDeleteClick($event, item)">X</span>
+          <span class="delete" 
+                (click)="onDeleteClick($event, item)" 
+                [innerHtml]="clearRenderer | template"
+          ></span>
           <span [innerHtml]="itemRenderer | template:item"></span>
         </div>
       </div>
-      <span *ngIf="showArrow" [ngClass]="{'arrow': true, 'up-arrow': arrowDirection}" class="arrow"></span>
+      
+      <span *ngIf="showArrow" [ngClass]="{'arrow': true, 'up-arrow': arrowDirection}"></span>
+      
     </div>
-  `,
-  styles: [`
-    .selection .multiple {
-      display: inline-block;
-    }
-
-    .selection .multiple .delete {
-      cursor: pointer;
-    }
-
-    .ngs-selection {
-      position: relative;
-    }
-
-    .ngs-selection span.arrow {
-      display: inline-block;
-      position: absolute;
-      right: 10px;
-      top: calc(50% - 8px / 2);
-      border: 8px solid gray;
-      border-bottom-width: 0;
-      border-left-color: transparent;
-      border-right-color: transparent;
-    }
-
-    .ngs-selection span.arrow.up-arrow {
-      border: 8px solid gray;
-      border-top-width: 0;
-      border-left-color: transparent;
-      border-right-color: transparent;
-    }
-
-    .selected {
-      background-color: blueviolet;
-    }
-  `]
+  `
 })
 export class SelectionComponent {
   @Input() items: Item[];
   @Input() highlightedItem: Item;
+  @Input() emptyRenderer: Template<() => string>;
+  @Input() clearRenderer: Template<() => string>;
   @Input() itemRenderer: Template<(item: Item) => string>;
-  @Input() emptyRenderer: () => string;
   @Input() selectionMode: string;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;

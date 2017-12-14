@@ -1,6 +1,6 @@
 import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges,
-  ViewChild, ViewChildren
+  ViewChild, ViewChildren, ViewEncapsulation
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
@@ -10,9 +10,13 @@ import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'list',
+  encapsulation: ViewEncapsulation.None,
   template: `
-    <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
-      <li *ngFor="let dataItem of data; trackBy: trackByFn" #itemList
+    <ul #ul
+        [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto'}"
+        (scroll)="onUlScroll($event)" >
+      <li #itemList
+          *ngFor="let dataItem of data; trackBy: trackByFn" 
           [ngClass]="{'active': !disabledItemMapper(dataItem) && dataItem === activeListItem, 'selected': insideSelection(dataItem), 'disabled': disabledItemMapper(dataItem)}"
           [innerHtml]="itemRenderer | template:dataItem:disabledItemMapper(dataItem)"
           (mouseenter)="activeListItem = dataItem"
@@ -34,27 +38,9 @@ import {Subscription} from 'rxjs/Subscription';
           (mousedown)="onPaginationClick($event)" 
     >
     </span>
-  `,
-  styles: [`
-    ul {
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-      overflow-y: auto;
-    }
-    .active {
-      background-color: bisque;
-    }
-    .selected {
-      background-color: grey;
-    }
-    .disabled {
-      color: gray;
-    }
-   `]
+  `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
-
   @Input() data: Item[];
   @Input() selection: Item[];
   @Input() loadingMoreResults: boolean;

@@ -41,6 +41,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      [items]="selection"
                      [highlightedItem]="highlightedItem"
                      [itemRenderer]="selectionItemRenderer"
+                     [clearRenderer]="selectionClearRenderer"
                      [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
                      [selectionMode]="selectionMode"
                      [showArrow]="!autocomplete"
@@ -93,7 +94,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                 [pagination]="pagination"
                                 [disabled]="disabled"
                                 [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
-                                [trackByFn]="trackBy"
+                                [trackByFn]="trackByFn"
                                 (onSelectItem)="selectItem($event)"
                                 (onNextPage)="onNextPageStart()"
               >
@@ -103,9 +104,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         </div>
       </ng-container>
     </div>
-  `,
-  styles: [`
-  `]
+  `
 })
 export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
@@ -126,11 +125,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() allowClear: boolean = false;
   @Input() dropdownDisabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   @Input() tabIndex: number = 1;
-  @Input() trackBy: ((index: number, item: Item) => any) | null = null;
+  @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
   @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
 
-  // templates
   static defaultItemRenderer = (item: Item) => {
     if (typeof item === 'string') {
       return item;
@@ -141,14 +139,15 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   };
   @Input() dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
-  @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() dropdownMaxHeight: string = '100px';
   @Input() searchPlaceholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
   @Input() dropdownPaginationMessageRenderer: Template<() => string> = 'Loading more results...';
   @Input() dropdownPaginationButtonRenderer: Template<() => string> = 'Get more...';
   @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
+  @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
+  @Input() selectionClearRenderer: Template<() => string> = '&#10005';
 
   @Output() onSearch = new EventEmitter<string>();
   @Output() onNextPage = new EventEmitter<{ currentLength: number, search: string }>();

@@ -1,29 +1,25 @@
 import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
-  ViewChild, NgZone,
+  ViewChild, NgZone, ViewEncapsulation,
 } from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'search',
+  encapsulation: ViewEncapsulation.None,
   template: `
-    <div [ngClass]="{'ngs-search': true, 'autocomplete': autocomplete}"
+    <div [ngClass]="{'search': true, 'autocomplete': autocomplete}"
          [formGroup]="textInputGroup">
-      <input formControlName="textInput" type="text" #search [attr.placeholder]="searchPlaceholder"
+      <input #search
+             formControlName="textInput" 
+             type="text"
+             [attr.placeholder]="searchPlaceholder"
              (blur)="onSearchBlur.emit($event)"
              (keydown)="onSearchKeyDown.emit($event)"
       />
     </div>
-  `,
-  styles: [`
-    .autocomplete input {
-      border: none;
-    }
-    .autocomplete input:focus {
-      outline: none;
-    }
-  `]
+  `
 })
 export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 

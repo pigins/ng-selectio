@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
@@ -99,9 +99,9 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [(ngModel)]="tabIndex">
       </app-number-input>
       <app-select-input
-        [label]="'trackBy'"
-        [options]="[{label: 'none', value: null}, {label: 'by index', value: trackBy_byIndex}]"
-        [(ngModel)]=trackBy>
+        [label]="'trackByFn'"
+        [options]="[{label: 'none', value: null}, {label: 'by index', value: trackByFn_byIndex}]"
+        [(ngModel)]=trackByFn>
       </app-select-input>
     </div>
     
@@ -140,6 +140,11 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [label]="'searchPlaceholder'"
         [(ngModel)]="searchPlaceholder">
       </app-text-input>
+      <app-select-input
+        [label]="'selectionClearRenderer'"
+        [options]="[{label: 'default', value: selectionClearRenderer_default}, {label: 'X', value: 'X'}]"
+        [(ngModel)]="selectionClearRenderer">
+      </app-select-input>
       <app-select-input
         [label]="'selectionEmptyRenderer'"
         [options]="[{label: 'default', value: selectionEmptyRenderer_default}, {label: 'null', value: null}]"
@@ -181,8 +186,9 @@ import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-sele
         [dropdownPaginationButtonRenderer]="dropdownPaginationButtonRenderer"
         [dropdownSearchingRenderer]="dropdownSearchingRenderer"
         [selectionEmptyRenderer]="selectionEmptyRenderer"
+        [selectionClearRenderer]="selectionClearRenderer"
         [tabIndex]="tabIndex"
-        [trackBy]="trackBy"
+        [trackByFn]="trackByFn"
         (onSearch)="onSearch($event)"
         (onNextPage)="onNextPage($event)"
       ></ng-selectio>
@@ -206,7 +212,7 @@ export class BuilderPageComponent {
   dropdownDisabledItemMapper_allEnabled(item: Item): boolean {
     return false;
   }
-  trackBy_byIndex(index: number, item: Item): any {
+  trackByFn_byIndex(index: number, item: Item): any {
     return index;
   }
   itemRenderer_default(item: any): string {
@@ -227,6 +233,7 @@ export class BuilderPageComponent {
   dropdownPaginationButtonRenderer_default = 'Get more...';
   dropdownSearchingRenderer_default = 'Searching...';
   selectionEmptyRenderer_default = 'No data';
+  selectionClearRenderer_default = '&#10005';
 
   $data: Observable<Item[]> = this.dataService.countriesStrings;
   $appendData: Observable<Item[]> = Observable.of([]);
@@ -248,7 +255,7 @@ export class BuilderPageComponent {
 
   dropdownDisabledItemMapper: (item: Item) => boolean = this.dropdownDisabledItemMapper_allEnabled;
   tabIndex: number = 1;
-  trackBy: ((index: number, item: Item) => any) | null = null;
+  trackByFn: ((index: number, item: Item) => any) | null = null;
   openUp: boolean = false;
   scrollToSelectionAfterOpen: boolean = true;
 
@@ -261,6 +268,7 @@ export class BuilderPageComponent {
   dropdownPaginationButtonRenderer: Template<() => string> = this.dropdownPaginationButtonRenderer_default;
   dropdownSearchingRenderer: Template<() => string> = this.dropdownSearchingRenderer_default;
   selectionEmptyRenderer: Template<() => string> = this.selectionEmptyRenderer_default;
+  selectionClearRenderer: Template<() => string> = this.selectionClearRenderer_default;
 
   datasourceId: string = 'strings';
   showSelectio = true;
