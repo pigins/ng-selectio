@@ -10,7 +10,7 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {DropdownComponent} from './dropdown.component';
+import {ListComponent} from './list.component';
 import {Template} from './template';
 import {Item} from './item';
 import {SearchComponent} from './search.component';
@@ -36,7 +36,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 
     <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
-        <div class="selection-cont" *ngIf="order===1">
+        <div class="selection-wrapper" *ngIf="order===1">
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                      [items]="selection"
                      [highlightedItem]="highlightedItem"
@@ -63,8 +63,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               (onSearchValueChanges)="onSearchValueChanges($event)"
           ></search>
         </div>
-        <div class="dropdown" *ngIf="order===2" [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}" >
-          <div class="body" [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
+        <div class="dropdown-wrapper" *ngIf="order===2" [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}" >
+          <div class="dropdown" [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
             <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
               <search #searchComponent *ngIf="order===1 && !autocomplete && search"
                                   [autocomplete]="autocomplete"
@@ -156,7 +156,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
 
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('searchComponent') searchComponent: SearchComponent;
-  @ViewChild('listComponent') listComponent: DropdownComponent;
+  @ViewChild('listComponent') listComponent: ListComponent;
 
   data: Item[] = [];
   selection: Item[] = [];

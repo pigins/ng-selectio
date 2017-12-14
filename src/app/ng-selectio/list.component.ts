@@ -1,10 +1,8 @@
 import {
-  AfterViewChecked, AfterViewInit,
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges,
   ViewChild, ViewChildren
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
-import {ItemComponent} from './item.component';
 import {Observable} from 'rxjs/Observable';
 import {Template} from './template';
 import {Item} from './item';
@@ -13,39 +11,29 @@ import {Subscription} from 'rxjs/Subscription';
 @Component({
   selector: 'list',
   template: `
-    <div #dropdown>
-      <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
-        
-        
-        <ng-selectio-item *ngFor="let dataItem of data; trackBy: trackByFn" #itemList
-                          [isActive]="!disabledItemMapper(dataItem) && dataItem === activeListItem"
-                          [isSelected]="insideSelection(dataItem)"
-                          [data]="dataItem"
-                          [itemRenderer]="itemRenderer"
-                          [disabled]="disabledItemMapper(dataItem)"
-                          (mouseenter)="activeListItem = dataItem"
-                          (click)="onClickItem(dataItem)"
-        >
-        </ng-selectio-item>
-        
-        
-        
-        <li *ngIf="(data.length === 0)"
-            [innerHtml]="emptyRenderer | template">
-        </li>
-        <li *ngIf="pagination && loadingMoreResults"
-            [innerHtml]="paginationMessageRenderer | template">
-        </li>
-        <li *ngIf="searching"
-            [innerHtml]="searchingRenderer | template">
-        </li>
-      </ul>
-      <span *ngIf="pagination && data.length > 0 && !this.hasScroll()"
-            [innerHtml]="paginationButtonRenderer | template"
-            (mousedown)="onpaginationClick($event)" 
+    <ul #ul (scroll)="onUlScroll($event)" [ngStyle]="{'max-height': maxHeight}">
+      <li *ngFor="let dataItem of data; trackBy: trackByFn" #itemList
+          [ngClass]="{'active': !disabledItemMapper(dataItem) && dataItem === activeListItem, 'selected': insideSelection(dataItem), 'disabled': disabledItemMapper(dataItem)}"
+          [innerHtml]="itemRenderer | template:dataItem:disabledItemMapper(dataItem)"
+          (mouseenter)="activeListItem = dataItem"
+          (click)="onClickItem(dataItem)"
       >
-      </span>
-    </div>
+      </li>
+      <li *ngIf="(data.length === 0)"
+          [innerHtml]="emptyRenderer | template">
+      </li>
+      <li *ngIf="pagination && loadingMoreResults"
+          [innerHtml]="paginationMessageRenderer | template">
+      </li>
+      <li *ngIf="searching"
+          [innerHtml]="searchingRenderer | template">
+      </li>
+    </ul>
+    <span *ngIf="pagination && data.length > 0 && !this.hasScroll()"
+          [innerHtml]="paginationButtonRenderer | template"
+          (mousedown)="onPaginationClick($event)" 
+    >
+    </span>
   `,
   styles: [`
     ul {
@@ -54,9 +42,18 @@ import {Subscription} from 'rxjs/Subscription';
       padding: 0;
       overflow-y: auto;
     }
+    .active {
+      background-color: bisque;
+    }
+    .selected {
+      background-color: grey;
+    }
+    .disabled {
+      color: gray;
+    }
    `]
 })
-export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
+export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   @Input() data: Item[];
   @Input() selection: Item[];
@@ -65,7 +62,6 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   @Input() paginationDelay: number;
   @Input() pagination: boolean;
   @Input() trackByFn: (index: number, item: Item) => any;
-
   @Input() maxHeight: string;
   @Input() maxItemsCount: number;
   @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
@@ -75,7 +71,6 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   @Input() searchingRenderer: Template<() => string>;
   @Input() disabledItemMapper: (item: Item) => boolean;
   @Input() scrollToSelectionAfterOpen: boolean;
-
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
   @Input() disabled: boolean;
@@ -84,7 +79,7 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onSelectItem = new EventEmitter<Item>();
 
   @ViewChild('ul') ul: ElementRef;
-  @ViewChildren('itemList') itemList: QueryList<ItemComponent>;
+  @ViewChildren('itemList') itemList: QueryList<ElementRef>;
 
   activeListItem: Item;
   enabledData: Item[];
@@ -132,7 +127,7 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
     this.onSelectItem.emit(dataItem);
   }
 
-  onpaginationClick($event: MouseEvent): void {
+  onPaginationClick($event: MouseEvent): void {
     $event.preventDefault();
     this.onNextPage.emit();
   }
@@ -147,11 +142,11 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
         if (currentIndex && currentIndex > 0) {
           this.activeListItem = this.enabledData[currentIndex - 1];
         }
-        const item = this.getActiveItemComponent();
+        const item = this.getActiveLi();
         if (item) {
-          const top = item.getTopPosition();
+          const top = this.getLiTopPosition(item);
           if (top < (this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop -= item.getHeight();
+            this.ul.nativeElement.scrollTop -= this.getLiHeight(item);
           }
         }
       }
@@ -162,11 +157,11 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
         if (currentIndex < this.enabledData.length - 1) {
           this.activeListItem = this.enabledData[currentIndex + 1];
         }
-        const item = this.getActiveItemComponent();
+        const item = this.getActiveLi();
         if (item) {
-          const bottom = item.getBottomPosition();
+          const bottom = this.getLiBottomPosition(item);
           if (bottom > (this.ul.nativeElement.offsetHeight + this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop += item.getHeight();
+            this.ul.nativeElement.scrollTop += this.getLiHeight(item);
           }
         }
       }
@@ -186,26 +181,27 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public scrollToSelection(): void {
-    const selections = this.itemList.filter((item: ItemComponent) => {
-      return this.selection.indexOf(item.data) >= 0;
+    const selectionList = this.itemList.filter((li: ElementRef) => {
+      return li.nativeElement.classList.contains('selection');
     });
-
-    if (selections.length > 0) {
-      let lastItemComponent = selections[selections.length - 1];
-      this.ul.nativeElement.scrollTop = lastItemComponent.getTopPosition();
+    if (selectionList.length > 0) {
+      let lastSelectedLi = selectionList[selectionList.length - 1];
+      this.ul.nativeElement.scrollTop = this.getLiTopPosition(lastSelectedLi);
     }
   }
 
   public scrollToTheBottom(): void {
     this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
   }
+
   private scrollExhausted(): boolean {
     const ul = this.ul.nativeElement;
     return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
-  private getActiveItemComponent(): ItemComponent|null {
-    const activeList = this.itemList.filter((item: ItemComponent) => {
-      return item.data === this.activeListItem;
+
+  private getActiveLi(): ElementRef|null {
+    const activeList = this.itemList.filter((li: ElementRef) => {
+      return li.nativeElement.classList.contains('active');
     });
     if (activeList.length > 0) {
       return activeList[0];
@@ -214,4 +210,15 @@ export class DropdownComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
+  private getLiHeight(li: ElementRef): number {
+    return li.nativeElement.offsetHeight;
+  }
+
+  private getLiBottomPosition(li: ElementRef): number {
+    return this.getLiTopPosition(li) + this.getLiHeight(li);
+  }
+
+  private getLiTopPosition(li: ElementRef): number {
+    return li.nativeElement.offsetTop;
+  }
 }
