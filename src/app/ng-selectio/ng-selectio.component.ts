@@ -34,7 +34,11 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   ],
   template: `
 
-    <div class="ngs" #ngs [attr.tabindex]="tabIndex" (blur)="onBlur($event)" (keydown)="onKeyPress($event)">
+    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete}"  
+         (blur)="onBlur($event)"
+         (keydown)="onKeyPress($event)"
+         (click)="autocomplete ? searchComponent.focus() : null"
+    >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
@@ -66,40 +70,42 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         </div>
         <div class="dropdown-wrapper" *ngIf="order===2" [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}" >
           <div class="dropdown" [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
-            <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
-              <search #searchComponent *ngIf="order===1 && !autocomplete && search"
-                                  [autocomplete]="autocomplete"
-                                  [searchPlaceholder]="searchPlaceholder"
-                                  [disabled]="disabled"
-                                  [searchDelay]="searchDelay"
-                                  [searchMinLength]="searchMinLength"
-                                  (onSearchBlur)="onBlur($event)"
-                                  (onSearchKeyDown)="onTextInputKeyDown($event)"
-                                  (onSearchValueChanges)="onSearchValueChanges($event)"
-              ></search>
-              <list #listComponent *ngIf="order===2"
-                                [data]="data"
-                                [selection]="selection"
-                                [expanded]="expanded"
-                                [loadingMoreResults]="loadingMoreResults"
-                                [searching]="searching"
-                                [maxHeight]="dropdownMaxHeight"
-                                [itemRenderer]="dropdownItemRenderer"
-                                [disabledItemMapper]="dropdownDisabledItemMapper"
-                                [emptyRenderer]="dropdownEmptyRenderer"
-                                [paginationMessageRenderer]="dropdownPaginationMessageRenderer"
-                                [paginationButtonRenderer]="dropdownPaginationButtonRenderer"
-                                [searchingRenderer]="dropdownSearchingRenderer"
-                                [keyEvents]="keyEvents"
-                                [pagination]="pagination"
-                                [disabled]="disabled"
-                                [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
-                                [trackByFn]="trackByFn"
-                                (onSelectItem)="selectItem($event)"
-                                (onNextPage)="onNextPageStart()"
-              >
-              </list>
-            </ng-container>
+            <div>
+              <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
+                <search #searchComponent *ngIf="order===1 && !autocomplete && search"
+                        [autocomplete]="autocomplete"
+                        [searchPlaceholder]="searchPlaceholder"
+                        [disabled]="disabled"
+                        [searchDelay]="searchDelay"
+                        [searchMinLength]="searchMinLength"
+                        (onSearchBlur)="onBlur($event)"
+                        (onSearchKeyDown)="onTextInputKeyDown($event)"
+                        (onSearchValueChanges)="onSearchValueChanges($event)"
+                ></search>
+                <list #listComponent *ngIf="order===2"
+                      [data]="data"
+                      [selection]="selection"
+                      [expanded]="expanded"
+                      [loadingMoreResults]="loadingMoreResults"
+                      [searching]="searching"
+                      [maxHeight]="dropdownMaxHeight"
+                      [itemRenderer]="dropdownItemRenderer"
+                      [disabledItemMapper]="dropdownDisabledItemMapper"
+                      [emptyRenderer]="dropdownEmptyRenderer"
+                      [paginationMessageRenderer]="dropdownPaginationMessageRenderer"
+                      [paginationButtonRenderer]="dropdownPaginationButtonRenderer"
+                      [searchingRenderer]="dropdownSearchingRenderer"
+                      [keyEvents]="keyEvents"
+                      [pagination]="pagination"
+                      [disabled]="disabled"
+                      [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
+                      [trackByFn]="trackByFn"
+                      (onSelectItem)="selectItem($event)"
+                      (onNextPage)="onNextPageStart()"
+                >
+                </list>
+              </ng-container>
+            </div>
           </div>
         </div>
       </ng-container>

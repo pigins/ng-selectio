@@ -23,8 +23,10 @@ export class ExamplesPageComponent {
     this.$objectArray = this.dataService.countriesData;
   }
   onSearchString(term: string) {
-    this.$stringArray = this.dataService.countriesStrings.filter((elem) => {
-      return elem.includes(term);
+    this.$stringArray = this.dataService.countriesStrings.mergeMap((arr) => {
+      return Observable.of(arr.filter((elem) => {
+        return (<string>elem).includes(term);
+      }));
     });
   }
   onSearch(term: string) {

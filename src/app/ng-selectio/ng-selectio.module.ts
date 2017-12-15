@@ -6,6 +6,7 @@ import {TemplatePipe} from './template.pipe';
 import {SearchComponent} from './search.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
+import {TextWidthService} from './text-width.service';
 
 @NgModule({
   declarations: [
@@ -19,6 +20,7 @@ import {CommonModule} from '@angular/common';
     CommonModule,
     ReactiveFormsModule
   ],
+  providers: [TextWidthService],
   exports: [
     ReactiveFormsModule,
     NgSelectioComponent

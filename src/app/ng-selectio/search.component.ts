@@ -1,15 +1,16 @@
 import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
-  ViewChild, NgZone, ViewEncapsulation,
+  ViewChild, NgZone, ViewEncapsulation, AfterViewInit, ChangeDetectorRef,
 } from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
+import {TextWidthService} from './text-width.service';
 
 @Component({
   selector: 'search',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div [ngClass]="{'search': true, 'autocomplete': autocomplete}"
+    <div [ngClass]="{'search': true}"
          [formGroup]="textInputGroup">
       <input #search
              formControlName="textInput" 
@@ -35,7 +36,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 
   @ViewChild('search') search: ElementRef;
 
-  constructor(private _ngZone: NgZone) {
+  constructor(private _ngZone: NgZone, private textWidthService: TextWidthService) {
     this.textInput = new FormControl({value: '', disabled: this.disabled});
     this.textInputGroup = new FormGroup({
       textInput: this.textInput
@@ -44,6 +45,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 
   textInputGroup: FormGroup;
   textInput: FormControl;
+  private textChangeSubscription: Subscription;
   private searchTextChangeSubscription: Subscription;
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -57,6 +59,13 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.textChangeSubscription = this.textInput.valueChanges.subscribe(text => {
+      if (text) {
+        this.search.nativeElement.style.width = (this.textWidthService.measureText(text, this.search.nativeElement) + 1) + 'px';
+      } else {
+        this.search.nativeElement.style.width = 5 + 'px';
+      }
+    });
     this.searchTextChangeSubscription = this.textInput.valueChanges
       .debounceTime(this.searchDelay)
       .filter(e => this.textInput.value.length >= this.searchMinLength)
@@ -67,6 +76,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.searchTextChangeSubscription.unsubscribe();
+    this.textChangeSubscription.unsubscribe();
   }
 
   public notEmpty(): boolean {
