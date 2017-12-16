@@ -8,7 +8,7 @@ import {Item} from './item';
   selector: 'selection',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true, 'disabled': disabled}">
+    <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true}">
       
       <div *ngIf="this.items.length === 0" class="empty">
         <span [innerHtml]="emptyRenderer | template"></span>
@@ -24,7 +24,7 @@ import {Item} from './item';
       <div *ngIf="singleMode() && deletable && items.length === 1" class="single deletable">
         <div [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}">
           <span [innerHtml]="itemRenderer | template:items[0]"></span>
-          <span class="delete" 
+          <span class="clear" 
                 (click)="onDeleteClick($event, items[0])"
                 [innerHtml]="clearRenderer | template"
           ></span>
@@ -45,7 +45,7 @@ import {Item} from './item';
              [ngStyle]="{'display': 'inline-block'}"
              [ngClass]="{'selected': highlightedItem === item}"
              (click)="highlight(item)">
-          <span class="delete" 
+          <span class="clear" 
                 (click)="onDeleteClick($event, item)" 
                 [innerHtml]="clearRenderer | template"
           ></span>

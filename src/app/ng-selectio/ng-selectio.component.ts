@@ -34,7 +34,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   ],
   template: `
 
-    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete}"  
+    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled}"  
          (blur)="onBlur($event)"
          (keydown)="onKeyPress($event)"
          (click)="autocomplete ? searchComponent.focus() : null"
