@@ -80,7 +80,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
         return !this.disabledItemMapper(dataElem);
       });
     }
-    if (changes.expanded && this.itemList) {
+    if (changes.expanded && changes.expanded.currentValue && this.itemList) {
       if (this.scrollToSelectionAfterOpen) {
         this.scrollToSelection();
       }
@@ -168,7 +168,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   public scrollToSelection(): void {
     const selectionList = this.itemList.filter((li: ElementRef) => {
-      return li.nativeElement.classList.contains('selection');
+      return li.nativeElement.classList.contains('selected');
     });
     if (selectionList.length > 0) {
       let lastSelectedLi = selectionList[selectionList.length - 1];

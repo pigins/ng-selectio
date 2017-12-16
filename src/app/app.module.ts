@@ -5,16 +5,15 @@ import {HttpModule} from '@angular/http';
 import {NgSelectioModule} from './ng-selectio/ng-selectio.module';
 import {ExamplesPageComponent} from './examples-page/examples-page.component';
 import {DocsPageComponent} from './docs-page/docs-page.component';
-import {BuilderPageComponent} from './builder-page/builder-page.component';
 import {HomePageComponent} from './home-page/home-page.component';
 import {routes} from './routes';
 import {RouterModule} from '@angular/router';
 import {DataService} from './service/data.service';
-import { NumberInputComponent } from './builder-page/number-input.component';
-import {SelectInputComponent} from './builder-page/select-input.component';
-import {CheckboxInputComponent} from './builder-page/checkbox-input.component';
+import { NumberInputComponent } from './docs-page/number-input.component';
+import {SelectInputComponent} from './docs-page/select-input.component';
+import {CheckboxInputComponent} from './docs-page/checkbox-input.component';
 import {FormsModule} from '@angular/forms';
-import {TextInputComponent} from './builder-page/text-input.component';
+import {TextInputComponent} from './docs-page/text-input.component';
 
 
 @NgModule({
@@ -23,7 +22,6 @@ import {TextInputComponent} from './builder-page/text-input.component';
     HomePageComponent,
     ExamplesPageComponent,
     DocsPageComponent,
-    BuilderPageComponent,
     NumberInputComponent,
     SelectInputComponent,
     TextInputComponent,

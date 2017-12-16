@@ -10,9 +10,6 @@ import {Component} from '@angular/core';
             <a [routerLink]="''">Home</a>
           </li>
           <li>
-            <a [routerLink]="'builder'">Builder</a>
-          </li>
-          <li>
             <a [routerLink]="'docs'">Documentation</a>
           </li>
           <li>
@@ -37,7 +34,7 @@ import {Component} from '@angular/core';
     </div>
     <router-outlet></router-outlet>
     <div>
-      Footer
+      
     </div>
   `,
   styleUrls: ['./app.component.css']

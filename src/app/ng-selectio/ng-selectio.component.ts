@@ -144,7 +144,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       return JSON.stringify(item);
     }
   };
-  @Input() dropdownItemRenderer: Template<(countryItem: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
+  @Input() dropdownItemRenderer: Template<(item: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() dropdownMaxHeight: string = '100px';
   @Input() searchPlaceholder: string = '';
   @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
