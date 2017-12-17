@@ -51,4 +51,10 @@ export class DataService {
     return Observable.of(['russia', 'canada', 'usa', 'germany', 'france' , 'china', 'uk', 'australia', 'bolivia', 'india', 'romania']);
   }
 
+  get exampleRandomUsers():Item[] {
+    return [
+      {"gender":"male","name":{"title":"mr","first":"christian","last":"bennett"},"picture":{"large":"https://randomuser.me/api/portraits/men/80.jpg","medium":"https://randomuser.me/api/portraits/med/men/80.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/80.jpg"}},
+      {"gender":"male","name":{"title":"mr","first":"benedikt","last":"hein"},"picture":{"large":"https://randomuser.me/api/portraits/men/76.jpg","medium":"https://randomuser.me/api/portraits/med/men/76.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/76.jpg"}}
+    ];
+  }
 }

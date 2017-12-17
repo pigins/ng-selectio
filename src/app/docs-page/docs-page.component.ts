@@ -478,8 +478,9 @@ export class DocsPageComponent {
           }
           };`;
 
-  selectionDefault_user = {"gender":"male","name":{"title":"mr","first":"christian","last":"bennett"},"picture":{"large":"https://randomuser.me/api/portraits/men/80.jpg","medium":"https://randomuser.me/api/portraits/med/men/80.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/80.jpg"}}
+
   // defaults
+  selectionDefault_user: Item;
   selectionDefaultMapper_selectFirst(items: Item[]): Item[] {
     return [items[0]];
   }
@@ -554,6 +555,7 @@ export class DocsPageComponent {
   showSelectio = true;
 
   constructor(private http: Http, private dataService: DataService) {
+    this.selectionDefault_user = this.dataService.exampleRandomUsers[0];
   }
 
   recreateSelectio() {

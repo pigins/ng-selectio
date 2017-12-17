@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import {Component, ViewEncapsulation} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
@@ -9,7 +9,8 @@ import {Item} from '../ng-selectio/types';
 @Component({
   selector: 'app-examples-page',
   templateUrl: './examples-page.component.html',
-  styleUrls: ['./examples-page.component.css']
+  styleUrls: ['./examples-page.component.css'],
+  encapsulation: ViewEncapsulation.None
 })
 export class ExamplesPageComponent {
   $stringArray: Observable<any> = this.dataService.countriesStrings;
@@ -19,7 +20,7 @@ export class ExamplesPageComponent {
   itemArray: Item[] = ['russia'];
 
 
-  constructor(private http: Http, private dataService: DataService ) {
+  constructor(private http: Http, public dataService: DataService ) {
     this.$objectArray = this.dataService.countriesData;
   }
   onSearchString(term: string) {
@@ -58,9 +59,7 @@ export class ExamplesPageComponent {
                <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
            </div>`;
   }
-  noDataRenderer() {
-    return 'Empty';
-  }
-  onSelectCountry(country: any) {
+  selectioRenderer() {
+    return 'Selectio...';
   }
 }

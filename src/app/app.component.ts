@@ -1,4 +1,6 @@
-import {Component} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {NavigationEnd, Router} from '@angular/router';
+import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'app-root',
@@ -11,7 +13,7 @@ import {Component} from '@angular/core';
         <p class="header-description">
           A functional and nice Select control for <a class="primary-link" href="https://angular.io/">Angular</a>
         </p>
-        <p class="menu-item"><a [routerLink]="'docs'">Documentation</a></p>
+        <p class="menu-item"><a [routerLink]="link">{{linkName}}</a></p>
       </div>
     </div>
     <div class="block1">
@@ -26,6 +28,31 @@ import {Component} from '@angular/core';
   `,
   styleUrls: ['./app.component.css']
 })
-export class AppComponent {
+export class AppComponent implements OnInit, OnDestroy {
 
+  link: string;
+  linkName: string;
+  routerSubscription: Subscription;
+
+  constructor(private router: Router) {
+  }
+
+  ngOnInit() {
+    this.routerSubscription = this.router.events
+      .subscribe((event) => {
+        if (event instanceof NavigationEnd) {
+          if (event.url === '/docs') {
+            this.link = '/';
+            this.linkName = 'Examples';
+          } else if (event.url === '/') {
+            this.link = '/docs';
+            this.linkName = 'Documentation';
+          }
+        }
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSubscription.unsubscribe();
+  }
 }

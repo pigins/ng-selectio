@@ -2,7 +2,7 @@
   <h2>Simple select array of strings</h2>
   <ng-selectio
     [$data]="$stringArray"
-    [selectionEmptyRenderer]="noDataRenderer"
+    [selectionEmptyRenderer]="selectioRenderer"
     [dropdownDisabledItemMapper]="disabledItem"
     [allowClear]="true"
   ></ng-selectio>
@@ -12,11 +12,11 @@
     [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
     [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
     [selectionDefaultMapper]="selectionDefaultMapper"
-    (onSelect)="onSelectCountry($event)"
   ></ng-selectio>
   <h2>Simple select array of strings with search</h2>
   <ng-selectio
     [$data]="$stringArray"
+    [selectionEmptyRenderer]="selectioRenderer"
     [search]="true"
     (onSearch)="onSearchString($event)"
   ></ng-selectio>
@@ -33,6 +33,8 @@
     [$appendData]="$appendUsers"
     [dropdownItemRenderer]="renderItem"
     [selectionItemRenderer]="renderItem"
+    [selectionEmptyRenderer]="selectioRenderer"
+    [selectionDefault]="this.dataService.exampleRandomUsers"
     [selectionMode]="'multiple'"
     [search]="true"
     [allowClear]="true"
@@ -46,7 +48,7 @@
   <div>
     <ng-selectio [(ngModel)]="itemArray"
                  [$data]="$stringArray"
-                 [selectionEmptyRenderer]="noDataRenderer"
+                 [selectionEmptyRenderer]="selectioRenderer"
                  [dropdownDisabledItemMapper]="disabledItem"
                  [allowClear]="true"
     >

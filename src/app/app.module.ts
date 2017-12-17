@@ -5,7 +5,6 @@ import {HttpModule} from '@angular/http';
 import {NgSelectioModule} from './ng-selectio/ng-selectio.module';
 import {ExamplesPageComponent} from './examples-page/examples-page.component';
 import {DocsPageComponent} from './docs-page/docs-page.component';
-import {HomePageComponent} from './home-page/home-page.component';
 import {routes} from './routes';
 import {RouterModule} from '@angular/router';
 import {DataService} from './service/data.service';
@@ -19,7 +18,6 @@ import {TextInputComponent} from './docs-page/text-input.component';
 @NgModule({
   declarations: [
     AppComponent,
-    HomePageComponent,
     ExamplesPageComponent,
     DocsPageComponent,
     NumberInputComponent,
