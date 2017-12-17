@@ -4,7 +4,7 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/item';
+import {Item} from '../ng-selectio/types';
 
 @Component({
   selector: 'app-examples-page',

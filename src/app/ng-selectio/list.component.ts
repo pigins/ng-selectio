@@ -4,8 +4,8 @@ import {
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
-import {Template} from './template';
-import {Item} from './item';
+import {Template} from './types';
+import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({

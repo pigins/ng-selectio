@@ -4,9 +4,10 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/item';
-import {Template} from '../ng-selectio/template';
+import {Item} from '../ng-selectio/types';
+import {Template} from '../ng-selectio/types';
 import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-selectio.component';
+import {SelectionMode} from '../ng-selectio/types';
 
 @Component({
   selector: 'app-docs-page',
@@ -517,7 +518,7 @@ export class DocsPageComponent {
   $data: Observable<Item[]> = this.dataService.countriesStrings;
   $appendData: Observable<Item[]> = Observable.of([]);
 
-  selectionMode: string = SELECTION_MODE_SINGLE;
+  selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
   selectionDefault: Item | Item[] | null = null;
   selectionDefaultMapper: (items: Item[]) => Item[] = this.selectionDefaultMapper_none;
   allowClear: boolean = false;

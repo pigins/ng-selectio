@@ -1,8 +1,9 @@
 import {Component, EventEmitter, Input, Output, ViewEncapsulation} from '@angular/core';
 import {SELECTION_MODE_SINGLE} from './ng-selectio.component';
 import {SELECTION_MODE_MULTIPLE} from './ng-selectio.component';
-import {Template} from './template';
-import {Item} from './item';
+import {Template} from './types';
+import {Item} from './types';
+import {SelectionMode} from './types';
 
 @Component({
   selector: 'selection',
@@ -64,7 +65,7 @@ export class SelectionComponent {
   @Input() emptyRenderer: Template<() => string>;
   @Input() clearRenderer: Template<() => string>;
   @Input() itemRenderer: Template<(item: Item) => string>;
-  @Input() selectionMode: string;
+  @Input() selectionMode: SelectionMode;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;
   @Input() arrowDirection: boolean;

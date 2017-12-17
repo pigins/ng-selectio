@@ -1,7 +1,6 @@
 import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
-  ViewChild, NgZone, ViewEncapsulation, AfterViewInit, ChangeDetectorRef,
-} from '@angular/core';
+  ViewChild, NgZone, ViewEncapsulation, } from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
 import {Subscription} from 'rxjs/Subscription';
 import {TextWidthService} from './text-width.service';

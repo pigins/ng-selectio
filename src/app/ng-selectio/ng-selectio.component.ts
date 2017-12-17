@@ -11,10 +11,11 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
 import {ListComponent} from './list.component';
-import {Template} from './template';
-import {Item} from './item';
+import {Template} from './types';
+import {Item} from './types';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
+import {SelectionMode} from './types';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -116,7 +117,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
 
   @Input() $data: Observable<Item[]> = Observable.of([]);
   @Input() $appendData: Observable<Item[]> = Observable.of([]);
-  @Input() selectionMode: string = SELECTION_MODE_SINGLE;
+  @Input() selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
   @Input() selectionDefault: Item | Item[] | null = null;
   @Input() selectionDefaultMapper: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() searchDelay: number = 0;

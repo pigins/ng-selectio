@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {Item} from '../ng-selectio/item';
+import {Item} from '../ng-selectio/types';
 
 export const COUNTRIES_DATA = [
     {
