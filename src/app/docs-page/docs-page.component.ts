@@ -508,7 +508,7 @@ export class DocsPageComponent {
            </div>`;
   }
   dropdownEmptyRenderer_default = 'Enter 1 or more characters';
-  dropdownEmptyRenderer_empty = 'empty';
+  dropdownEmptyRenderer_empty = 'select...';
   dropdownPaginationMessageRenderer_default = 'Loading more results...';
   dropdownPaginationButtonRenderer_default = 'Get more...';
   dropdownSearchingRenderer_default = 'Searching...';

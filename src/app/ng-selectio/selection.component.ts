@@ -24,7 +24,7 @@ import {SelectionMode} from './types';
       
       <div *ngIf="singleMode() && deletable && items.length === 1" class="single deletable">
         <div [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}">
-          <span [innerHtml]="itemRenderer | template:items[0]"></span>
+          <span [innerHtml]="itemRenderer | template:items[0]" class="single-item"></span>
           <span class="clear" 
                 (click)="onDeleteClick($event, items[0])"
                 [innerHtml]="clearRenderer | template"

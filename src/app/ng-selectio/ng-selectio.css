@@ -1,5 +1,6 @@
 .ngs {
   background-color: white;
+  cursor: pointer;
 }
 .ngs:focus {
   outline: none;
@@ -16,19 +17,25 @@
 }
 .ngs.expanded:not(.open-up) .selection-wrapper {
   border-radius: 4px 4px 0 0;
-  border-bottom: 0;
+  border-bottom: 1px solid transparent;
 }
 .ngs.expanded.open-up .selection-wrapper {
   border-radius: 0 0 4px 4px;
-  border-top: 0;
+  border-top: 1px solid transparent;
 }
 .ngs span.clear {
   cursor: pointer;
+  font-size: 12px;
+}
+.ngs span.clear:hover,
+.ngs span.clear:focus {
+  color: #c10933;
 }
 
 
 .ngs .dropdown-wrapper .dropdown {
   margin-top: 0;
+  min-height: 150px;
 }
 .ngs .dropdown-wrapper .dropdown > div {
   background-color: white;
@@ -42,25 +49,26 @@
   border-radius: 4px 4px 0 0;
 }
 .ngs .dropdown-wrapper .dropdown li {
+  min-height: 30px;
   padding: 5px;
 }
 .ngs .dropdown-wrapper .dropdown li.active {
-  background-color: bisque;
+  background-color: #dedede;
   cursor: pointer;
 }
-.ngs .dropdown-wrapper .dropdown li.selected {
-  background-color: grey;
+.ngs:not(.autocomplete) .dropdown-wrapper .dropdown li.selected {
+  background-color: #2f80ed;
 }
 .ngs .dropdown-wrapper .dropdown li.disabled {
-  color: gray;
+  color: #aaa;
 }
 
 
 .ngs .selection {
   padding: 5px;
 }
-.ngs .selection .selected {
-  background-color: #cccccc;
+.ngs:not(.autocomplete) .selection .selected {
+  background-color: #2f80ed;
 }
 .ngs .selection.disabled {
   /*styles for disabled selection*/
@@ -77,9 +85,28 @@
 .ngs .selection .single.deletable {
 
 }
-.ngs .selection .multiple.deletable {
-
+.ngs .selection .multiple.deletable > div {
+  position: relative;
+  padding: 5px 7px;
+  margin: 0 5px 0;
+  background: #b7dcfb;
+  border: 1px solid #5383f8;
+  border-radius: 2px;
 }
+.ngs .selection .multiple.deletable > div::before {
+  content: "";
+  display: inline-block;
+  position: absolute;
+  width: 1px;
+  height: 100%;
+  top: 0;
+  left: 22px;
+  background: #5383f8;
+}
+.ngs .selection .multiple.deletable > div span:not(.clear) {
+  padding-left: 10px;
+}
+
 .ngs .selection span.arrow {
   display: inline-block;
   position: absolute;
@@ -101,7 +128,7 @@
   padding: 4px 8px 4px 4px;
 }
 .ngs .search input {
-  width: 100%;
+  min-width: 100%;
 }
 
 
@@ -120,5 +147,22 @@
 }
 .ngs.autocomplete .search {
   padding: 4px 0 4px 0;
-  margin-left: -2px;
+}
+.ngs .single-item {
+  display: inline-block;
+  width: calc(100% - 35px);
+}
+
+
+
+
+.flag-wrapper {
+  display: inline-block;
+  vertical-align: middle;
+}
+.flag-wrapper svg {
+  border: 1px solid #dedede;
+}
+#country-iso-name {
+  max-height: 20px;
 }

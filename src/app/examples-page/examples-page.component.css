@@ -1,6 +1,20 @@
 #examples-cont {
-  padding: 0 15px;
+  padding: 30px 15px;
   margin: 0 auto;
   max-width: 400px;
   width: 100%;
+  font-family: "Roboto", sans-serif;
+  font-weight: 300;
+}
+#examples-cont h2 {
+  padding: 25px 0 5px;
+  font-family: "Roboto Condensed", "Roboto", sans-serif;
+  font-weight: 300;
+  font-size: 20px;
+}
+.selected-item {
+  padding: 5px 0 0 5px;
+  font-size: 16px;
+  color: #5383f8;
+  text-align: center;
 }
