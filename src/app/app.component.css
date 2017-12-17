@@ -9,20 +9,23 @@
   max-width: 400px;
 }
 .header {
-  margin-top: 70px;
   padding: 30px 0;
-  background: #b7dcfb;
+  background: #5383f8;
   font-size: 18px;
   color: #5482f8;
 }
 .header-title {
-  margin-bottom: 15px;
+  margin-bottom: 35px;
   text-align: center;
-  font-size: 28px;
+  font-size: 40px;
   color: #fff;
 }
 .header-description {
   margin-bottom: 20px;
+  color: #9ee7fb;
+}
+.menu-item {
+  text-align: center;
 }
 a {
   border-bottom: 1px solid transparent;
@@ -46,40 +49,17 @@ a:focus {
   border-bottom: 1px solid #c10933;
 }
 .small-link {
+  display: inline-block;
+  padding: 7px 0 0;
   font-size: 14px;
-  border-bottom: 1px solid #9ee7fb;
+  border-bottom: 1px solid #5383f8;
+  color: #0366d6;
 }
 .small-link:hover,
 .small-link:focus {
-  border-bottom: 1px solid #5383f8;
-}
-.main-menu {
-  position: fixed;
-  top: 0;
-  min-height: 70px;
-  width: 100%;
-  padding: 25px 0;
-  background: #5383f8;
-}
-.link-list {
-  padding: 0;
-  margin: 0;
-  font-size: 0;
-}
-.link-list li {
-  display: inline-block;
-  padding: 0 10px;
-  width: auto;
-  vertical-align: top;
-}
-.link-list li a {
-  font-size: 16px;
-  color: #e7f9fe;
   border-bottom: 1px solid transparent;
-  transition: .5s ease;
 }
-.link-list li a:hover,
-.link-list li a:focus {
-  text-decoration: none;
-  border-bottom: 1px solid #9ee7fb;
+.block1 {
+  padding: 20px 0;
+  background: #b7dcfb;
 }
