@@ -2,10 +2,10 @@
   background-color: white;
   cursor: pointer;
 }
-.ngs:focus {
+.ngs.focus {
   outline: none;
 }
-.ngs:focus .selection-wrapper {
+.ngs.focus .selection-wrapper {
   border: 1px solid #b3b3b3;
   border-radius: 4px;
 }
@@ -28,7 +28,7 @@
   font-size: 12px;
 }
 .ngs span.clear:hover,
-.ngs span.clear:focus {
+.ngs.focus span.clear {
   color: #c10933;
 }
 
@@ -139,7 +139,7 @@
   border: none;
   width: 5px;
 }
-.ngs.autocomplete .search input:focus {
+.ngs.autocomplete.focus .search input {
   outline: none;
 }
 .ngs.autocomplete .selection {

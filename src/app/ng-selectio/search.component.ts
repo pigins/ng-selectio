@@ -14,7 +14,9 @@ import {TextWidthService} from './text-width.service';
       <input #search
              formControlName="textInput" 
              type="text"
+             [tabindex]="tabIndex"
              [attr.placeholder]="searchPlaceholder"
+             (focus)="onSearchFocus.emit($event)"
              (blur)="onSearchBlur.emit($event)"
              (keydown)="onSearchKeyDown.emit($event)"
       />
@@ -28,7 +30,9 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   @Input() disabled: boolean;
   @Input() searchDelay: number;
   @Input() searchMinLength: number;
+  @Input() tabIndex: number;
 
+  @Output() onSearchFocus = new EventEmitter<Event>();
   @Output() onSearchBlur = new EventEmitter<Event>();
   @Output() onSearchKeyDown = new EventEmitter<KeyboardEvent>();
   @Output() onSearchValueChanges = new EventEmitter<string>();
@@ -60,7 +64,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   ngOnInit(): void {
     this.textChangeSubscription = this.textInput.valueChanges.subscribe(text => {
       if (text) {
-        this.search.nativeElement.style.width = (this.textWidthService.measureText(text, this.search.nativeElement) + 1) + 'px';
+        this.search.nativeElement.style.width = (this.textWidthService.measureText(text, this.search.nativeElement) + 5) + 'px';
       } else {
         this.search.nativeElement.style.width = 5 + 'px';
       }

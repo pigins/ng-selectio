@@ -35,10 +35,10 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   ],
   template: `
 
-    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled}"  
-         (blur)="onBlur($event)"
+    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
+         (focus)="onNgsFocus($event)"
+         (blur)="onNgsBlur($event)"
          (keydown)="onKeyPress($event)"
-         (click)="autocomplete ? searchComponent.focus() : null"
     >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
@@ -64,7 +64,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               [disabled]="disabled"
                               [searchDelay]="searchDelay"
                               [searchMinLength]="searchMinLength"
-                              (onSearchBlur)="onBlur($event)"
+                              [tabIndex]="tabIndex"
+                              (onSearchFocus)="onSearchFocus($event)"
+                              (onSearchBlur)="onSearchBlur($event)"
                               (onSearchKeyDown)="onTextInputKeyDown($event)"
                               (onSearchValueChanges)="onSearchValueChanges($event)"
           ></search>
@@ -79,7 +81,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         [disabled]="disabled"
                         [searchDelay]="searchDelay"
                         [searchMinLength]="searchMinLength"
-                        (onSearchBlur)="onBlur($event)"
+                        [tabIndex]="tabIndex"
+                        (onSearchFocus)="onSearchFocus($event)"
+                        (onSearchBlur)="onSearchBlur($event)"
                         (onSearchKeyDown)="onTextInputKeyDown($event)"
                         (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></search>
@@ -168,6 +172,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   selection: Item[] = [];
   highlightedItem: Item | null = null;
   expanded: boolean;
+  focus: boolean = false;
   loadingMoreResults: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
@@ -269,8 +274,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       });
     }
 
-    this.onSelect.subscribe(() => {
-    });
   }
 
   ngOnDestroy(): void {
@@ -304,27 +307,58 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     this.onSelect.emit(item);
   }
 
-  onBlur($event: Event) {
-    const e = (<any>$event);
-    if (!this.expanded) {
-      return;
-    }
-    if (!e.relatedTarget) {
-      this.expandedChanged.emit(false);
-      return;
-    }
-    if (this.searchComponent) {
-      if (e.relatedTarget !== this.searchComponent.getNativeElement() && e.relatedTarget !== this.ngs.nativeElement) {
-        this.expandedChanged.emit(false);
-        return;
-      }
-    } else {
-      if (e.relatedTarget !== this.ngs.nativeElement) {
-        this.expandedChanged.emit(false);
-        return;
-      }
+  onNgsFocus($event: Event): void {
+    this.focus = true;
+    if (this.autocomplete) {
+      this.searchComponent.focus();
     }
   }
+
+  onSearchFocus($event: Event): void {
+    this.focus = true;
+  }
+
+  onNgsBlur($event: Event) :void {
+    const e = (<any>$event);
+    if (this.searchComponent && e.relatedTarget === this.searchComponent.getNativeElement()) {
+      /*NOPE*/
+    } else if (this.expanded) {
+      this.expandedChanged.emit(false);
+    }
+    this.focus = false;
+  }
+
+  onSearchBlur($event: Event): void {
+    const e = (<any>$event);
+    if (e.relatedTarget === this.ngs.nativeElement) {
+      /*NOPE*/
+    } else if (this.expanded) {
+      this.expandedChanged.emit(false);
+    }
+    this.focus = false;
+  }
+
+  // onBlur($event: Event): void {
+  //   const e = (<any>$event);
+  //   if (!this.expanded) {
+  //     return;
+  //   }
+  //   if (!e.relatedTarget) {
+  //     this.expandedChanged.emit(false);
+  //     return;
+  //   }
+  //   if (this.searchComponent) {
+  //     if (e.relatedTarget !== this.searchComponent.getNativeElement() && e.relatedTarget !== this.ngs.nativeElement) {
+  //       this.expandedChanged.emit(false);
+  //       return;
+  //     }
+  //   } else {
+  //     if (e.relatedTarget !== this.ngs.nativeElement) {
+  //       this.expandedChanged.emit(false);
+  //       return;
+  //     }
+  //   }
+  // }
 
   onKeyPress(event: KeyboardEvent) {
     if (event.keyCode === KEY_CODE.DOWN_ARROW && !this.expanded && this.hasFocus()) {
