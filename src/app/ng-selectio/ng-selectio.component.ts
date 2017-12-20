@@ -139,6 +139,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
   @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
+  @Input() clearSearchAfterCollapse: boolean = true;
 
   static defaultItemRenderer = (item: Item) => {
     if (typeof item === 'string') {
@@ -252,6 +253,9 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       this.expanded = expanded;
       if (this.expanded && this.searchComponent) {
         this.searchComponent.focus();
+      }
+      if (this.search && this.clearSearchAfterCollapse && !this.expanded) {
+        this.searchComponent.empty();
       }
     });
 

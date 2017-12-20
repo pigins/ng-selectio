@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, Input} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
@@ -60,7 +60,20 @@ import {SelectionMode} from '../ng-selectio/types';
           <td></td>
           <td>false</td>
         </tr>
-
+        
+        <tr>
+          <td>clearSearchAfterCollapse</td>
+          <td>
+            <app-checkbox-input
+              [(ngModel)]="clearSearchAfterCollapse">
+            </app-checkbox-input>
+          </td>
+          <td>Clear search after dropdown collapse</td>
+          <td>boolean</td>
+          <td></td>
+          <td>true</td>
+        </tr>
+        
         <tr>
           <td>closeAfterSelect</td>
           <td>
@@ -444,7 +457,8 @@ import {SelectionMode} from '../ng-selectio/types';
         [disabled]="disabled"
         [closeAfterSelect]="closeAfterSelect"
         [selectionMaxLength]="selectionMaxLength"
-        [allowClear]="allowClear"
+        [allowClear]="allowClear" 
+        [clearSearchAfterCollapse]="clearSearchAfterCollapse"
         [openUp]="openUp"
         [dropdownDisabledItemMapper]="dropdownDisabledItemMapper"
         [dropdownItemRenderer]="dropdownItemRenderer"
@@ -539,6 +553,7 @@ export class DocsPageComponent {
   trackByFn: ((index: number, item: Item) => any) | null = null;
   openUp: boolean = false;
   scrollToSelectionAfterOpen: boolean = true;
+  clearSearchAfterCollapse: boolean = true;
 
   dropdownItemRenderer: Template<(item: Item, disabled: boolean) => string> = this.itemRenderer_default;
   selectionItemRenderer: Template<(item: Item) => string> = this.itemRenderer_default;
