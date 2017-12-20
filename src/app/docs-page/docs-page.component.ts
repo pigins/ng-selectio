@@ -333,7 +333,7 @@ import {SelectionMode} from '../ng-selectio/types';
           <td>Max height for dropdown</td>
           <td>string</td>
           <td></td>
-          <td>100px</td>
+          <td>150px</td>
         </tr>
         
         <tr>
@@ -557,7 +557,7 @@ export class DocsPageComponent {
 
   dropdownItemRenderer: Template<(item: Item, disabled: boolean) => string> = this.itemRenderer_default;
   selectionItemRenderer: Template<(item: Item) => string> = this.itemRenderer_default;
-  dropdownMaxHeight: string = '100px';
+  dropdownMaxHeight: string = '150px';
   searchPlaceholder: string = '';
   dropdownEmptyRenderer: Template<() => string> = this.dropdownEmptyRenderer_default;
   dropdownPaginationMessageRenderer: Template<() => string> = this.dropdownPaginationMessageRenderer_default;

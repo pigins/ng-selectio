@@ -76,7 +76,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.data) {
-      this.enabledData = this.data.filter((dataElem: Item) => {
+      this.enabledData = changes.data.currentValue.filter((dataElem: Item) => {
         return !this.disabledItemMapper(dataElem);
       });
     }

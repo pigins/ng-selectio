@@ -53,7 +53,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.disabled) {
-      if (this.disabled) {
+      if (changes.disabled.currentValue) {
         this.textInput.disable();
       } else {
         this.textInput.enable();

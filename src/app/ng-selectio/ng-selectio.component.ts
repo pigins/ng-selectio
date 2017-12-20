@@ -218,7 +218,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.$data && this.$data) {
+    if (changes.$data && changes.$data.currentValue) {
       this.$data.take(1).subscribe((data) => {
         this.data = data;
         if (this.autocomplete && changes.$data.previousValue && this.searchComponent.notEmpty()) {
@@ -228,7 +228,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
         this.changeDetectorRef.markForCheck();
       });
     }
-    if (changes.$appendData && this.$appendData) {
+    if (changes.$appendData && changes.$appendData.currentValue) {
       this.$appendData.take(1).subscribe((data) => {
         this.data = this.data.concat(data);
         this.changeDetectorRef.markForCheck();
@@ -236,7 +236,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       });
     }
     if (changes.openUp) {
-      if (this.openUp) {
+      if (changes.openUp.currentValue) {
         this.verticalOrder = [2, 1];
       } else {
         this.verticalOrder = [1, 2];
@@ -245,10 +245,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   ngOnInit(): void {
-    if (!this.$data) {
-      this.$data = Observable.of([]);
-    }
-
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this.searchComponent) {
@@ -258,7 +254,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
         this.searchComponent.empty();
       }
     });
-
     if (this.selectionDefault) {
       if (Array.isArray(this.selectionDefault)) {
         this.selection = this.selectionDefault;
@@ -271,13 +266,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       this.selection = this.selectionDefaultMapper(this.data);
       this.modelChange();
     }
-
     if (this.selection.length > 0) {
       this.selection.forEach((item: Item) => {
         this.onSelect.emit(item);
       });
     }
-
   }
 
   ngOnDestroy(): void {
@@ -341,28 +334,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
     this.focus = false;
   }
-
-  // onBlur($event: Event): void {
-  //   const e = (<any>$event);
-  //   if (!this.expanded) {
-  //     return;
-  //   }
-  //   if (!e.relatedTarget) {
-  //     this.expandedChanged.emit(false);
-  //     return;
-  //   }
-  //   if (this.searchComponent) {
-  //     if (e.relatedTarget !== this.searchComponent.getNativeElement() && e.relatedTarget !== this.ngs.nativeElement) {
-  //       this.expandedChanged.emit(false);
-  //       return;
-  //     }
-  //   } else {
-  //     if (e.relatedTarget !== this.ngs.nativeElement) {
-  //       this.expandedChanged.emit(false);
-  //       return;
-  //     }
-  //   }
-  // }
 
   onKeyPress(event: KeyboardEvent) {
     if (event.keyCode === KEY_CODE.DOWN_ARROW && !this.expanded && this.hasFocus()) {
