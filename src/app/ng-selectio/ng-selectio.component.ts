@@ -385,4 +385,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       return false;
     }
   }
+
+  // public methods
+  public getSearchComponent(): SearchComponent {
+    return this.searchComponent;
+  }
+
+  public getData(): Item[] {
+    return this.data;
+  }
+
 }

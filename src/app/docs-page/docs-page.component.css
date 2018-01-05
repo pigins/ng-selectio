@@ -1,0 +1,122 @@
+#container {
+  position: relative;
+  font-family: "Roboto Condensed", "Roboto", sans-serif;
+  font-weight: lighter;
+  padding: 10px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.menu {
+  position: absolute;
+  width: 100px;
+  height: 300px;
+  display: inline-block;
+}
+
+.menu a {
+  display: block;
+  margin-bottom: 8px;
+  text-decoration: none;
+}
+.menu a:hover {
+  font-weight: bolder;
+}
+.menu a.active {
+  font-weight: bold;
+}
+
+/*selectio styles*/
+#selectio-container {
+
+}
+
+.ngs {
+  width: 200px;
+}
+
+
+h1 {
+  padding: 25px 0 5px;
+  font-family: "Roboto Condensed", "Roboto", sans-serif;
+  font-weight: bolder;
+  font-size: 20px;
+  margin-left: 0;
+}
+
+table {
+  border-spacing: 1px;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 6px;
+  overflow: hidden;
+  max-width: 800px;
+  width: 100%;
+  position: relative;
+}
+table * {
+  position: relative;
+}
+table td, table th {
+  padding-left: 8px;
+}
+table thead tr {
+  height: 60px;
+  background: #FFED86;
+  font-size: 16px;
+}
+table tbody tr {
+  height: 48px;
+  border-bottom: 1px solid #E3F1D5;
+}
+table tbody tr:last-child {
+  border: 0;
+}
+table td, table th {
+  text-align: left;
+}
+
+@media screen and (max-width: 35.5em) {
+  table {
+    display: block;
+  }
+  table > *, table tr, table td, table th {
+    display: block;
+  }
+  table thead {
+    display: none;
+  }
+  table tbody tr {
+    height: auto;
+    padding: 8px 0;
+  }
+  table tbody tr td {
+    padding-left: 45%;
+    margin-bottom: 12px;
+  }
+  table tbody tr td:last-child {
+    margin-bottom: 0;
+  }
+  table tbody tr td:before {
+    position: absolute;
+    font-weight: 700;
+    width: 40%;
+    left: 10px;
+    top: 0;
+  }
+  table tbody tr td:nth-child(1):before {
+    content: "Code";
+  }
+  table tbody tr td:nth-child(2):before {
+    content: "Stock";
+  }
+  table tbody tr td:nth-child(3):before {
+    content: "Cap";
+  }
+  table tbody tr td:nth-child(4):before {
+    content: "Inch";
+  }
+  table tbody tr td:nth-child(5):before {
+    content: "Box Type";
+  }
+}

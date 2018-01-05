@@ -23,7 +23,8 @@ import {TextWidthService} from './text-width.service';
   providers: [TextWidthService],
   exports: [
     ReactiveFormsModule,
-    NgSelectioComponent
+    NgSelectioComponent,
+    SearchComponent
   ]
 })
 export class NgSelectioModule {

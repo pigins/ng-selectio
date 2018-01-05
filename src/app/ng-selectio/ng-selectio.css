@@ -35,7 +35,6 @@
 
 .ngs .dropdown-wrapper .dropdown {
   margin-top: 0;
-  min-height: 150px;
 }
 .ngs .dropdown-wrapper .dropdown > div {
   background-color: white;
@@ -151,18 +150,4 @@
 .ngs .single-item {
   display: inline-block;
   width: calc(100% - 35px);
-}
-
-
-
-
-.flag-wrapper {
-  display: inline-block;
-  vertical-align: middle;
-}
-.flag-wrapper svg {
-  border: 1px solid #dedede;
-}
-#country-iso-name {
-  max-height: 20px;
 }

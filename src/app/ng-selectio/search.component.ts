@@ -103,4 +103,8 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   public getValue() {
     return this.textInput.value;
   }
+
+  public getTextInput(): FormControl {
+    return this.textInput;
+  }
 }

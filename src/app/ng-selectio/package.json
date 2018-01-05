@@ -1,6 +1,6 @@
 {
   "name": "ng-selectio",
-  "version": "1.0.0-beta.8",
+  "version": "1.0.0-beta.9",
   "description": "Full-featured select component for angular 2/4/5.",
   "main": "index.js",
   "scripts": {
