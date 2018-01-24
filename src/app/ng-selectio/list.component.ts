@@ -153,6 +153,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
   }
+
   insideSelection(item: Item): boolean {
     for (let i = 0; i < this.selection.length; i++) {
       if (item === this.selection[i]) {
@@ -161,6 +162,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     }
     return false;
   }
+
   hasScroll(): boolean {
     const ul = this.ul.nativeElement;
     return ul.scrollHeight > ul.clientHeight;

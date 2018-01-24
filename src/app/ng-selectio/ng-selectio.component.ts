@@ -35,7 +35,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   ],
   template: `
 
-    <div class="ngs" #ngs [attr.tabindex]="tabIndex" [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
+    <div class="ngs" #ngs 
+         [attr.tabindex]="tabIndex"
+         [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
          (focus)="onNgsFocus($event)"
          (blur)="onNgsBlur($event)"
          (keydown)="onKeyPress($event)"
@@ -182,6 +184,8 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   private expandedChanged = new EventEmitter<boolean>();
   private changed: Array<(value: Item[]) => void> = [];
   private touched: Array<() => void> = [];
+  private clickInside: boolean = false;
+  private searchFocus: boolean = false;
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
@@ -245,6 +249,18 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   ngOnInit(): void {
+    window.addEventListener('mousedown', (e)=> {
+      let clickInside = NgSelectioComponent.isDescendant(this.ngs.nativeElement, e.target);
+      if (!clickInside) {
+
+      } else {
+        this.clickInside = true;
+        setTimeout(()=> {
+          this.clickInside = false;
+        }, 10);
+      }
+    });
+
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this.searchComponent) {
@@ -313,26 +329,43 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
 
   onSearchFocus($event: Event): void {
     this.focus = true;
+    this.searchFocus = true;
+    setTimeout(()=> {
+      this.searchFocus = false;
+    }, 10)
   }
 
   onNgsBlur($event: Event) :void {
-    const e = (<any>$event);
-    if (this.searchComponent && e.relatedTarget === this.searchComponent.getNativeElement()) {
-      /*NOPE*/
-    } else if (this.expanded) {
-      this.expandedChanged.emit(false);
+    if (!this.search) {
+      if (this.expanded) {
+        this.expandedChanged.emit(false);
+      }
+      this.focus = false;
+    } else {
+      setTimeout(()=> {
+        if (this.clickInside) {
+          this.searchComponent.focus();
+        }
+        else  if (this.searchFocus) {
+          /*NOPE*/
+        } else if (this.expanded) {
+          this.expandedChanged.emit(false);
+          this.focus = false;
+        }
+      }, 5);
     }
-    this.focus = false;
   }
 
   onSearchBlur($event: Event): void {
-    const e = (<any>$event);
-    if (e.relatedTarget === this.ngs.nativeElement) {
-      /*NOPE*/
-    } else if (this.expanded) {
-      this.expandedChanged.emit(false);
-    }
-    this.focus = false;
+    setTimeout(()=> {
+      if (this.clickInside) {
+        this.ngs.nativeElement.focus();
+        /*NOPE*/
+      } else if (this.expanded) {
+        this.expandedChanged.emit(false);
+        this.focus = false;
+      }
+    }, 5);
   }
 
   onKeyPress(event: KeyboardEvent) {
@@ -395,4 +428,15 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     return this.data;
   }
 
+
+  public static isDescendant(parent, child) {
+    let node = child.parentNode;
+    while (node != null) {
+      if (node == parent) {
+        return true;
+      }
+      node = node.parentNode;
+    }
+    return false;
+  }
 }
