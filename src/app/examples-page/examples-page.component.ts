@@ -124,6 +124,7 @@ export class ExamplesPageComponent {
     });
   }
 
+  // IE 9 BUG https://github.com/angular/angular-cli/issues/6110
   onSearch(term: string) {
     if (term === '') {
       this.$users = Observable.of([]);

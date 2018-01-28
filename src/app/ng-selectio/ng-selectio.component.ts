@@ -39,8 +39,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
          [attr.tabindex]="tabIndex"
          [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
          (focus)="onNgsFocus($event)"
-         (blur)="onNgsBlur($event)"
          (keydown)="onKeyPress($event)"
+         (keydown.tab)="onTab($event)"
+         (clickOutside)="onClickOutside()"
     >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
@@ -49,7 +50,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                      [highlightedItem]="highlightedItem"
                      [itemRenderer]="selectionItemRenderer"
                      [clearRenderer]="selectionClearRenderer"
-                     [emptyRenderer]="autocomplete ? null : selectionEmptyRenderer"
+                     [emptyRenderer]="autocomplete ? '' : selectionEmptyRenderer"
                      [selectionMode]="selectionMode"
                      [showArrow]="!autocomplete"
                      [arrowDirection]="openUp ? !expanded : expanded"
@@ -68,7 +69,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               [searchMinLength]="searchMinLength"
                               [tabIndex]="tabIndex"
                               (onSearchFocus)="onSearchFocus($event)"
-                              (onSearchBlur)="onSearchBlur($event)"
                               (onSearchKeyDown)="onTextInputKeyDown($event)"
                               (onSearchValueChanges)="onSearchValueChanges($event)"
           ></search>
@@ -85,7 +85,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         [searchMinLength]="searchMinLength"
                         [tabIndex]="tabIndex"
                         (onSearchFocus)="onSearchFocus($event)"
-                        (onSearchBlur)="onSearchBlur($event)"
                         (onSearchKeyDown)="onTextInputKeyDown($event)"
                         (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></search>
@@ -249,18 +248,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   ngOnInit(): void {
-    window.addEventListener('mousedown', (e)=> {
-      let clickInside = NgSelectioComponent.isDescendant(this.ngs.nativeElement, e.target);
-      if (!clickInside) {
-
-      } else {
-        this.clickInside = true;
-        setTimeout(()=> {
-          this.clickInside = false;
-        }, 10);
-      }
-    });
-
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this.searchComponent) {
@@ -329,43 +316,20 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
 
   onSearchFocus($event: Event): void {
     this.focus = true;
-    this.searchFocus = true;
-    setTimeout(()=> {
-      this.searchFocus = false;
-    }, 10)
   }
 
-  onNgsBlur($event: Event) :void {
-    if (!this.search) {
-      if (this.expanded) {
-        this.expandedChanged.emit(false);
-      }
-      this.focus = false;
-    } else {
-      setTimeout(()=> {
-        if (this.clickInside) {
-          this.searchComponent.focus();
-        }
-        else  if (this.searchFocus) {
-          /*NOPE*/
-        } else if (this.expanded) {
-          this.expandedChanged.emit(false);
-          this.focus = false;
-        }
-      }, 5);
+  onTab() {
+    if (this.expanded) {
+      this.expandedChanged.emit(false);
     }
+    this.focus = false;
   }
 
-  onSearchBlur($event: Event): void {
-    setTimeout(()=> {
-      if (this.clickInside) {
-        this.ngs.nativeElement.focus();
-        /*NOPE*/
-      } else if (this.expanded) {
-        this.expandedChanged.emit(false);
-        this.focus = false;
-      }
-    }, 5);
+  onClickOutside() {
+    if (this.expanded) {
+      this.expandedChanged.emit(false);
+    }
+    this.focus = false;
   }
 
   onKeyPress(event: KeyboardEvent) {
@@ -426,17 +390,5 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
 
   public getData(): Item[] {
     return this.data;
-  }
-
-
-  public static isDescendant(parent, child) {
-    let node = child.parentNode;
-    while (node != null) {
-      if (node == parent) {
-        return true;
-      }
-      node = node.parentNode;
-    }
-    return false;
   }
 }

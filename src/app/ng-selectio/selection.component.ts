@@ -15,44 +15,46 @@ import {SelectionMode} from './types';
         <span [innerHtml]="emptyRenderer | template"></span>
       </div>
       
-      <div *ngIf="singleMode() && !deletable" class="single">
-        <div
-          [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}"
-          [innerHtml]="itemRenderer | template:items[0]">
+      <ng-container *ngIf="items.length >= 1">
+        <div *ngIf="singleMode() && !deletable" class="single">
+          <div
+            [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}"
+            [innerHtml]="itemRenderer | template:items[0]">
+          </div>
         </div>
-      </div>
-      
-      <div *ngIf="singleMode() && deletable && items.length === 1" class="single deletable">
-        <div [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}">
-          <span [innerHtml]="itemRenderer | template:items[0]" class="single-item"></span>
-          <span class="clear" 
-                (click)="onDeleteClick($event, items[0])"
+
+        <div *ngIf="singleMode() && deletable" class="single deletable">
+          <div [ngClass]="{'single': true, 'selected': highlightedItem === items[0]}">
+            <span [innerHtml]="itemRenderer | template:items[0]" class="single-item"></span>
+            <span class="clear"
+                  (click)="onDeleteClick($event, items[0])"
+                  [innerHtml]="clearRenderer | template"
+            ></span>
+          </div>
+        </div>
+
+        <div *ngIf="multipleMode() && !deletable" class="multiple">
+          <div *ngFor="let item of items;"
+               [ngStyle]="{'display': 'inline-block'}"
+               [ngClass]="{'selected': highlightedItem === item}"
+               [innerHtml]="itemRenderer | template:item"
+               (click)="highlight(item)">
+          </div>
+        </div>
+
+        <div *ngIf="multipleMode() && deletable" class="multiple deletable">
+          <div *ngFor="let item of items"
+               [ngStyle]="{'display': 'inline-block'}"
+               [ngClass]="{'selected': highlightedItem === item}"
+               (click)="highlight(item)">
+          <span class="clear"
+                (click)="onDeleteClick($event, item)"
                 [innerHtml]="clearRenderer | template"
           ></span>
+            <span [innerHtml]="itemRenderer | template:item"></span>
+          </div>
         </div>
-      </div>
-      
-      <div *ngIf="multipleMode() && !deletable" class="multiple">
-        <div *ngFor="let item of items;" 
-             [ngStyle]="{'display': 'inline-block'}"
-             [ngClass]="{'selected': highlightedItem === item}"
-             [innerHtml]="itemRenderer | template:item"
-             (click)="highlight(item)">
-        </div>
-      </div>
-      
-      <div *ngIf="multipleMode() && deletable" class="multiple deletable">
-        <div *ngFor="let item of items" 
-             [ngStyle]="{'display': 'inline-block'}"
-             [ngClass]="{'selected': highlightedItem === item}"
-             (click)="highlight(item)">
-          <span class="clear" 
-                (click)="onDeleteClick($event, item)" 
-                [innerHtml]="clearRenderer | template"
-          ></span>
-          <span [innerHtml]="itemRenderer | template:item"></span>
-        </div>
-      </div>
+      </ng-container>
       
       <span *ngIf="showArrow" [ngClass]="{'arrow': true, 'up-arrow': arrowDirection}"></span>
       

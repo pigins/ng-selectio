@@ -7,6 +7,7 @@ import {SearchComponent} from './search.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {TextWidthService} from './text-width.service';
+import {ClickOutsideDirective} from './click-outside.directive';
 
 @NgModule({
   declarations: [
@@ -14,7 +15,8 @@ import {TextWidthService} from './text-width.service';
     SelectionComponent,
     ListComponent,
     TemplatePipe,
-    SearchComponent
+    SearchComponent,
+    ClickOutsideDirective
   ],
   imports: [
     CommonModule,
