@@ -1,7 +1,7 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
+  Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
   ViewChild
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
@@ -34,7 +34,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgSelectioComponent), multi: true}
   ],
   template: `
-
+    
+    
+    
     <div class="ngs" #ngs 
          [attr.tabindex]="tabIndex"
          [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
@@ -95,17 +97,15 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                       [loadingMoreResults]="loadingMoreResults"
                       [searching]="searching"
                       [maxHeight]="dropdownMaxHeight"
-                      [itemRenderer]="dropdownItemRenderer"
                       [disabledItemMapper]="dropdownDisabledItemMapper"
-                      [emptyRenderer]="dropdownEmptyRenderer"
-                      [paginationMessageRenderer]="dropdownPaginationMessageRenderer"
-                      [paginationButtonRenderer]="dropdownPaginationButtonRenderer"
-                      [searchingRenderer]="dropdownSearchingRenderer"
                       [keyEvents]="keyEvents"
                       [pagination]="pagination"
                       [disabled]="disabled"
                       [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                       [trackByFn]="trackByFn"
+                      [itemTemplate]="listItemTemplate"
+                      [lastLiTemplate]="listLastLiTemplate"
+                      [afterUlTemplate]="listAfterUlTemplate"
                       (onSelectItem)="selectItem($event)"
                       (onNextPage)="onNextPageStart()"
                 >
@@ -151,13 +151,14 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       return JSON.stringify(item);
     }
   };
-  @Input() dropdownItemRenderer: Template<(item: Item, disabled: boolean) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() dropdownMaxHeight: string = '150px';
   @Input() searchPlaceholder: string = '';
-  @Input() dropdownEmptyRenderer: Template<() => string> = 'Enter 1 or more characters';
-  @Input() dropdownPaginationMessageRenderer: Template<() => string> = 'Loading more results...';
-  @Input() dropdownPaginationButtonRenderer: Template<() => string> = 'Get more...';
-  @Input() dropdownSearchingRenderer: Template<() => string> = 'Searching...';
+
+
+  // Templates
+  @Input() listItemTemplate: TemplateRef<any>;
+  @Input() listLastLiTemplate: TemplateRef<any>;
+  @Input() listAfterUlTemplate: TemplateRef<any>;
   @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
   @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
   @Input() selectionClearRenderer: Template<() => string> = '&#10005';

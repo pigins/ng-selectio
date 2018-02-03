@@ -1,5 +1,5 @@
 import {
-  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges,
+  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges, TemplateRef,
   ViewChild, ViewChildren, ViewEncapsulation
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
@@ -12,32 +12,40 @@ import {Subscription} from 'rxjs/Subscription';
   selector: 'list',
   encapsulation: ViewEncapsulation.None,
   template: `
+    
+    <ng-template #defaultItemTemplate let-item="item" let-disabled="disabled">
+      <span>{{defaultItemRenderer(item)}}</span>
+    </ng-template>
+    
+    <ng-template #defaultLastLiTemplate let-data="data" let-pagination="pagination" let-loadingMoreResults="loadingMoreResults" let-searching="searching">
+      <li *ngIf="(data.length === 0)">Enter 1 or more characters</li>
+      <li *ngIf="pagination && loadingMoreResults">Loading more results...</li>
+      <li *ngIf="searching">Searching...</li>
+    </ng-template>
+
+    <ng-template #defaultAfterUlTemplate let-data="data" let-pagination="pagination" let-hasScroll="hasScroll">
+      <span *ngIf="pagination && data.length > 0 && !hasScroll"
+            (mousedown)="onPaginationClick($event)">
+        Get more...
+      </span>
+    </ng-template>
+    
     <ul #ul
         [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto'}"
         (scroll)="onUlScroll($event)" >
       <li #itemList
           *ngFor="let dataItem of data; trackBy: trackByFn" 
           [ngClass]="{'active': !disabledItemMapper(dataItem) && dataItem === activeListItem, 'selected': insideSelection(dataItem), 'disabled': disabledItemMapper(dataItem)}"
-          [innerHtml]="itemRenderer | template:dataItem:disabledItemMapper(dataItem)"
           (mouseenter)="activeListItem = dataItem"
-          (click)="onClickItem(dataItem)"
-      >
+          (click)="onClickItem(dataItem)">
+        <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
+        context:{item:dataItem, disabled: disabledItemMapper(dataItem)}"></ng-container>
       </li>
-      <li *ngIf="(data.length === 0)"
-          [innerHtml]="emptyRenderer | template">
-      </li>
-      <li *ngIf="pagination && loadingMoreResults"
-          [innerHtml]="paginationMessageRenderer | template">
-      </li>
-      <li *ngIf="searching"
-          [innerHtml]="searchingRenderer | template">
-      </li>
+      <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
+      context:{data: data, pagination: pagination, loadingMoreResults: loadingMoreResults, searching: searching}"></ng-container>
     </ul>
-    <span *ngIf="pagination && data.length > 0 && !this.hasScroll()"
-          [innerHtml]="paginationButtonRenderer | template"
-          (mousedown)="onPaginationClick($event)" 
-    >
-    </span>
+    <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
+    context:{data: data, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
@@ -50,19 +58,20 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() trackByFn: (index: number, item: Item) => any;
   @Input() maxHeight: string;
   @Input() maxItemsCount: number;
-  @Input() itemRenderer: Template<(countryItem: Item, disabled: boolean) => string>;
-  @Input() emptyRenderer: Template<() => string>;
-  @Input() paginationMessageRenderer: Template<() => string>;
-  @Input() paginationButtonRenderer: Template<() => string>;
-  @Input() searchingRenderer: Template<() => string>;
   @Input() disabledItemMapper: (item: Item) => boolean;
   @Input() scrollToSelectionAfterOpen: boolean;
   @Input() expanded: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
   @Input() disabled: boolean;
+  @Input() itemTemplate: TemplateRef<any>;
+  @Input() lastLiTemplate: TemplateRef<any>;
+  @Input() afterUlTemplate: TemplateRef<any>;
+
 
   @Output() onNextPage = new EventEmitter<void>();
   @Output() onSelectItem = new EventEmitter<Item>();
+
+
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList') itemList: QueryList<ElementRef>;
@@ -168,6 +177,16 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     return ul.scrollHeight > ul.clientHeight;
   }
 
+  defaultItemRenderer = (item: Item) => {
+    if (typeof item === 'string') {
+      return item;
+    } else if (typeof item === 'number') {
+      return item + '';
+    } else {
+      return JSON.stringify(item);
+    }
+  };
+
   public scrollToSelection(): void {
     const selectionList = this.itemList.filter((li: ElementRef) => {
       return li.nativeElement.classList.contains('selected');
@@ -209,4 +228,5 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   private getLiTopPosition(li: ElementRef): number {
     return li.nativeElement.offsetTop;
   }
+
 }

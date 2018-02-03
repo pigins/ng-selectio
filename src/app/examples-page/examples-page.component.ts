@@ -15,13 +15,11 @@ import {Item} from '../ng-selectio/types';
       <ng-selectio
         [$data]="$stringArray"
         [selectionEmptyRenderer]="selectioRenderer"
-        [dropdownDisabledItemMapper]="disabledItem"
         [allowClear]="true"
       ></ng-selectio>
       <h2>Simple select array of objects</h2>
       <ng-selectio
         [$data]="$objectArray"
-        [dropdownItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
         [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
         [selectionDefaultMapper]="selectionDefaultMapper"
       ></ng-selectio>
@@ -43,7 +41,6 @@ import {Item} from '../ng-selectio/types';
       <ng-selectio
         [$data]="$users"
         [$appendData]="$appendUsers"
-        [dropdownItemRenderer]="renderItem"
         [selectionItemRenderer]="renderItem"
         [selectionEmptyRenderer]="selectioRenderer"
         [selectionDefault]="this.dataService.exampleRandomUsers"
