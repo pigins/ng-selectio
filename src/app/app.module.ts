@@ -13,6 +13,7 @@ import {SelectInputComponent} from './docs-page/select-input.component';
 import {CheckboxInputComponent} from './docs-page/checkbox-input.component';
 import {FormsModule} from '@angular/forms';
 import {TextInputComponent} from './docs-page/text-input.component';
+import {SafeHtmlPipe} from './safeHtml.pipe';
 
 
 @NgModule({
@@ -23,6 +24,7 @@ import {TextInputComponent} from './docs-page/text-input.component';
     NumberInputComponent,
     SelectInputComponent,
     TextInputComponent,
+    SafeHtmlPipe,
     CheckboxInputComponent
   ],
   imports: [

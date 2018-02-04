@@ -28,11 +28,8 @@
                    [clearSearchAfterCollapse]="clearSearchAfterCollapse"
                    [openUp]="openUp"
                    [dropdownDisabledItemMapper]="dropdownDisabledItemMapper"
-                   [selectionItemRenderer]="selectionItemRenderer"
                    [searchPlaceholder]="searchPlaceholder"
                    [dropdownMaxHeight]="dropdownMaxHeight"
-                   [selectionEmptyRenderer]="selectionEmptyRenderer"
-                   [selectionClearRenderer]="selectionClearRenderer"
                    [tabIndex]="tabIndex"
                    [trackByFn]="trackByFn"
                    (onSearch)="onSearch($event)"
@@ -339,36 +336,6 @@
       <td colspan="6">View</td>
     </tr>
 
-    <tr>
-      <td>dropdownEmptyRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: dropdownEmptyRenderer_default}, {label: 'null', value: null}, {label: 'user', value: dropdownEmptyRenderer_empty}]"
-          [(ngModel)]="dropdownEmptyRenderer">
-        </app-select-input>
-      </td>
-      <td>Renderer for empty dropdown content</td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td>Enter 1 or more characters</td>
-    </tr>
-
-    <tr>
-      <td>dropdownItemRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
-          [(ngModel)]=dropdownItemRenderer>
-        </app-select-input>
-      </td>
-      <td>Renderer for item in dropdown</td>
-      <td>Template<(item: Item, disabled: boolean) => string></td>
-      <td></td>
-      <td>
-        <span (click)="showDropdownItemRendererDefault = !showDropdownItemRendererDefault">defaultItemRenderer</span>
-        <pre *ngIf="showDropdownItemRendererDefault"><code [innerHTML]="defaultItemRendererString"></code></pre>
-      </td>
-    </tr>
 
     <tr>
       <td>dropdownMaxHeight</td>
@@ -384,48 +351,6 @@
     </tr>
 
     <tr>
-      <td>dropdownPaginationMessageRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: dropdownPaginationMessageRenderer_default}, {label: 'null', value: null}]"
-          [(ngModel)]="dropdownPaginationMessageRenderer">
-        </app-select-input>
-      </td>
-      <td></td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td>{{dropdownPaginationMessageRenderer_default}}</td>
-    </tr>
-
-    <tr>
-      <td>dropdownPaginationButtonRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: dropdownPaginationButtonRenderer_default}, {label: 'null', value: null}]"
-          [(ngModel)]="dropdownPaginationButtonRenderer">
-        </app-select-input>
-      </td>
-      <td>dropdownPaginationButtonRenderer</td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td>{{dropdownPaginationButtonRenderer_default}}</td>
-    </tr>
-
-    <tr>
-      <td>dropdownSearchingRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: dropdownSearchingRenderer_default}, {label: 'null', value: null}]"
-          [(ngModel)]="dropdownSearchingRenderer">
-        </app-select-input>
-      </td>
-      <td>dropdownSearchingRenderer</td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td>{{dropdownSearchingRenderer_default}}</td>
-    </tr>
-
-    <tr>
       <td>searchPlaceholder</td>
       <td>
         <app-text-input
@@ -436,51 +361,6 @@
       <td>string</td>
       <td></td>
       <td>''</td>
-    </tr>
-
-    <tr>
-      <td>selectionClearRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: selectionClearRenderer_default}, {label: 'X', value: 'X'}]"
-          [(ngModel)]="selectionClearRenderer">
-        </app-select-input>
-      </td>
-      <td>selectionClearRenderer</td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td [innerHtml]="selectionClearRenderer_default"></td>
-    </tr>
-
-    <tr>
-      <td>selectionEmptyRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: selectionEmptyRenderer_default}, {label: 'null', value: null}]"
-          [(ngModel)]="selectionEmptyRenderer">
-        </app-select-input>
-      </td>
-      <td>selectionEmptyRenderer</td>
-      <td>Template<() => string></td>
-      <td></td>
-      <td [innerHtml]="selectionEmptyRenderer_default"></td>
-    </tr>
-
-    <tr>
-      <td>selectionItemRenderer</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'default', value: itemRenderer_default}, {label: 'country', value: itemRenderer_renderCountry}, {label: 'user', value: itemRenderer_renderUser}]"
-          [(ngModel)]="selectionItemRenderer">
-        </app-select-input>
-      </td>
-      <td>selectionItemRenderer</td>
-      <td>Template<(item: Item, disabled: boolean) => string></td>
-      <td></td>
-      <td>
-        <span (click)="showSelectionItemRendererDefault = !showSelectionItemRendererDefault">defaultItemRenderer</span>
-        <pre *ngIf="showSelectionItemRendererDefault"><code [innerHTML]="defaultItemRendererString"></code></pre>
-      </td>
     </tr>
 
     </tbody>

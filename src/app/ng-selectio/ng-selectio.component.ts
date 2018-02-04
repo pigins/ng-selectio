@@ -11,7 +11,6 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
 import {ListComponent} from './list.component';
-import {Template} from './types';
 import {Item} from './types';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -34,15 +33,12 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgSelectioComponent), multi: true}
   ],
   template: `
-    
-    
-    
     <div class="ngs" #ngs 
          [attr.tabindex]="tabIndex"
          [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
          (focus)="onNgsFocus($event)"
          (keydown)="onKeyPress($event)"
-         (keydown.tab)="onTab($event)"
+         (keydown.tab)="onTab()"
          (clickOutside)="onClickOutside()"
     >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
@@ -50,9 +46,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                      [items]="selection"
                      [highlightedItem]="highlightedItem"
-                     [itemRenderer]="selectionItemRenderer"
-                     [clearRenderer]="selectionClearRenderer"
-                     [emptyRenderer]="autocomplete ? '' : selectionEmptyRenderer"
+                     [itemTemplate]="selectionItemTemplate"
+                     [clearTemplate]="selectionClearTemplate"
+                     [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate"
                      [selectionMode]="selectionMode"
                      [showArrow]="!autocomplete"
                      [arrowDirection]="openUp ? !expanded : expanded"
@@ -141,27 +137,16 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
   @Input() clearSearchAfterCollapse: boolean = true;
-
-  static defaultItemRenderer = (item: Item) => {
-    if (typeof item === 'string') {
-      return item;
-    } else if (typeof item === 'number') {
-      return item + '';
-    } else {
-      return JSON.stringify(item);
-    }
-  };
   @Input() dropdownMaxHeight: string = '150px';
   @Input() searchPlaceholder: string = '';
-
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
   @Input() listLastLiTemplate: TemplateRef<any>;
   @Input() listAfterUlTemplate: TemplateRef<any>;
-  @Input() selectionItemRenderer: Template<(item: Item) => string> = NgSelectioComponent.defaultItemRenderer;
-  @Input() selectionEmptyRenderer: Template<() => string> = 'No data';
-  @Input() selectionClearRenderer: Template<() => string> = '&#10005';
+  @Input() selectionItemTemplate: TemplateRef<any>;
+  @Input() selectionEmptyTemplate: TemplateRef<any>;
+  @Input() selectionClearTemplate: TemplateRef<any>;
 
   @Output() onSearch = new EventEmitter<string>();
   @Output() onNextPage = new EventEmitter<{ currentLength: number, search: string }>();

@@ -5,10 +5,9 @@ import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from '../ng-selectio/types';
-import {Template} from '../ng-selectio/types';
 import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-selectio.component';
 import {SelectionMode} from '../ng-selectio/types';
-import {ActivatedRoute, NavigationEnd, Router} from '@angular/router';
+import {NavigationEnd, Router} from '@angular/router';
 
 @Component({
   selector: 'app-docs-page',
@@ -45,25 +44,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   trackByFn_byIndex(index: number, item: Item): any {
     return index;
   }
-  itemRenderer_default(item: any): string {
-    return NgSelectioComponent.defaultItemRenderer(item);
-  }
-  itemRenderer_renderUser(item: any): string {
-    return item.name.first;
-  }
-  itemRenderer_renderCountry(countryItem: any): string {
-    return `<div id="country-iso-name" class=${countryItem.isoName}>
-               <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
-               <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
-           </div>`;
-  }
-  dropdownEmptyRenderer_default = 'Enter 1 or more characters';
-  dropdownEmptyRenderer_empty = 'select...';
-  dropdownPaginationMessageRenderer_default = 'Loading more results...';
-  dropdownPaginationButtonRenderer_default = 'Get more...';
-  dropdownSearchingRenderer_default = 'Searching...';
-  selectionEmptyRenderer_default = 'No data';
-  selectionClearRenderer_default = '&#10005';
 
   $data: Observable<Item[]> = this.dataService.countriesData;
   $appendData: Observable<Item[]> = Observable.of([]);
@@ -89,17 +69,9 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   openUp: boolean = false;
   scrollToSelectionAfterOpen: boolean = true;
   clearSearchAfterCollapse: boolean = true;
-
-  dropdownItemRenderer: Template<(item: Item, disabled: boolean) => string> = this.itemRenderer_default;
-  selectionItemRenderer: Template<(item: Item) => string> = this.itemRenderer_default;
   dropdownMaxHeight: string = '150px';
   searchPlaceholder: string = '';
-  dropdownEmptyRenderer: Template<() => string> = this.dropdownEmptyRenderer_default;
-  dropdownPaginationMessageRenderer: Template<() => string> = this.dropdownPaginationMessageRenderer_default;
-  dropdownPaginationButtonRenderer: Template<() => string> = this.dropdownPaginationButtonRenderer_default;
-  dropdownSearchingRenderer: Template<() => string> = this.dropdownSearchingRenderer_default;
-  selectionEmptyRenderer: Template<() => string> = this.selectionEmptyRenderer_default;
-  selectionClearRenderer: Template<() => string> = this.selectionClearRenderer_default;
+
 
   showSelectio = true;
 

@@ -4,7 +4,6 @@ import {
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
-import {Template} from './types';
 import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
 
@@ -14,7 +13,7 @@ import {Subscription} from 'rxjs/Subscription';
   template: `
     
     <ng-template #defaultItemTemplate let-item="item" let-disabled="disabled">
-      <span>{{defaultItemRenderer(item)}}</span>
+      <span>{{item | defaultItem}}</span>
     </ng-template>
     
     <ng-template #defaultLastLiTemplate let-data="data" let-pagination="pagination" let-loadingMoreResults="loadingMoreResults" let-searching="searching">
@@ -176,16 +175,6 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     const ul = this.ul.nativeElement;
     return ul.scrollHeight > ul.clientHeight;
   }
-
-  defaultItemRenderer = (item: Item) => {
-    if (typeof item === 'string') {
-      return item;
-    } else if (typeof item === 'number') {
-      return item + '';
-    } else {
-      return JSON.stringify(item);
-    }
-  };
 
   public scrollToSelection(): void {
     const selectionList = this.itemList.filter((li: ElementRef) => {

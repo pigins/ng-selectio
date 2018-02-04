@@ -10,28 +10,46 @@ import {Item} from '../ng-selectio/types';
   selector: 'app-examples-page',
   encapsulation: ViewEncapsulation.None,
   template: `
+    <ng-template #selectioTemplate>
+      Selectio...
+    </ng-template>
+    
+    <ng-template #countryTemplate let-countryItem="item">
+      <div id="country-iso-name">
+        <div class="flag-wrapper"><div class="icon-flag" [innerHtml]="countryItem.svgFlag | safeHtml"></div></div>
+        <span class="country-name">{{countryItem.name + '(' + countryItem.code + ')'}}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #personTemplate let-item="item">
+      {{item.name.first}}
+    </ng-template>
+    
     <div id="examples-cont">
       <h2>Simple select array of strings</h2>
       <ng-selectio
+        [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$stringArray"
-        [selectionEmptyRenderer]="selectioRenderer"
         [allowClear]="true"
       ></ng-selectio>
       <h2>Simple select array of objects</h2>
       <ng-selectio
+        [selectionEmptyTemplate]="selectioTemplate"
+        [selectionItemTemplate]="countryTemplate"
+        [listItemTemplate]="countryTemplate"
         [$data]="$objectArray"
-        [selectionItemRenderer]="{template:renderCountry, bypassSecurityTrustHtml:true}"
         [selectionDefaultMapper]="selectionDefaultMapper"
       ></ng-selectio>
       <h2>Simple select array of strings with search</h2>
       <ng-selectio
+        [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$stringArray"
-        [selectionEmptyRenderer]="selectioRenderer"
         [search]="true"
         (onSearch)="onSearchString($event)"
       ></ng-selectio>
       <h2>Simple select array of strings with search and autocomplete</h2>
       <ng-selectio
+        [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$stringArray"
         [search]="true"
         [autocomplete]="true"
@@ -39,10 +57,11 @@ import {Item} from '../ng-selectio/types';
       ></ng-selectio>
       <h2>Remote data select with search and pagination</h2>
       <ng-selectio
+        [selectionItemTemplate]="personTemplate"
+        [listItemTemplate]="personTemplate"
+        [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$users"
         [$appendData]="$appendUsers"
-        [selectionItemRenderer]="renderItem"
-        [selectionEmptyRenderer]="selectioRenderer"
         [selectionDefault]="this.dataService.exampleRandomUsers"
         [selectionMode]="'multiple'"
         [search]="true"
@@ -55,11 +74,12 @@ import {Item} from '../ng-selectio/types';
 
       <h2>ngmodel</h2>
       <div>
-        <ng-selectio [(ngModel)]="itemArray"
-                     [$data]="$stringArray"
-                     [selectionEmptyRenderer]="selectioRenderer"
-                     [dropdownDisabledItemMapper]="disabledItem"
-                     [allowClear]="true"
+        <ng-selectio
+          [selectionEmptyTemplate]="selectioTemplate"
+          [(ngModel)]="itemArray"
+          [$data]="$stringArray"
+          [dropdownDisabledItemMapper]="disabledItem"
+          [allowClear]="true"
         >
         </ng-selectio>
         <div class="selected-item">{{itemArray}}</div>
@@ -140,22 +160,7 @@ export class ExamplesPageComponent {
     return item === 'canada';
   }
 
-  renderItem(item: any) {
-    return item.name.first;
-  }
-
   selectionDefaultMapper(items: any[]): any[] {
     return [items[0]];
-  }
-
-  renderCountry(countryItem: any): string {
-    return `<div id="country-iso-name" class=${countryItem.isoName}>
-               <div class="flag-wrapper"><div class="icon-flag">${countryItem.svgFlag}</div></div>
-               <span class="country-name">${countryItem.name + ' (+' + countryItem.code + ')'}</span>
-           </div>`;
-  }
-
-  selectioRenderer() {
-    return 'Selectio...';
   }
 }
