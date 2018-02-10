@@ -169,8 +169,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   private expandedChanged = new EventEmitter<boolean>();
   private changed: Array<(value: Item[]) => void> = [];
   private touched: Array<() => void> = [];
-  private clickInside: boolean = false;
-  private searchFocus: boolean = false;
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }

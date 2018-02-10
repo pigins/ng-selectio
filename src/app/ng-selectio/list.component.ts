@@ -1,6 +1,6 @@
 import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges, TemplateRef,
-  ViewChild, ViewChildren, ViewEncapsulation
+  ViewChild, ViewChildren
 } from '@angular/core';
 import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
@@ -9,7 +9,6 @@ import {Subscription} from 'rxjs/Subscription';
 
 @Component({
   selector: 'list',
-  encapsulation: ViewEncapsulation.None,
   template: `
     
     <ng-template #defaultItemTemplate let-item="item" let-disabled="disabled">
@@ -66,11 +65,8 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() lastLiTemplate: TemplateRef<any>;
   @Input() afterUlTemplate: TemplateRef<any>;
 
-
   @Output() onNextPage = new EventEmitter<void>();
   @Output() onSelectItem = new EventEmitter<Item>();
-
-
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList') itemList: QueryList<ElementRef>;
