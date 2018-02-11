@@ -6,6 +6,12 @@ import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
 import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
+import {Source} from './model/source';
+import {SourceFactory} from './model/source';
+
+export enum SourceType {
+  TREE = "tree", ARRAY = "array"
+}
 
 @Component({
   selector: 'list',
@@ -55,6 +61,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() trackByFn: (index: number, item: Item) => any;
   @Input() maxHeight: string;
   @Input() disabledItemMapper: (item: Item) => boolean;
+  @Input() sourceType: SourceType;
 
   // external context
   @Input() selection: Item[];
@@ -76,7 +83,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   activeListItem: Item;
   enabledData: Item[]; // дубликать надо убрать
-  data: Item[] = [];
+  data: Source;
   keyEventsSubscription: Subscription;
   updatingData: boolean;
   appendingData: boolean;
@@ -87,20 +94,21 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.$data && changes.$data.currentValue) {
       this.updatingData = true;
-      this.$data.take(1).subscribe((data) => {
-        this.data = data;
+      this.$data.take(1).subscribe((data: Item[]) => {
+        this.data = SourceFactory.getInstance(this.sourceType, data);
         this.enabledData = data.filter((dataElem: Item) => {
           return !this.disabledItemMapper(dataElem);
         });
-        this.onChangeData.emit(this.data);
+        this.onChangeData.emit(this.data.getDataItems());
         this.updatingData = false;
       });
     }
     if (changes.$appendData && changes.$appendData.currentValue) {
       this.appendingData = true;
       this.$appendData.take(1).subscribe((data) => {
-        this.data = this.data.concat(data);
-        this.onChangeData.emit(this.data);
+        this.data.appendDataItems(data);
+        //this.data = this.data.concat(data);
+        this.onChangeData.emit(this.data.getDataItems());
         this.appendingData = false;
       });
     }
