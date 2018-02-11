@@ -15,9 +15,9 @@ import {Subscription} from 'rxjs/Subscription';
       <span>{{item | defaultItem}}</span>
     </ng-template>
     
-    <ng-template #defaultLastLiTemplate let-data="data" let-pagination="pagination" let-loadingMoreResults="loadingMoreResults" let-searching="searching">
+    <ng-template #defaultLastLiTemplate let-data="data" let-pagination="pagination" let-appendingData="appendingData" let-searching="searching">
       <li *ngIf="(data.length === 0)">Enter 1 or more characters</li>
-      <li *ngIf="pagination && loadingMoreResults">Loading more results...</li>
+      <li *ngIf="pagination && appendingData">Loading more data...</li>
       <li *ngIf="searching">Searching...</li>
     </ng-template>
 
@@ -29,7 +29,7 @@ import {Subscription} from 'rxjs/Subscription';
     </ng-template>
     
     <ul #ul
-        [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto'}"
+        [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)" >
       <li #itemList
           *ngFor="let dataItem of data; trackBy: trackByFn" 
@@ -40,54 +40,69 @@ import {Subscription} from 'rxjs/Subscription';
         context:{item:dataItem, disabled: disabledItemMapper(dataItem)}"></ng-container>
       </li>
       <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
-      context:{data: data, pagination: pagination, loadingMoreResults: loadingMoreResults, searching: searching}"></ng-container>
+      context:{data: data, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
     </ul>
     <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
     context:{data: data, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
-  @Input() data: Item[];
-  @Input() selection: Item[];
-  @Input() loadingMoreResults: boolean;
-  @Input() searching: boolean;
-  @Input() paginationDelay: number;
+
+  // inputs
+  @Input() $data: Observable<Item[]> = Observable.of([]);
+  @Input() $appendData: Observable<Item[]> = Observable.of([]);
   @Input() pagination: boolean;
   @Input() trackByFn: (index: number, item: Item) => any;
   @Input() maxHeight: string;
-  @Input() maxItemsCount: number;
   @Input() disabledItemMapper: (item: Item) => boolean;
-  @Input() scrollToSelectionAfterOpen: boolean;
-  @Input() expanded: boolean;
+
+  // external context
+  @Input() selection: Item[];
+  @Input() searching: boolean;
   @Input() keyEvents: Observable<KeyboardEvent>;
-  @Input() disabled: boolean;
+
+  // templates
   @Input() itemTemplate: TemplateRef<any>;
   @Input() lastLiTemplate: TemplateRef<any>;
   @Input() afterUlTemplate: TemplateRef<any>;
 
   @Output() onNextPage = new EventEmitter<void>();
   @Output() onSelectItem = new EventEmitter<Item>();
+  @Output() onChangeData = new EventEmitter<Item[]>();
+
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList') itemList: QueryList<ElementRef>;
 
   activeListItem: Item;
-  enabledData: Item[];
+  enabledData: Item[]; // дубликать надо убрать
+  data: Item[] = [];
   keyEventsSubscription: Subscription;
+  updatingData: boolean;
+  appendingData: boolean;
 
   constructor() {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.data) {
-      this.enabledData = changes.data.currentValue.filter((dataElem: Item) => {
-        return !this.disabledItemMapper(dataElem);
+    if (changes.$data && changes.$data.currentValue) {
+      this.updatingData = true;
+      this.$data.take(1).subscribe((data) => {
+        this.data = data;
+        this.enabledData = data.filter((dataElem: Item) => {
+          return !this.disabledItemMapper(dataElem);
+        });
+        this.onChangeData.emit(this.data);
+        this.updatingData = false;
       });
     }
-    if (changes.expanded && changes.expanded.currentValue && this.itemList) {
-      if (this.scrollToSelectionAfterOpen) {
-        this.scrollToSelection();
-      }
+    if (changes.$appendData && changes.$appendData.currentValue) {
+      this.appendingData = true;
+      this.$appendData.take(1).subscribe((data) => {
+        this.data = this.data.concat(data);
+        this.onChangeData.emit(this.data);
+        this.appendingData = false;
+      });
     }
   }
 
@@ -102,10 +117,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onUlScroll(event: Event) {
-    if (!this.pagination) {
-      return;
-    }
-    if (this.scrollExhausted() && !this.loadingMoreResults) {
+    if (this.pagination && this.scrollExhausted() && !this.appendingData) {
       this.onNextPage.emit();
     }
   }
@@ -123,36 +135,32 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   onKeyPress(event: KeyboardEvent) {
-    if (event.keyCode === KEY_CODE.ENTER && this.expanded && this.activeListItem) {
+    if (event.keyCode === KEY_CODE.ENTER && this.activeListItem && !this.isHidden()) {
       this.onSelectItem.emit(this.activeListItem);
     }
     if (event.keyCode === KEY_CODE.UP_ARROW) {
-      if (this.expanded) {
-        const currentIndex = this.enabledData.indexOf(this.activeListItem);
-        if (currentIndex && currentIndex > 0) {
-          this.activeListItem = this.enabledData[currentIndex - 1];
-        }
-        const item = this.getActiveLi();
-        if (item) {
-          const top = this.getLiTopPosition(item);
-          if (top < (this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop -= this.getLiHeight(item);
-          }
+      const currentIndex = this.enabledData.indexOf(this.activeListItem);
+      if (currentIndex && currentIndex > 0) {
+        this.activeListItem = this.enabledData[currentIndex - 1];
+      }
+      const item = this.getActiveLi();
+      if (item) {
+        const top = this.getLiTopPosition(item);
+        if (top < (this.ul.nativeElement.scrollTop)) {
+          this.ul.nativeElement.scrollTop -= this.getLiHeight(item);
         }
       }
     }
     if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      if (this.expanded) {
-        const currentIndex = this.enabledData.indexOf(this.activeListItem);
-        if (currentIndex < this.enabledData.length - 1) {
-          this.activeListItem = this.enabledData[currentIndex + 1];
-        }
-        const item = this.getActiveLi();
-        if (item) {
-          const bottom = this.getLiBottomPosition(item);
-          if (bottom > (this.ul.nativeElement.offsetHeight + this.ul.nativeElement.scrollTop)) {
-            this.ul.nativeElement.scrollTop += this.getLiHeight(item);
-          }
+      const currentIndex = this.enabledData.indexOf(this.activeListItem);
+      if (currentIndex < this.enabledData.length - 1) {
+        this.activeListItem = this.enabledData[currentIndex + 1];
+      }
+      const item = this.getActiveLi();
+      if (item) {
+        const bottom = this.getLiBottomPosition(item);
+        if (bottom > (this.ul.nativeElement.offsetHeight + this.ul.nativeElement.scrollTop)) {
+          this.ul.nativeElement.scrollTop += this.getLiHeight(item);
         }
       }
     }
@@ -214,4 +222,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     return li.nativeElement.offsetTop;
   }
 
+  private isHidden() {
+    return (this.ul.nativeElement.offsetParent === null)
+  }
 }

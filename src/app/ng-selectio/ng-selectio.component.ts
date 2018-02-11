@@ -87,23 +87,21 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></search>
                 <list #listComponent *ngIf="order===2"
-                      [data]="data"
+                      [$data]="$data"
+                      [$appendData]="$appendData"
                       [selection]="selection"
-                      [expanded]="expanded"
-                      [loadingMoreResults]="loadingMoreResults"
                       [searching]="searching"
                       [maxHeight]="dropdownMaxHeight"
                       [disabledItemMapper]="dropdownDisabledItemMapper"
                       [keyEvents]="keyEvents"
                       [pagination]="pagination"
-                      [disabled]="disabled"
-                      [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                       [trackByFn]="trackByFn"
                       [itemTemplate]="listItemTemplate"
                       [lastLiTemplate]="listLastLiTemplate"
                       [afterUlTemplate]="listAfterUlTemplate"
                       (onSelectItem)="selectItem($event)"
                       (onNextPage)="onNextPageStart()"
+                      (onChangeData)="onChangeData($event)"
                 >
                 </list>
               </ng-container>
@@ -161,10 +159,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   highlightedItem: Item | null = null;
   expanded: boolean;
   focus: boolean = false;
-  loadingMoreResults: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
   verticalOrder = [1, 2];
+  private appendingData: boolean = false;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
   private changed: Array<(value: Item[]) => void> = [];
@@ -205,23 +203,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.$data && changes.$data.currentValue) {
-      this.$data.take(1).subscribe((data) => {
-        this.data = data;
-        if (this.autocomplete && changes.$data.previousValue && this.searchComponent.notEmpty()) {
-          this.expanded = true;
-        }
-        this.searching = false;
-        this.changeDetectorRef.markForCheck();
-      });
-    }
-    if (changes.$appendData && changes.$appendData.currentValue) {
-      this.$appendData.take(1).subscribe((data) => {
-        this.data = this.data.concat(data);
-        this.changeDetectorRef.markForCheck();
-        this.loadingMoreResults = false;
-      });
-    }
     if (changes.openUp) {
       if (changes.openUp.currentValue) {
         this.verticalOrder = [2, 1];
@@ -229,6 +210,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
         this.verticalOrder = [1, 2];
       }
     }
+  }
+
+  onChangeData (newData: Item[]) {
+    this.data = newData;
   }
 
   ngOnInit(): void {
@@ -239,6 +224,10 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
       }
       if (this.search && this.clearSearchAfterCollapse && !this.expanded) {
         this.searchComponent.empty();
+      }
+      if (this.expanded && this.scrollToSelectionAfterOpen) {
+          this.changeDetectorRef.detectChanges();
+          this.listComponent.scrollToSelection();
       }
     });
     if (this.selectionDefault) {
@@ -324,7 +313,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   onNextPageStart() {
-    this.loadingMoreResults = true;
     this.changeDetectorRef.detectChanges();
     this.listComponent.scrollToTheBottom();
     setTimeout(() => {

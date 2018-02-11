@@ -35,7 +35,7 @@ import {Item} from '../ng-selectio/types';
       <h2>Simple select array of objects</h2>
       <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
-        [selectionItemTemplate]="countryTemplate"
+        
         [listItemTemplate]="countryTemplate"
         [$data]="$objectArray"
         [selectionDefaultMapper]="selectionDefaultMapper"
