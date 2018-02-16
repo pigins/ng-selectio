@@ -12,7 +12,7 @@ import {TextWidthService} from './text-width.service';
     <div [ngClass]="{'search': true}"
          [formGroup]="textInputGroup">
       <input #search
-             formControlName="textInput" 
+             formControlName="textInput"
              type="text"
              [tabindex]="tabIndex"
              [attr.placeholder]="searchPlaceholder"

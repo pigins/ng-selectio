@@ -10,7 +10,7 @@ import {Source} from './model/source';
 import {SourceFactory} from './model/source';
 
 export enum SourceType {
-  TREE = "tree", ARRAY = "array"
+  TREE = 'tree', ARRAY = 'array'
 }
 
 @Component({
@@ -21,14 +21,14 @@ export enum SourceType {
       <span>{{item | defaultItem}}</span>
     </ng-template>
     
-    <ng-template #defaultLastLiTemplate let-data="data" let-pagination="pagination" let-appendingData="appendingData" let-searching="searching">
-      <li *ngIf="(data.length === 0)">Enter 1 or more characters</li>
+    <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination" let-appendingData="appendingData" let-searching="searching">
+      <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
       <li *ngIf="pagination && appendingData">Loading more data...</li>
       <li *ngIf="searching">Searching...</li>
     </ng-template>
 
-    <ng-template #defaultAfterUlTemplate let-data="data" let-pagination="pagination" let-hasScroll="hasScroll">
-      <span *ngIf="pagination && data.length > 0 && !hasScroll"
+    <ng-template #defaultAfterUlTemplate let-source="source" let-pagination="pagination" let-hasScroll="hasScroll">
+      <span *ngIf="pagination && source.size > 0 && !hasScroll"
             (mousedown)="onPaginationClick($event)">
         Get more...
       </span>
@@ -38,7 +38,7 @@ export enum SourceType {
         [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)" >
       <li #itemList
-          *ngFor="let dataItem of data; trackBy: trackByFn" 
+          *ngFor="let dataItem of data; trackBy: trackByFn"
           [ngClass]="{'active': !disabledItemMapper(dataItem) && dataItem === activeListItem, 'selected': insideSelection(dataItem), 'disabled': disabledItemMapper(dataItem)}"
           (mouseenter)="activeListItem = dataItem"
           (click)="onClickItem(dataItem)">
@@ -46,17 +46,17 @@ export enum SourceType {
         context:{item:dataItem, disabled: disabledItemMapper(dataItem)}"></ng-container>
       </li>
       <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
-      context:{data: data, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
+      context:{source: data, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
     </ul>
     <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
-    context:{data: data, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
+    context:{source: data, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // inputs
-  @Input() $data: Observable<Item[]> = Observable.of([]);
-  @Input() $appendData: Observable<Item[]> = Observable.of([]);
+  @Input() $data: Observable<Item[]>;
+  @Input() $appendData: Observable<Item[]>;
   @Input() pagination: boolean;
   @Input() trackByFn: (index: number, item: Item) => any;
   @Input() maxHeight: string;
@@ -83,8 +83,10 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   activeListItem: Item;
   enabledData: Item[]; // дубликать надо убрать
-  data: Source;
+  data: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
   keyEventsSubscription: Subscription;
+  dataSubscription: Subscription;
+  appendDataSubscription: Subscription;
   updatingData: boolean;
   appendingData: boolean;
 
@@ -94,7 +96,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.$data && changes.$data.currentValue) {
       this.updatingData = true;
-      this.$data.take(1).subscribe((data: Item[]) => {
+      this.dataSubscription = this.$data.take(1).subscribe((data: Item[]) => {
         this.data = SourceFactory.getInstance(this.sourceType, data);
         this.enabledData = data.filter((dataElem: Item) => {
           return !this.disabledItemMapper(dataElem);
@@ -105,9 +107,8 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     }
     if (changes.$appendData && changes.$appendData.currentValue) {
       this.appendingData = true;
-      this.$appendData.take(1).subscribe((data) => {
+      this.appendDataSubscription = this.$appendData.take(1).subscribe((data) => {
         this.data.appendDataItems(data);
-        //this.data = this.data.concat(data);
         this.onChangeData.emit(this.data.getDataItems());
         this.appendingData = false;
       });
@@ -122,6 +123,8 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   ngOnDestroy(): void {
     this.keyEventsSubscription.unsubscribe();
+    this.dataSubscription.unsubscribe();
+    this.appendDataSubscription.unsubscribe();
   }
 
   onUlScroll(event: Event) {
@@ -193,7 +196,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       return li.nativeElement.classList.contains('selected');
     });
     if (selectionList.length > 0) {
-      let lastSelectedLi = selectionList[selectionList.length - 1];
+      const lastSelectedLi = selectionList[selectionList.length - 1];
       this.ul.nativeElement.scrollTop = this.getLiTopPosition(lastSelectedLi);
     }
   }
@@ -231,6 +234,6 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   private isHidden() {
-    return (this.ul.nativeElement.offsetParent === null)
+    return (this.ul.nativeElement.offsetParent === null);
   }
 }

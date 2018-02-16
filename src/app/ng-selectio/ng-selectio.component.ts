@@ -10,7 +10,7 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {ListComponent} from './list.component';
+import {ListComponent, SourceType} from './list.component';
 import {Item} from './types';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -89,6 +89,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                 <list #listComponent *ngIf="order===2"
                       [$data]="$data"
                       [$appendData]="$appendData"
+                      [sourceType]="sourceType"
                       [selection]="selection"
                       [searching]="searching"
                       [maxHeight]="dropdownMaxHeight"
@@ -137,6 +138,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() clearSearchAfterCollapse: boolean = true;
   @Input() dropdownMaxHeight: string = '150px';
   @Input() searchPlaceholder: string = '';
+  @Input() sourceType: SourceType = SourceType.ARRAY;
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;

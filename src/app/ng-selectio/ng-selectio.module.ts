@@ -8,6 +8,7 @@ import {CommonModule} from '@angular/common';
 import {TextWidthService} from './text-width.service';
 import {ClickOutsideDirective} from './click-outside.directive';
 import {DefaultItemPipe} from './defaultItem.pipe';
+import {SelectioRequiredValidator} from './selectio-required.validator';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import {DefaultItemPipe} from './defaultItem.pipe';
     ListComponent,
     DefaultItemPipe,
     SearchComponent,
-    ClickOutsideDirective
+    ClickOutsideDirective,
+    SelectioRequiredValidator
   ],
   imports: [
     CommonModule,
@@ -26,7 +28,8 @@ import {DefaultItemPipe} from './defaultItem.pipe';
   exports: [
     ReactiveFormsModule,
     NgSelectioComponent,
-    SearchComponent
+    SearchComponent,
+    SelectioRequiredValidator
   ]
 })
 export class NgSelectioModule {
