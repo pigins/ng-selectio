@@ -14,7 +14,7 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
       mappedArr[arrElem[idProp]] = new TreeNode<T>(arrElem);
     }
     let mappedElem: TreeNode<T>;
-    const root: TreeNode<T> = new TreeNode<T>(null);
+    const root: TreeNode<T> = new TreeNode<T>(<T>{});
     for (const prop in mappedArr) {
       if (mappedArr.hasOwnProperty(prop)) {
         mappedElem = mappedArr[prop];
@@ -122,7 +122,9 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
             }
           }
         }
-        return {value: nodeExist ? node : null, done: nodeStack.isEmpty() && !nodeExist};
+        return {
+          value: node, done: nodeStack.isEmpty() && !nodeExist
+        };
       }
     };
   }

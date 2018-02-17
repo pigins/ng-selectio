@@ -15,6 +15,7 @@ import {Item} from './types';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SelectionMode} from './types';
+import {SourceItem} from './model/source';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -266,20 +267,20 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   }
 
-  selectItem(item: Item): void {
+  selectItem(sourceItem: SourceItem): void {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
-      this.selection = [item];
+      this.selection = [sourceItem.data];
       this.modelChange();
     } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
       if (this.selectionMaxLength < 0 || (this.selection.length + 1 <= this.selectionMaxLength)) {
-        this.selection.push(item);
+        this.selection.push(sourceItem.data);
         this.modelChange();
       }
     }
     if (this.closeAfterSelect) {
       this.expandedChanged.emit(false);
     }
-    this.onSelect.emit(item);
+    this.onSelect.emit(sourceItem.data);
   }
 
   onNgsFocus($event: Event): void {

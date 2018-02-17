@@ -1,14 +1,15 @@
 import {Pipe, PipeTransform} from '@angular/core';
+import {SourceItem} from './model/source';
 
 @Pipe({name: 'defaultItem'})
 export class DefaultItemPipe implements PipeTransform {
-  transform(value: any, ...args: any[]): any {
-    if (typeof value === 'string') {
-      return value;
-    } else if (typeof value === 'number') {
-      return value + '';
+  transform(value: SourceItem, ...args: any[]): any {
+    if (typeof value.data === 'string') {
+      return value.data;
+    } else if (typeof value.data === 'number') {
+      return value.data + '';
     } else {
-      return JSON.stringify(value);
+      return JSON.stringify(value.data);
     }
   }
 }

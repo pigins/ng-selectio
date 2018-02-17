@@ -6,7 +6,7 @@ import {KEY_CODE} from './ng-selectio.component';
 import {Observable} from 'rxjs/Observable';
 import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
-import {Source} from './model/source';
+import {Source, SourceItem} from './model/source';
 import {SourceFactory} from './model/source';
 
 export enum SourceType {
@@ -17,8 +17,8 @@ export enum SourceType {
   selector: 'list',
   template: `
     
-    <ng-template #defaultItemTemplate let-item="item" let-disabled="disabled">
-      <span>{{item | defaultItem}}</span>
+    <ng-template #defaultItemTemplate let-sourceItem="sourceItem">
+      <span>{{sourceItem | defaultItem}}</span>
     </ng-template>
     
     <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination" let-appendingData="appendingData" let-searching="searching">
@@ -38,18 +38,18 @@ export enum SourceType {
         [ngStyle]="{'max-height': maxHeight, 'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)" >
       <li #itemList
-          *ngFor="let dataItem of data; trackBy: trackByFn"
-          [ngClass]="{'active': !disabledItemMapper(dataItem) && dataItem === activeListItem, 'selected': insideSelection(dataItem), 'disabled': disabledItemMapper(dataItem)}"
-          (mouseenter)="activeListItem = dataItem"
-          (click)="onClickItem(dataItem)">
+          *ngFor="let sourceItem of source; trackBy: trackByFn"
+          [ngClass]="{'active': !sourceItem.disabled && source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
+          (mouseenter)="source.setHighlited(sourceItem)"
+          (click)="onClickItem(sourceItem)">
         <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-        context:{item:dataItem, disabled: disabledItemMapper(dataItem)}"></ng-container>
+        context:{sourceItem: sourceItem}"></ng-container>
       </li>
       <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
-      context:{source: data, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
+      context:{source: source, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
     </ul>
     <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
-    context:{source: data, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
+    context:{source: source, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
@@ -58,7 +58,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() $data: Observable<Item[]>;
   @Input() $appendData: Observable<Item[]>;
   @Input() pagination: boolean;
-  @Input() trackByFn: (index: number, item: Item) => any;
+  @Input() trackByFn: (index: number, sourceItem: SourceItem) => any;
   @Input() maxHeight: string;
   @Input() disabledItemMapper: (item: Item) => boolean;
   @Input() sourceType: SourceType;
@@ -74,16 +74,14 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() afterUlTemplate: TemplateRef<any>;
 
   @Output() onNextPage = new EventEmitter<void>();
-  @Output() onSelectItem = new EventEmitter<Item>();
+  @Output() onSelectItem = new EventEmitter<SourceItem>();
   @Output() onChangeData = new EventEmitter<Item[]>();
 
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList') itemList: QueryList<ElementRef>;
 
-  activeListItem: Item;
-  enabledData: Item[]; // дубликать надо убрать
-  data: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
+  source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
   keyEventsSubscription: Subscription;
   dataSubscription: Subscription;
   appendDataSubscription: Subscription;
@@ -97,21 +95,21 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     if (changes.$data && changes.$data.currentValue) {
       this.updatingData = true;
       this.dataSubscription = this.$data.take(1).subscribe((data: Item[]) => {
-        this.data = SourceFactory.getInstance(this.sourceType, data);
-        this.enabledData = data.filter((dataElem: Item) => {
-          return !this.disabledItemMapper(dataElem);
-        });
-        this.onChangeData.emit(this.data.getDataItems());
+        this.source = SourceFactory.getInstance(this.sourceType, data, this.disabledItemMapper);
+        this.onChangeData.emit(this.source.getDataItems());
         this.updatingData = false;
       });
     }
     if (changes.$appendData && changes.$appendData.currentValue) {
       this.appendingData = true;
-      this.appendDataSubscription = this.$appendData.take(1).subscribe((data) => {
-        this.data.appendDataItems(data);
-        this.onChangeData.emit(this.data.getDataItems());
+      this.appendDataSubscription = this.$appendData.take(1).subscribe(data => {
+        this.source.appendDataItems(data);
+        this.onChangeData.emit(this.source.getDataItems());
         this.appendingData = false;
       });
+    }
+    if (changes.selection && changes.selection.currentValue) {
+      this.source.updateSelection(this.selection);
     }
   }
 
@@ -133,26 +131,26 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     }
   }
 
-  onClickItem(dataItem: Item) {
-    if (this.disabledItemMapper(dataItem)) {
+  onClickItem(sourceItem: SourceItem) {
+    if (sourceItem.disabled) {
       return;
     }
-    this.onSelectItem.emit(dataItem);
+    this.onSelectItem.emit(sourceItem);
   }
 
   onPaginationClick($event: MouseEvent): void {
     $event.preventDefault();
     this.onNextPage.emit();
   }
-
+  // TODO превратить в настраиваемый интерфейс
   onKeyPress(event: KeyboardEvent) {
-    if (event.keyCode === KEY_CODE.ENTER && this.activeListItem && !this.isHidden()) {
-      this.onSelectItem.emit(this.activeListItem);
+    if (event.keyCode === KEY_CODE.ENTER && this.source.getHighlited() && !this.isHidden()) {
+      this.onSelectItem.emit(this.source.getHighlited());
     }
     if (event.keyCode === KEY_CODE.UP_ARROW) {
-      const currentIndex = this.enabledData.indexOf(this.activeListItem);
+      const currentIndex = this.source.getEnabledSourceItems().indexOf(this.source.getHighlited());
       if (currentIndex && currentIndex > 0) {
-        this.activeListItem = this.enabledData[currentIndex - 1];
+        this.source.setHighlited(this.source.getEnabledSourceItems()[currentIndex - 1]);
       }
       const item = this.getActiveLi();
       if (item) {
@@ -163,9 +161,9 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       }
     }
     if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      const currentIndex = this.enabledData.indexOf(this.activeListItem);
-      if (currentIndex < this.enabledData.length - 1) {
-        this.activeListItem = this.enabledData[currentIndex + 1];
+      const currentIndex = this.source.getEnabledSourceItems().indexOf(this.source.getHighlited());
+      if (currentIndex < this.source.getEnabledSourceItems().length - 1) {
+        this.source.setHighlited(this.source.getEnabledSourceItems()[currentIndex + 1]);
       }
       const item = this.getActiveLi();
       if (item) {
@@ -175,15 +173,6 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
         }
       }
     }
-  }
-
-  insideSelection(item: Item): boolean {
-    for (let i = 0; i < this.selection.length; i++) {
-      if (item === this.selection[i]) {
-        return true;
-      }
-    }
-    return false;
   }
 
   hasScroll(): boolean {

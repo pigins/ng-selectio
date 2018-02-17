@@ -7,41 +7,72 @@ import {SourceType} from '../list.component';
  */
 export interface Source extends Iterable<SourceItem> {
   size(): number;
-  appendSourceItem(sourceItem: SourceItem);
-  appendSourceItems(sourceItems: SourceItem[]);
   appendDataItem(item: Item);
   appendDataItems(items: Item[]);
   getDataItems(): Item[];
+  getEnabledSourceItems(): SourceItem[];
+  setDisabledItemMapper(mapper: (item: Item) => boolean): void;
+  updateSelection(selection: Item[]): void;
+  isHighlited(sourceItem: SourceItem): boolean;
+  setHighlited(sourceItem: SourceItem): void;
+  getHighlited(): SourceItem;
 }
 
 export class ArraySource implements Source {
-  private source: SourceItem[] = [];
 
-  appendSourceItem(sourceItem: SourceItem) {
-    throw new Error('not implemented');
-  }
-
-  appendSourceItems(sourceItems: SourceItem[]) {
-    throw new Error('not implemented');
-  }
+  private disabledItemMapper: (item: Item) => boolean = (item: Item) => false;
+  private sourceItems: SourceItem[] = [];
+  private highlitedItem: SourceItem;
 
   appendDataItem(item: Item) {
-    this.source = this.source.concat(new SourceItem(item));
+    this.sourceItems = this.sourceItems.concat(new SourceItem(item));
   }
 
   appendDataItems(items: Item[]) {
     const sourceItems = items.map(item => new SourceItem(item));
-    this.source = this.source.concat(sourceItems);
+    this.sourceItems = this.sourceItems.concat(sourceItems);
   }
 
   getDataItems(): Item[] {
-    return this.source.map(sourceItem => {
+    return this.sourceItems.map(sourceItem => {
       return sourceItem.data;
     });
   }
 
+  getEnabledSourceItems(): SourceItem[] {
+    return this.sourceItems.filter(sourceItem => sourceItem.disabled);
+  }
+
   public size(): number {
-    return this.source.length;
+    return this.sourceItems.length;
+  }
+
+  public setDisabledItemMapper(mapper: (item: Item) => boolean): void {
+    this.disabledItemMapper = mapper;
+    this.sourceItems.forEach((sourceItem: SourceItem) => {
+      sourceItem.disabled = this.disabledItemMapper(sourceItem.data);
+    });
+  }
+
+  // TODO rewrite with hash
+  public updateSelection(selection: Item[]): void {
+    for (let i = 0; i < selection.length; i++) {
+      for (let j = 0; j < this.sourceItems.length; j++) {
+        this.sourceItems[j].selected = selection[i] === this.sourceItems[j].data;
+      }
+    }
+  }
+
+  isHighlited(sourceItem: SourceItem): boolean {
+    return sourceItem === this.highlitedItem;
+  }
+
+  setHighlited(sourceItem: SourceItem): void {
+    this.highlitedItem = sourceItem;
+  }
+
+  getHighlited(): SourceItem {
+    return this.highlitedItem;
   }
 
   [Symbol.iterator](): Iterator<SourceItem> {
@@ -50,8 +81,8 @@ export class ArraySource implements Source {
       next: () => {
         index++;
         return {
-          value: this.source[index],
-          done: this.source.length === 0 || index + 1 >= this.source.length
+          value: this.sourceItems[index],
+          done: this.sourceItems.length === 0 || index + 1 >= this.sourceItems.length
         };
       },
     };
@@ -61,12 +92,11 @@ export class ArraySource implements Source {
 export class SourceItem {
   private _data: Item;
   private _disabled: boolean;
-  private _highlited: boolean;
+  private _selected: boolean;
 
   constructor(data: Item) {
     this._data = data;
     this._disabled = false;
-    this._highlited = false;
   }
 
   get data(): Item {
@@ -85,20 +115,23 @@ export class SourceItem {
     this._disabled = value;
   }
 
-  get highlited(): boolean {
-    return this._highlited;
+  get selected(): boolean {
+    return this._selected;
   }
 
-  set highlited(value: boolean) {
-    this._highlited = value;
+  set selected(value: boolean) {
+    this._selected = value;
   }
 }
 
 export class SourceFactory {
-  static getInstance(sourceType: SourceType, items?: Item[]): Source {
+  static getInstance(sourceType: SourceType, items?: Item[], disabledItemMapper?: (item: Item) => boolean): Source {
     if (items) {
       if (sourceType === SourceType.ARRAY) {
         const result = new ArraySource();
+        if (disabledItemMapper) {
+          result.setDisabledItemMapper(disabledItemMapper);
+        }
         result.appendDataItems(items);
         return result;
       } else if (sourceType === SourceType.TREE) {
