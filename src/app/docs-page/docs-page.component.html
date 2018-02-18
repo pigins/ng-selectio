@@ -29,7 +29,6 @@
                    [openUp]="openUp"
                    [dropdownDisabledItemMapper]="dropdownDisabledItemMapper"
                    [searchPlaceholder]="searchPlaceholder"
-                   [dropdownMaxHeight]="dropdownMaxHeight"
                    [tabIndex]="tabIndex"
                    [trackByFn]="trackByFn"
                    (onSearch)="onSearch($event)"
@@ -336,19 +335,6 @@
       <td colspan="6">View</td>
     </tr>
 
-
-    <tr>
-      <td>dropdownMaxHeight</td>
-      <td>
-        <app-text-input
-          [(ngModel)]="dropdownMaxHeight">
-        </app-text-input>
-      </td>
-      <td>Max height for dropdown</td>
-      <td>string</td>
-      <td></td>
-      <td>150px</td>
-    </tr>
 
     <tr>
       <td>searchPlaceholder</td>

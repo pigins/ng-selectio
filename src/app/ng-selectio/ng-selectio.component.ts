@@ -93,15 +93,13 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                       [sourceType]="sourceType"
                       [selection]="selection"
                       [searching]="searching"
-                      [maxHeight]="dropdownMaxHeight"
                       [disabledItemMapper]="dropdownDisabledItemMapper"
-                      [keyEvents]="keyEvents"
                       [pagination]="pagination"
                       [trackByFn]="trackByFn"
                       [itemTemplate]="listItemTemplate"
                       [lastLiTemplate]="listLastLiTemplate"
                       [afterUlTemplate]="listAfterUlTemplate"
-                      (onSelectItem)="selectItem($event)"
+                      (onSelectItem)="onSelectItem($event)"
                       (onNextPage)="onNextPageStart()"
                       (onChangeData)="onChangeData($event)"
                 >
@@ -137,7 +135,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() openUp: boolean = false;
   @Input() scrollToSelectionAfterOpen: boolean = true;
   @Input() clearSearchAfterCollapse: boolean = true;
-  @Input() dropdownMaxHeight: string = '150px';
   @Input() searchPlaceholder: string = '';
   @Input() sourceType: SourceType = SourceType.ARRAY;
 
@@ -267,7 +264,7 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   }
 
-  selectItem(sourceItem: SourceItem): void {
+  onSelectItem(sourceItem: SourceItem): void {
     if (this.selectionMode === SELECTION_MODE_SINGLE) {
       this.selection = [sourceItem.data];
       this.modelChange();
@@ -309,10 +306,43 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   onKeyPress(event: KeyboardEvent) {
+
     if (event.keyCode === KEY_CODE.DOWN_ARROW && !this.expanded && this.hasFocus()) {
       this.expandedChanged.emit(true);
     }
     this.keyEvents.emit(event);
+
+    let list = this.listComponent;
+    if (event.keyCode === KEY_CODE.ENTER && list.source.getHighlited() && !list.isHidden()) {
+      list.onSelectItem.emit(list.source.getHighlited());
+    }
+    if (event.keyCode === KEY_CODE.UP_ARROW) {
+      const currentIndex = list.source.getEnabledSourceItems().indexOf(list.source.getHighlited());
+      if (currentIndex && currentIndex > 0) {
+        list.source.setHighlited(list.source.getEnabledSourceItems()[currentIndex - 1]);
+      }
+      const item = list.getActiveLi();
+      if (item) {
+        const top = list.getLiTopPosition(item);
+        if (top < (list.ul.nativeElement.scrollTop)) {
+          list.ul.nativeElement.scrollTop -= list.getLiHeight(item);
+        }
+      }
+    }
+    if (event.keyCode === KEY_CODE.DOWN_ARROW) {
+      const currentIndex = list.source.getEnabledSourceItems().indexOf(list.source.getHighlited());
+      if (currentIndex < list.source.getEnabledSourceItems().length - 1) {
+        list.source.setHighlited(list.source.getEnabledSourceItems()[currentIndex + 1]);
+      }
+      const item = list.getActiveLi();
+      if (item) {
+        const bottom = list.getLiBottomPosition(item);
+        if (bottom > (list.ul.nativeElement.offsetHeight + list.ul.nativeElement.scrollTop)) {
+          list.ul.nativeElement.scrollTop += list.getLiHeight(item);
+        }
+      }
+    }
+
   }
 
   onNextPageStart() {

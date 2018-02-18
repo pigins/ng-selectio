@@ -47,6 +47,9 @@
   border: 1px solid #ccc;
   border-radius: 4px 4px 0 0;
 }
+.ngs .dropdown-wrapper .dropdown ul {
+  max-height: 150px;
+}
 .ngs .dropdown-wrapper .dropdown li {
   min-height: 30px;
   padding: 5px;
