@@ -12,7 +12,6 @@
                    [$data]="$data"
                    [$appendData]="$appendData"
                    [selectionMode]="selectionMode"
-                   [selectionDefaultMapper]="selectionDefaultMapper"
                    [selectionDefault]="selectionDefault"
                    [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                    [searchDelay]="searchDelay"
@@ -259,21 +258,6 @@
       <td>Item | Item[] | null</td>
       <td></td>
       <td>null</td>
-    </tr>
-
-    <tr>
-      <td>selectionDefaultMapper</td>
-      <td>
-        <app-select-input style="display: inline-block"
-                          [options]="[{label: 'none', value: selectionDefaultMapper_none}, {label: 'select first', value: selectionDefaultMapper_selectFirst}]"
-                          [(ngModel)]=selectionDefaultMapper>
-        </app-select-input>
-        <button (click)="recreateSelectio()" style="display: inline-block">recreate selectio</button>
-      </td>
-      <td></td>
-      <td>(items: Item[]) => Item[]</td>
-      <td></td>
-      <td>(items: Item[]) => []</td>
     </tr>
 
     <tr>

@@ -29,12 +29,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
           }
           };`;
   selectionDefault_user: Item;
-  selectionDefaultMapper_selectFirst(items: Item[]): Item[] {
-    return [items[0]];
-  }
-  selectionDefaultMapper_none(items: Item[]): Item[] {
-    return [];
-  }
+
   dropdownDisabledItemMapper_allDisabled(item: Item): boolean {
     return true;
   }
@@ -50,7 +45,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
 
   selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
   selectionDefault: Item | Item[] | null = null;
-  selectionDefaultMapper: (items: Item[]) => Item[] = this.selectionDefaultMapper_none;
   allowClear: boolean = false;
 
   searchDelay: number = 0;
@@ -170,10 +164,10 @@ export class DocsPageComponent implements OnInit, OnDestroy {
 
   onManualAppend() {
    let term = '';
-   if (this.selectio.getSearchComponent()) {
-     term = this.selectio.getSearchComponent().getValue();
+   if (this.selectio.searchComponent) {
+     term = this.selectio.searchComponent.getValue();
    }
-   this.appendUser({term: term, currentLength: this.selectio.getData().length});
+   this.appendUser({term: term, currentLength: this.selectio.source.size()});
   }
 
   appendUser(pagination) {

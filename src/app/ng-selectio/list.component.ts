@@ -7,6 +7,8 @@ import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
 import {Source, SourceItem} from './model/source';
 import {SourceFactory} from './model/source';
+import {SourceItemDirective} from './source-item.directive';
+import {Selection} from './model/selection';
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -36,8 +38,9 @@ export enum SourceType {
     <ul #ul
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)" >
-      <li #itemList
+      <li #itemList 
           *ngFor="let sourceItem of _source; trackBy: trackByFn"
+          [sourceItem]="sourceItem"
           [ngClass]="{'active': !sourceItem.disabled && _source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
           (mouseenter)="_source.setHighlited(sourceItem)"
           (click)="onClickItem(sourceItem)">
@@ -62,7 +65,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() sourceType: SourceType;
 
   // external context
-  @Input() selection: Item[];
+  @Input() $selection: Observable<Selection>;
   @Input() searching: boolean;
 
   // templates
@@ -72,11 +75,11 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // outputs
   @Output() onNextPage = new EventEmitter<void>();
-  @Output() onSelectItem = new EventEmitter<SourceItem>();
-  @Output() onChangeData = new EventEmitter<Item[]>();
+  @Output() onSelectItem = new EventEmitter<SourceItem[]>();
+  @Output() onChangeData = new EventEmitter<Source>();
 
   @ViewChild('ul') ul: ElementRef;
-  @ViewChildren('itemList') itemList: QueryList<ElementRef>;
+  @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
   _source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
   updatingData: boolean;
@@ -93,7 +96,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       this.updatingData = true;
       this.dataSubscription = this.$data.take(1).subscribe((data: Item[]) => {
         this._source = SourceFactory.getInstance(this.sourceType, data, this.disabledItemMapper);
-        this.onChangeData.emit(this._source.getDataItems());
+        this.onChangeData.emit(this._source);
         this.updatingData = false;
       });
     }
@@ -101,16 +104,16 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       this.appendingData = true;
       this.appendDataSubscription = this.$appendData.take(1).subscribe(data => {
         this._source.appendDataItems(data);
-        this.onChangeData.emit(this._source.getDataItems());
+        this.onChangeData.emit(this._source);
         this.appendingData = false;
       });
-    }
-    if (changes.selection && changes.selection.currentValue) {
-      this._source.updateSelection(this.selection);
     }
   }
 
   ngOnInit() {
+    this.$selection.subscribe((selection: Selection) => {
+      this._source.updateSelection(selection.toDataArray());
+    });
   }
 
   ngOnDestroy(): void {
@@ -128,7 +131,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     if (sourceItem.disabled) {
       return;
     }
-    this.onSelectItem.emit(sourceItem);
+    this.onSelectItem.emit([sourceItem]);
   }
 
   onPaginationClick($event: MouseEvent): void {
@@ -142,12 +145,12 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   public scrollToSelection(): void {
-    const selectionList = this.itemList.filter((li: ElementRef) => {
-      return li.nativeElement.classList.contains('selected');
+    const selectionList = this.itemList.filter((li: SourceItemDirective) => {
+      return li.sourceItem.selected;
     });
     if (selectionList.length > 0) {
       const lastSelectedLi = selectionList[selectionList.length - 1];
-      this.ul.nativeElement.scrollTop = this.getLiTopPosition(lastSelectedLi);
+      this.ul.nativeElement.scrollTop = lastSelectedLi.topPosition;
     }
   }
 
@@ -160,27 +163,15 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
 
-  public getActiveLi(): ElementRef | null {
-    const activeList = this.itemList.filter((li: ElementRef) => {
-      return li.nativeElement.classList.contains('active');
+  public getHighlited(): SourceItemDirective | null {
+    const activeList = this.itemList.filter((li: SourceItemDirective) => {
+      return this._source.getHighlited() === li.sourceItem;
     });
     if (activeList.length > 0) {
       return activeList[0];
     } else {
       return null;
     }
-  }
-
-  public getLiHeight(li: ElementRef): number {
-    return li.nativeElement.offsetHeight;
-  }
-
-  public getLiBottomPosition(li: ElementRef): number {
-    return this.getLiTopPosition(li) + this.getLiHeight(li);
-  }
-
-  public getLiTopPosition(li: ElementRef): number {
-    return li.nativeElement.offsetTop;
   }
 
   public isHidden() {

@@ -9,6 +9,7 @@ import {TextWidthService} from './text-width.service';
 import {ClickOutsideDirective} from './click-outside.directive';
 import {DefaultItemPipe} from './defaultItem.pipe';
 import {SelectioRequiredValidator} from './selectio-required.validator';
+import {SourceItemDirective} from './source-item.directive';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import {SelectioRequiredValidator} from './selectio-required.validator';
     DefaultItemPipe,
     SearchComponent,
     ClickOutsideDirective,
-    SelectioRequiredValidator
+    SelectioRequiredValidator,
+    SourceItemDirective
   ],
   imports: [
     CommonModule,

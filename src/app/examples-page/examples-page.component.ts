@@ -33,57 +33,57 @@ import {Item} from '../ng-selectio/types';
         [allowClear]="true"
       ></ng-selectio>
       <h2>Simple select array of objects</h2>
-      <ng-selectio
-        [selectionEmptyTemplate]="selectioTemplate"
-        
-        [listItemTemplate]="countryTemplate"
-        [$data]="$objectArray"
-        [selectionDefaultMapper]="selectionDefaultMapper"
-      ></ng-selectio>
-      <h2>Simple select array of strings with search</h2>
-      <ng-selectio
-        [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$stringArray"
-        [search]="true"
-        (onSearch)="onSearchString($event)"
-      ></ng-selectio>
-      <h2>Simple select array of strings with search and autocomplete</h2>
-      <ng-selectio
-        [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$stringArray"
-        [search]="true"
-        [autocomplete]="true"
-        (onSearch)="onSearchString($event)"
-      ></ng-selectio>
-      <h2>Remote data select with search and pagination</h2>
-      <ng-selectio
-        [selectionItemTemplate]="personTemplate"
-        [listItemTemplate]="personTemplate"
-        [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$users"
-        [$appendData]="$appendUsers"
-        [selectionDefault]="this.dataService.exampleRandomUsers"
-        [selectionMode]="'multiple'"
-        [search]="true"
-        [allowClear]="true"
-        [pagination]="true"
-        [paginationDelay]="500"
-        (onSearch)="onSearch($event)"
-        (onNextPage)="onNextPage($event)"
-      ></ng-selectio>
+      <!--<ng-selectio-->
+        <!--[selectionEmptyTemplate]="selectioTemplate"-->
+        <!---->
+        <!--[listItemTemplate]="countryTemplate"-->
+        <!--[$data]="$objectArray"-->
+        <!--[selectionDefaultMapper]="selectionDefaultMapper"-->
+      <!--&gt;</ng-selectio>-->
+      <!--<h2>Simple select array of strings with search</h2>-->
+      <!--<ng-selectio-->
+        <!--[selectionEmptyTemplate]="selectioTemplate"-->
+        <!--[$data]="$stringArray"-->
+        <!--[search]="true"-->
+        <!--(onSearch)="onSearchString($event)"-->
+      <!--&gt;</ng-selectio>-->
+      <!--<h2>Simple select array of strings with search and autocomplete</h2>-->
+      <!--<ng-selectio-->
+        <!--[selectionEmptyTemplate]="selectioTemplate"-->
+        <!--[$data]="$stringArray"-->
+        <!--[search]="true"-->
+        <!--[autocomplete]="true"-->
+        <!--(onSearch)="onSearchString($event)"-->
+      <!--&gt;</ng-selectio>-->
+      <!--<h2>Remote data select with search and pagination</h2>-->
+      <!--<ng-selectio-->
+        <!--[selectionItemTemplate]="personTemplate"-->
+        <!--[listItemTemplate]="personTemplate"-->
+        <!--[selectionEmptyTemplate]="selectioTemplate"-->
+        <!--[$data]="$users"-->
+        <!--[$appendData]="$appendUsers"-->
+        <!--[selectionDefault]="this.dataService.exampleRandomUsers"-->
+        <!--[selectionMode]="'multiple'"-->
+        <!--[search]="true"-->
+        <!--[allowClear]="true"-->
+        <!--[pagination]="true"-->
+        <!--[paginationDelay]="500"-->
+        <!--(onSearch)="onSearch($event)"-->
+        <!--(onNextPage)="onNextPage($event)"-->
+      <!--&gt;</ng-selectio>-->
 
-      <h2>ngmodel</h2>
-      <div>
-        <ng-selectio
-          [selectionEmptyTemplate]="selectioTemplate"
-          [(ngModel)]="itemArray"
-          [$data]="$stringArray"
-          [dropdownDisabledItemMapper]="disabledItem"
-          [allowClear]="true"
-        >
-        </ng-selectio>
-        <div class="selected-item">{{itemArray}}</div>
-      </div>
+      <!--<h2>ngmodel</h2>-->
+      <!--<div>-->
+        <!--<ng-selectio-->
+          <!--[selectionEmptyTemplate]="selectioTemplate"-->
+          <!--[(ngModel)]="itemArray"-->
+          <!--[$data]="$stringArray"-->
+          <!--[dropdownDisabledItemMapper]="disabledItem"-->
+          <!--[allowClear]="true"-->
+        <!--&gt;-->
+        <!--</ng-selectio>-->
+        <!--<div class="selected-item">{{itemArray}}</div>-->
+      <!--</div>-->
     </div>
   `,
   styles: [`
@@ -158,9 +158,5 @@ export class ExamplesPageComponent {
 
   disabledItem(item: any) {
     return item === 'canada';
-  }
-
-  selectionDefaultMapper(items: any[]): any[] {
-    return [items[0]];
   }
 }

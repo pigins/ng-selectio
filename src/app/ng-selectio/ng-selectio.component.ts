@@ -15,7 +15,11 @@ import {Item} from './types';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {SelectionMode} from './types';
-import {SourceItem} from './model/source';
+import {Source, SourceItem} from './model/source';
+import {KeyboardStrategy} from './model/keyboard-strategy';
+import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
+import {SelectionComponent} from './selection.component';
+import {Selection} from './model/selection';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -45,19 +49,21 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
           <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
-                     [items]="selection"
+                     [$selections]="_onSelectItem"
                      [highlightedItem]="highlightedItem"
                      [itemTemplate]="selectionItemTemplate"
                      [clearTemplate]="selectionClearTemplate"
                      [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate"
                      [selectionMode]="selectionMode"
+                     [selectionMaxLength]="selectionMaxLength"
                      [showArrow]="!autocomplete"
                      [arrowDirection]="openUp ? !expanded : expanded"
                      [deletable]="allowClear"
                      [disabled]="disabled"
+                     [selectionDefault]="selectionDefault"
                      (click)="onClickSelection($event)"
-                     (onDeleteItem)="onDeleteItem($event)"
                      (onHighlightItem)="onHighlightItem($event)"
+                     (onAfterSelectionChanged)="afterSelectionChanged($event)" 
           >
           </selection>
           <search #searchComponent *ngIf="autocomplete" style="display: inline-block"
@@ -90,8 +96,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                 <list #listComponent *ngIf="order===2"
                       [$data]="$data"
                       [$appendData]="$appendData"
+                      [$selection]="_onAfterSelectionChanged"
                       [sourceType]="sourceType"
-                      [selection]="selection"
                       [searching]="searching"
                       [disabledItemMapper]="dropdownDisabledItemMapper"
                       [pagination]="pagination"
@@ -101,7 +107,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                       [afterUlTemplate]="listAfterUlTemplate"
                       (onSelectItem)="onSelectItem($event)"
                       (onNextPage)="onNextPageStart()"
-                      (onChangeData)="onChangeData($event)"
                 >
                 </list>
               </ng-container>
@@ -118,7 +123,6 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() $appendData: Observable<Item[]> = Observable.of([]);
   @Input() selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
   @Input() selectionDefault: Item | Item[] | null = null;
-  @Input() selectionDefaultMapper: (items: Item[]) => Item[] = (items: Item[]): Item[] => [];
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;
   @Input() search: boolean = false;
@@ -137,6 +141,11 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Input() clearSearchAfterCollapse: boolean = true;
   @Input() searchPlaceholder: string = '';
   @Input() sourceType: SourceType = SourceType.ARRAY;
+  @Input() keyboardStrategy: KeyboardStrategy = new KeyboardStrategyDefault();
+  // TODO
+  @Input() equals;
+  @Input() hashcode;
+
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
@@ -151,22 +160,24 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   @Output() onSelect = new EventEmitter<Item>();
 
   @ViewChild('ngs') ngs: ElementRef;
-  @ViewChild('searchComponent') searchComponent: SearchComponent;
-  @ViewChild('listComponent') listComponent: ListComponent;
+  @ViewChild('searchComponent') _searchComponent: SearchComponent;
+  @ViewChild('listComponent') _listComponent: ListComponent;
+  @ViewChild('selectionComponent') _selectionComponent: SelectionComponent;
 
-  data: Item[] = [];
-  selection: Item[] = [];
+  //selection: Item[] = [];
   highlightedItem: Item | null = null;
   expanded: boolean;
   focus: boolean = false;
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
   verticalOrder = [1, 2];
-  private appendingData: boolean = false;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
   private changed: Array<(value: Item[]) => void> = [];
   private touched: Array<() => void> = [];
+
+  _onSelectItem = new EventEmitter<SourceItem[]>();
+  _onAfterSelectionChanged = new EventEmitter<Selection>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
@@ -177,17 +188,17 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   modelChange() {
-    this.changed.forEach(f => f(this.selection));
+    //this.changed.forEach(f => f(this.selection));
   }
 
   writeValue(obj: Item[]): void {
-    if (obj === null) {
-      this.selection = [];
-      this.modelChange();
-    } else {
-      this.selection = obj;
-      this.modelChange();
-    }
+    // if (obj === null) {
+    //   this._selectionComponent.selection = [];
+    //   this.modelChange();
+    // } else {
+    //   this.selection = obj;
+    //   this.modelChange();
+    // }
   }
 
   registerOnChange(fn: (value: Item[]) => void): void {
@@ -212,41 +223,20 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   }
 
-  onChangeData (newData: Item[]) {
-    this.data = newData;
-  }
-
   ngOnInit(): void {
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
-      if (this.expanded && this.searchComponent) {
-        this.searchComponent.focus();
+      if (this.expanded && this._searchComponent) {
+        this._searchComponent.focus();
       }
       if (this.search && this.clearSearchAfterCollapse && !this.expanded) {
-        this.searchComponent.empty();
+        this._searchComponent.empty();
       }
       if (this.expanded && this.scrollToSelectionAfterOpen) {
           this.changeDetectorRef.detectChanges();
           this.listComponent.scrollToSelection();
       }
     });
-    if (this.selectionDefault) {
-      if (Array.isArray(this.selectionDefault)) {
-        this.selection = this.selectionDefault;
-        this.modelChange();
-      } else {
-        this.selection = [this.selectionDefault];
-        this.modelChange();
-      }
-    } else if (this.selectionDefaultMapper) {
-      this.selection = this.selectionDefaultMapper(this.data);
-      this.modelChange();
-    }
-    if (this.selection.length > 0) {
-      this.selection.forEach((item: Item) => {
-        this.onSelect.emit(item);
-      });
-    }
   }
 
   ngOnDestroy(): void {
@@ -264,26 +254,32 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
     }
   }
 
-  onSelectItem(sourceItem: SourceItem): void {
-    if (this.selectionMode === SELECTION_MODE_SINGLE) {
-      this.selection = [sourceItem.data];
-      this.modelChange();
-    } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-      if (this.selectionMaxLength < 0 || (this.selection.length + 1 <= this.selectionMaxLength)) {
-        this.selection.push(sourceItem.data);
-        this.modelChange();
-      }
-    }
-    if (this.closeAfterSelect) {
-      this.expandedChanged.emit(false);
-    }
-    this.onSelect.emit(sourceItem.data);
+  onSelectItem(sourceItems: SourceItem[]): void {
+    this._onSelectItem.emit(sourceItems);
+
+    // if (this.selectionMode === SELECTION_MODE_SINGLE) {
+    //   this.selection = [sourceItems[0].data];
+    //   this.modelChange();
+    // } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
+    //   if (this.selectionMaxLength < 0 || (this.selection.length + 1 <= this.selectionMaxLength)) {
+    //     this.selection.push(sourceItem.data);
+    //     this.modelChange();
+    //   }
+    // }
+    // if (this.closeAfterSelect) {
+    //   this.expandedChanged.emit(false);
+    // }
+    // this.onSelect.emit(sourceItem.data);
+  }
+
+  afterSelectionChanged(selection: Selection): void {
+    this._onAfterSelectionChanged.emit(selection);
   }
 
   onNgsFocus($event: Event): void {
     this.focus = true;
     if (this.autocomplete) {
-      this.searchComponent.focus();
+      this._searchComponent.focus();
     }
   }
 
@@ -306,56 +302,17 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   onKeyPress(event: KeyboardEvent) {
-
-    if (event.keyCode === KEY_CODE.DOWN_ARROW && !this.expanded && this.hasFocus()) {
-      this.expandedChanged.emit(true);
+    if (this.keyboardStrategy) {
+      this.keyboardStrategy.onKeyPress(event, this);
     }
-    this.keyEvents.emit(event);
-
-    let list = this.listComponent;
-    if (event.keyCode === KEY_CODE.ENTER && list.source.getHighlited() && !list.isHidden()) {
-      list.onSelectItem.emit(list.source.getHighlited());
-    }
-    if (event.keyCode === KEY_CODE.UP_ARROW) {
-      const currentIndex = list.source.getEnabledSourceItems().indexOf(list.source.getHighlited());
-      if (currentIndex && currentIndex > 0) {
-        list.source.setHighlited(list.source.getEnabledSourceItems()[currentIndex - 1]);
-      }
-      const item = list.getActiveLi();
-      if (item) {
-        const top = list.getLiTopPosition(item);
-        if (top < (list.ul.nativeElement.scrollTop)) {
-          list.ul.nativeElement.scrollTop -= list.getLiHeight(item);
-        }
-      }
-    }
-    if (event.keyCode === KEY_CODE.DOWN_ARROW) {
-      const currentIndex = list.source.getEnabledSourceItems().indexOf(list.source.getHighlited());
-      if (currentIndex < list.source.getEnabledSourceItems().length - 1) {
-        list.source.setHighlited(list.source.getEnabledSourceItems()[currentIndex + 1]);
-      }
-      const item = list.getActiveLi();
-      if (item) {
-        const bottom = list.getLiBottomPosition(item);
-        if (bottom > (list.ul.nativeElement.offsetHeight + list.ul.nativeElement.scrollTop)) {
-          list.ul.nativeElement.scrollTop += list.getLiHeight(item);
-        }
-      }
-    }
-
   }
 
   onNextPageStart() {
     this.changeDetectorRef.detectChanges();
-    this.listComponent.scrollToTheBottom();
+    this._listComponent.scrollToTheBottom();
     setTimeout(() => {
-      this.onNextPage.emit({currentLength: this.data.length, search: this.searchComponent.getValue()});
+      this.onNextPage.emit({currentLength: this.listComponent.source.size(), search: this._searchComponent.getValue()});
     }, this.paginationDelay);
-  }
-
-  onDeleteItem(_item: Item) {
-    this.selection = this.selection.filter(item => item !== _item);
-    this.modelChange();
   }
 
   onHighlightItem(_item: Item) {
@@ -363,37 +320,52 @@ export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, Contro
   }
 
   onTextInputKeyDown(event: KeyboardEvent) {
-    if (this.autocomplete) {
-      if (event.keyCode === KEY_CODE.BACKSPACE && !this.searchComponent.getValue()) {
-        if (!this.highlightedItem) {
-          this.highlightedItem = this.selection[this.selection.length - 1];
-        } else {
-          this.selection = this.selection.filter(item => item !== this.highlightedItem);
-          this.modelChange();
-          this.highlightedItem = null;
-        }
-      }
-    }
+    // if (this.autocomplete) {
+    //   if (event.keyCode === KEY_CODE.BACKSPACE && !this._searchComponent.getValue()) {
+    //     if (!this.highlightedItem) {
+    //       this.highlightedItem = this.selection[this.selection.length - 1];
+    //     } else {
+    //       this.selection = this.selection.filter(item => item !== this.highlightedItem);
+    //       this.modelChange();
+    //       this.highlightedItem = null;
+    //     }
+    //   }
+    // }
   }
 
   trackByOpenUp(index, item) {
     return item;
   }
 
-  private hasFocus(): boolean {
+  public hasFocus(): boolean {
     if (document.activeElement) {
-      return document.activeElement === this.ngs.nativeElement || document.activeElement === this.searchComponent.getNativeElement();
+      return document.activeElement === this.ngs.nativeElement || document.activeElement === this._searchComponent.getNativeElement();
     } else {
       return false;
     }
   }
 
-  // public methods
-  public getSearchComponent(): SearchComponent {
-    return this.searchComponent;
+  public expand() {
+    this.expandedChanged.emit(true);
   }
 
-  public getData(): Item[] {
-    return this.data;
+  public collapse() {
+    this.expandedChanged.emit(false);
+  }
+
+  get listComponent(): ListComponent {
+    return this._listComponent;
+  }
+
+  get searchComponent(): SearchComponent {
+    return this._searchComponent;
+  }
+
+  get selectionComponent(): SelectionComponent {
+    return this._selectionComponent;
+  }
+
+  get source(): Source {
+    return this.listComponent.source;
   }
 }

@@ -8,7 +8,6 @@ export class SelectionItem {
     this._data = data;
     this._markedForDelete = markedForDelete;
   }
-
   get data(): Item {
     return this._data;
   }
@@ -28,11 +27,10 @@ export class SelectionItem {
 
 export class Selection implements Iterable<SelectionItem> {
   private items: SelectionItem[] = [];
-  private _equals: (item1: Item, item2: Item) => boolean;
+  private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
 
-
-  constructor(equals: (item1: Item, item2: Item) => boolean) {
-    this._equals = equals;
+  public setData(items: SelectionItem[]) {
+    this.items = items;
   }
 
   public forEach(fn: Function): void {
@@ -59,19 +57,20 @@ export class Selection implements Iterable<SelectionItem> {
     return false;
   }
 
+  public get(index: number) {
+    return this.items[index];
+  }
+
   public remove(item: SelectionItem): void {
     this.items.splice(this.items.indexOf(item), 1);
   }
-
 
   public push(data: any): void {
     this.items.push(new SelectionItem(data, false));
   }
 
-  public pushAll(data: any[]): void {
-    data.forEach(item => {
-      this.push(item);
-    });
+  public pushAll(items: SelectionItem[]): void {
+    this.items = this.items.concat(items);
   }
 
   public size(): number {
