@@ -24,13 +24,12 @@ import {Subscription} from 'rxjs/Subscription';
     <ng-template #defaultClearTemplate>
       <span [innerHtml]="cross"></span>
     </ng-template>
-    
+
     <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true}">
-      
       <div *ngIf="selection.size() === 0" class="empty">
         <ng-container *ngTemplateOutlet="emptyTemplate ? emptyTemplate : defaultEmptyTemplate"></ng-container>
       </div>
-      
+
       <ng-container *ngIf="selection.size() >= 1">
         <div *ngIf="singleMode() && !deletable" class="single">
           <div [ngClass]="{'single': true, 'selected': highlightedItem === selection.get(0)}">
@@ -74,9 +73,9 @@ import {Subscription} from 'rxjs/Subscription';
           </div>
         </div>
       </ng-container>
-      
+
       <span *ngIf="showArrow" [ngClass]="{'arrow': true, 'up-arrow': arrowDirection}"></span>
-      
+
     </div>
   `
 })
@@ -112,12 +111,12 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   ngOnInit(): void {
     this.selectionChangeSubscription = this.$selections.subscribe((sourceItems: SourceItem[]) => {
       if (this.selectionMode === SELECTION_MODE_SINGLE) {
-        let dataItem = sourceItems[0].data;
+        const dataItem = sourceItems[0].data;
         this.selection.setData([new SelectionItem(dataItem, false)]);
         this.onAfterSelectionChanged.emit(this.selection);
       } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
         if (this.selectionMaxLength < 0 || (this.selection.size() + 1 <= this.selectionMaxLength)) {
-          let selectionItems = sourceItems.map((sourceItem: SourceItem) => {
+          const selectionItems = sourceItems.map((sourceItem: SourceItem) => {
             return new SelectionItem(sourceItem.data, false);
           });
           this.selection.pushAll(selectionItems);
@@ -128,7 +127,7 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
 
     if (this.selectionDefault) {
       if (Array.isArray(this.selectionDefault)) {
-        let selectionItems = this.selectionDefault.map((dataItem: Item) => {
+        const selectionItems = this.selectionDefault.map((dataItem: Item) => {
           return new SelectionItem(dataItem, false);
         });
         this.selection.setData(selectionItems);
