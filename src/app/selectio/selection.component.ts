@@ -2,8 +2,8 @@ import {
   Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
-import {SELECTION_MODE_SINGLE} from './ng-selectio.component';
-import {SELECTION_MODE_MULTIPLE} from './ng-selectio.component';
+import {SELECTION_MODE_SINGLE} from './selectio-plugin.component';
+import {SELECTION_MODE_MULTIPLE} from './selectio-plugin.component';
 import {Item} from './types';
 import {SelectionMode} from './types';
 import {SourceItem} from './model/source';
@@ -12,7 +12,7 @@ import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 
 @Component({
-  selector: 'selection',
+  selector: 'selectio-selection',
   encapsulation: ViewEncapsulation.None,
   template: `
     <ng-template #defaultItemTemplate let-item="item">
@@ -143,14 +143,6 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
     this.selectionChangeSubscription.unsubscribe();
   }
 
-  singleMode() {
-    return this.selectionMode === SELECTION_MODE_SINGLE;
-  }
-
-  multipleMode() {
-    return this.selectionMode === SELECTION_MODE_MULTIPLE;
-  }
-
   onDeleteClick(event: MouseEvent, selectionItem: SelectionItem) {
     if (this.disabled) {
       return;
@@ -167,5 +159,13 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
     if (this.highlightedItem !== selectionItem) {
       this.onHighlightItem.emit(selectionItem);
     }
+  }
+
+  singleMode() {
+    return this.selectionMode === SELECTION_MODE_SINGLE;
+  }
+
+  multipleMode() {
+    return this.selectionMode === SELECTION_MODE_MULTIPLE;
   }
 }

@@ -4,19 +4,21 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/types';
+import {Item} from '../selectio/types';
 
 @Component({
-  selector: 'app-examples-page',
+  selector: 'selectio-examples-page',
   encapsulation: ViewEncapsulation.None,
   template: `
     <ng-template #selectioTemplate>
       Selectio...
     </ng-template>
-    
+
     <ng-template #countryTemplate let-countryItem="item">
       <div id="country-iso-name">
-        <div class="flag-wrapper"><div class="icon-flag" [innerHtml]="countryItem.svgFlag | safeHtml"></div></div>
+        <div class="flag-wrapper">
+          <div class="icon-flag" [innerHtml]="countryItem.svgFlag | safeHtml"></div>
+        </div>
         <span class="country-name">{{countryItem.name + '(' + countryItem.code + ')'}}</span>
       </div>
     </ng-template>
@@ -24,65 +26,65 @@ import {Item} from '../ng-selectio/types';
     <ng-template #personTemplate let-item="item">
       {{item.name.first}}
     </ng-template>
-    
+
     <div id="examples-cont">
       <h2>Simple select array of strings</h2>
-      <ng-selectio
+      <selectio-plugin
         [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$stringArray"
         [allowClear]="true"
-      ></ng-selectio>
+      ></selectio-plugin>
       <h2>Simple select array of objects</h2>
-      <!--<ng-selectio-->
-        <!--[selectionEmptyTemplate]="selectioTemplate"-->
-        <!---->
-        <!--[listItemTemplate]="countryTemplate"-->
-        <!--[$data]="$objectArray"-->
-        <!--[selectionDefaultMapper]="selectionDefaultMapper"-->
+      <!--<selectio-plugin-->
+      <!--[selectionEmptyTemplate]="selectioTemplate"-->
+      <!---->
+      <!--[listItemTemplate]="countryTemplate"-->
+      <!--[$data]="$objectArray"-->
+      <!--[selectionDefaultMapper]="selectionDefaultMapper"-->
       <!--&gt;</ng-selectio>-->
       <!--<h2>Simple select array of strings with search</h2>-->
-      <!--<ng-selectio-->
-        <!--[selectionEmptyTemplate]="selectioTemplate"-->
-        <!--[$data]="$stringArray"-->
-        <!--[search]="true"-->
-        <!--(onSearch)="onSearchString($event)"-->
+      <!--<selectio-plugin-->
+      <!--[selectionEmptyTemplate]="selectioTemplate"-->
+      <!--[$data]="$stringArray"-->
+      <!--[search]="true"-->
+      <!--(onSearch)="onSearchString($event)"-->
       <!--&gt;</ng-selectio>-->
       <!--<h2>Simple select array of strings with search and autocomplete</h2>-->
-      <!--<ng-selectio-->
-        <!--[selectionEmptyTemplate]="selectioTemplate"-->
-        <!--[$data]="$stringArray"-->
-        <!--[search]="true"-->
-        <!--[autocomplete]="true"-->
-        <!--(onSearch)="onSearchString($event)"-->
+      <!--<selectio-plugin-->
+      <!--[selectionEmptyTemplate]="selectioTemplate"-->
+      <!--[$data]="$stringArray"-->
+      <!--[search]="true"-->
+      <!--[autocomplete]="true"-->
+      <!--(onSearch)="onSearchString($event)"-->
       <!--&gt;</ng-selectio>-->
       <!--<h2>Remote data select with search and pagination</h2>-->
-      <!--<ng-selectio-->
-        <!--[selectionItemTemplate]="personTemplate"-->
-        <!--[listItemTemplate]="personTemplate"-->
-        <!--[selectionEmptyTemplate]="selectioTemplate"-->
-        <!--[$data]="$users"-->
-        <!--[$appendData]="$appendUsers"-->
-        <!--[selectionDefault]="this.dataService.exampleRandomUsers"-->
-        <!--[selectionMode]="'multiple'"-->
-        <!--[search]="true"-->
-        <!--[allowClear]="true"-->
-        <!--[pagination]="true"-->
-        <!--[paginationDelay]="500"-->
-        <!--(onSearch)="onSearch($event)"-->
-        <!--(onNextPage)="onNextPage($event)"-->
+      <!--<selectio-plugin-->
+      <!--[selectionItemTemplate]="personTemplate"-->
+      <!--[listItemTemplate]="personTemplate"-->
+      <!--[selectionEmptyTemplate]="selectioTemplate"-->
+      <!--[$data]="$users"-->
+      <!--[$appendData]="$appendUsers"-->
+      <!--[selectionDefault]="this.dataService.exampleRandomUsers"-->
+      <!--[selectionMode]="'multiple'"-->
+      <!--[search]="true"-->
+      <!--[allowClear]="true"-->
+      <!--[pagination]="true"-->
+      <!--[paginationDelay]="500"-->
+      <!--(onSearch)="onSearch($event)"-->
+      <!--(onNextPage)="onNextPage($event)"-->
       <!--&gt;</ng-selectio>-->
 
       <!--<h2>ngmodel</h2>-->
       <!--<div>-->
-        <!--<ng-selectio-->
-          <!--[selectionEmptyTemplate]="selectioTemplate"-->
-          <!--[(ngModel)]="itemArray"-->
-          <!--[$data]="$stringArray"-->
-          <!--[dropdownDisabledItemMapper]="disabledItem"-->
-          <!--[allowClear]="true"-->
-        <!--&gt;-->
-        <!--</ng-selectio>-->
-        <!--<div class="selected-item">{{itemArray}}</div>-->
+      <!--<selectio-plugin-->
+      <!--[selectionEmptyTemplate]="selectioTemplate"-->
+      <!--[(ngModel)]="itemArray"-->
+      <!--[$data]="$stringArray"-->
+      <!--[dropdownDisabledItemMapper]="disabledItem"-->
+      <!--[allowClear]="true"-->
+      <!--&gt;-->
+      <!--</ng-selectio>-->
+      <!--<div class="selected-item">{{itemArray}}</div>-->
       <!--</div>-->
     </div>
   `,

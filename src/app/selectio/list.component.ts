@@ -15,7 +15,7 @@ export enum SourceType {
 }
 
 @Component({
-  selector: 'list',
+  selector: 'selectio-list',
   template: `
     
     <ng-template #defaultItemTemplate let-sourceItem="sourceItem">

@@ -33,12 +33,12 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'ng-selectio',
+  selector: 'selectio-plugin',
   providers: [
-    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => NgSelectioComponent), multi: true}
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true}
   ],
   template: `
-    <div class="ngs" #ngs 
+    <div class="ngs" #ngs
          [attr.tabindex]="tabIndex"
          [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
          (focus)="onNgsFocus($event)"
@@ -48,41 +48,43 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
-          <selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
-                     [$selections]="_onSelectItem"
-                     [highlightedItem]="highlightedItem"
-                     [itemTemplate]="selectionItemTemplate"
-                     [clearTemplate]="selectionClearTemplate"
-                     [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate"
-                     [selectionMode]="selectionMode"
-                     [selectionMaxLength]="selectionMaxLength"
-                     [showArrow]="!autocomplete"
-                     [arrowDirection]="openUp ? !expanded : expanded"
-                     [deletable]="allowClear"
-                     [disabled]="disabled"
-                     [selectionDefault]="selectionDefault"
-                     (click)="onClickSelection($event)"
-                     (onHighlightItem)="onHighlightItem($event)"
-                     (onAfterSelectionChanged)="afterSelectionChanged($event)" 
-          >
-          </selection>
-          <search #searchComponent *ngIf="autocomplete" style="display: inline-block"
-                              [autocomplete]="autocomplete"
-                              [searchPlaceholder]="searchPlaceholder"
+          <selectio-selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
+                              [$selections]="_onSelectItem"
+                              [highlightedItem]="highlightedItem"
+                              [itemTemplate]="selectionItemTemplate"
+                              [clearTemplate]="selectionClearTemplate"
+                              [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate"
+                              [selectionMode]="selectionMode"
+                              [selectionMaxLength]="selectionMaxLength"
+                              [showArrow]="!autocomplete"
+                              [arrowDirection]="openUp ? !expanded : expanded"
+                              [deletable]="allowClear"
                               [disabled]="disabled"
-                              [searchDelay]="searchDelay"
-                              [searchMinLength]="searchMinLength"
-                              [tabIndex]="tabIndex"
-                              (onSearchFocus)="onSearchFocus($event)"
-                              (onSearchKeyDown)="onTextInputKeyDown($event)"
-                              (onSearchValueChanges)="onSearchValueChanges($event)"
-          ></search>
+                              [selectionDefault]="selectionDefault"
+                              (click)="onClickSelection($event)"
+                              (onHighlightItem)="onHighlightItem($event)"
+                              (onAfterSelectionChanged)="afterSelectionChanged($event)"
+          >
+          </selectio-selection>
+          <selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
+                  [autocomplete]="autocomplete"
+                  [searchPlaceholder]="searchPlaceholder"
+                  [disabled]="disabled"
+                  [searchDelay]="searchDelay"
+                  [searchMinLength]="searchMinLength"
+                  [tabIndex]="tabIndex"
+                  (onSearchFocus)="onSearchFocus($event)"
+                  (onSearchKeyDown)="onTextInputKeyDown($event)"
+                  (onSearchValueChanges)="onSearchValueChanges($event)"
+          ></selectio-search>
         </div>
-        <div class="dropdown-wrapper" *ngIf="order===2" [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}" >
-          <div class="dropdown" [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
+        <div class="dropdown-wrapper" *ngIf="order===2"
+             [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}">
+          <div class="dropdown"
+               [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
             <div>
               <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
-                <search #searchComponent *ngIf="order===1 && !autocomplete && search"
+                <selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
                         [autocomplete]="autocomplete"
                         [searchPlaceholder]="searchPlaceholder"
                         [disabled]="disabled"
@@ -92,8 +94,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         (onSearchFocus)="onSearchFocus($event)"
                         (onSearchKeyDown)="onTextInputKeyDown($event)"
                         (onSearchValueChanges)="onSearchValueChanges($event)"
-                ></search>
-                <list #listComponent *ngIf="order===2"
+                ></selectio-search>
+                <selectio-list #listComponent *ngIf="order===2"
                       [$data]="$data"
                       [$appendData]="$appendData"
                       [$selection]="_onAfterSelectionChanged"
@@ -108,7 +110,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                       (onSelectItem)="onSelectItem($event)"
                       (onNextPage)="onNextPageStart()"
                 >
-                </list>
+                </selectio-list>
               </ng-container>
             </div>
           </div>
@@ -117,7 +119,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     </div>
   `
 })
-export class NgSelectioComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
   @Input() $data: Observable<Item[]> = Observable.of([]);
   @Input() $appendData: Observable<Item[]> = Observable.of([]);

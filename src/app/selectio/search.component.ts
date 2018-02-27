@@ -6,7 +6,7 @@ import {Subscription} from 'rxjs/Subscription';
 import {TextWidthService} from './text-width.service';
 
 @Component({
-  selector: 'search',
+  selector: 'selectio-search',
   encapsulation: ViewEncapsulation.None,
   template: `
     <div [ngClass]="{'search': true}"

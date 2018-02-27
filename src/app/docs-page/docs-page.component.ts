@@ -4,9 +4,9 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/types';
-import {NgSelectioComponent, SELECTION_MODE_SINGLE} from '../ng-selectio/ng-selectio.component';
-import {SelectionMode} from '../ng-selectio/types';
+import {Item} from '../selectio/types';
+import {SelectioPluginComponent, SELECTION_MODE_SINGLE} from '../selectio/selectio-plugin.component';
+import {SelectionMode} from '../selectio/types';
 import {NavigationEnd, Router} from '@angular/router';
 
 @Component({
@@ -76,7 +76,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   private fixed: boolean;
   private menuPositionChange = new EventEmitter<boolean>();
 
-  @ViewChild('selectio') selectio: NgSelectioComponent;
+  @ViewChild('selectio') selectio: SelectioPluginComponent;
   @ViewChild('menu') menu: ElementRef;
   @ViewChild('container') container: ElementRef;
 

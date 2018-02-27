@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {NgSelectioComponent} from './ng-selectio.component';
+import {SelectioPluginComponent} from './selectio-plugin.component';
 import {SelectionComponent} from './selection.component';
 import {ListComponent} from './list.component';
 import {SearchComponent} from './search.component';
@@ -13,7 +13,7 @@ import {SourceItemDirective} from './source-item.directive';
 
 @NgModule({
   declarations: [
-    NgSelectioComponent,
+    SelectioPluginComponent,
     SelectionComponent,
     ListComponent,
     DefaultItemPipe,
@@ -29,11 +29,11 @@ import {SourceItemDirective} from './source-item.directive';
   providers: [TextWidthService],
   exports: [
     ReactiveFormsModule,
-    NgSelectioComponent,
+    SelectioPluginComponent,
     SearchComponent,
     SelectioRequiredValidator
   ]
 })
-export class NgSelectioModule {
+export class SelectioPluginModule {
 
 }

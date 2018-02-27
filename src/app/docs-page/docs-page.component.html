@@ -8,7 +8,7 @@
     </nav>
     <div id="selectio-container">
       <h1>Selectio</h1>
-      <ng-selectio *ngIf="showSelectio" #selectio
+      <selectio-plugin *ngIf="showSelectio" #selectio
                    [$data]="$data"
                    [$appendData]="$appendData"
                    [selectionMode]="selectionMode"
@@ -32,7 +32,7 @@
                    [trackByFn]="trackByFn"
                    (onSearch)="onSearch($event)"
                    (onNextPage)="onNextPage($event)"
-      ></ng-selectio>
+      ></selectio-plugin>
     </div>
   </div>
 

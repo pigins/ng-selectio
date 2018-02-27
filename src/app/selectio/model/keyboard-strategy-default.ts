@@ -1,9 +1,9 @@
 import {KeyboardStrategy} from './keyboard-strategy';
-import {KEY_CODE, NgSelectioComponent} from '../ng-selectio.component';
+import {KEY_CODE, SelectioPluginComponent} from '../selectio-plugin.component';
 
 export class KeyboardStrategyDefault implements KeyboardStrategy {
   // TODO
-  onKeyPress(event: KeyboardEvent, selectio: NgSelectioComponent): void {
+  onKeyPress(event: KeyboardEvent, selectio: SelectioPluginComponent): void {
 
     // if (event.keyCode === KEY_CODE.DOWN_ARROW && !selectio.expanded && selectio.hasFocus()) {
     //   selectio.expand();
