@@ -26,7 +26,6 @@
                    [allowClear]="allowClear"
                    [clearSearchAfterCollapse]="clearSearchAfterCollapse"
                    [openUp]="openUp"
-                   [dropdownDisabledItemMapper]="dropdownDisabledItemMapper"
                    [searchPlaceholder]="searchPlaceholder"
                    [tabIndex]="tabIndex"
                    [trackByFn]="trackByFn"
@@ -141,20 +140,6 @@
       <td>boolean</td>
       <td></td>
       <td>false</td>
-    </tr>
-
-    <tr>
-      <td>dropdownDisabledItemMapper</td>
-      <td>
-        <app-select-input
-          [options]="[{label: 'all disabled', value: dropdownDisabledItemMapper_allDisabled}, {label: 'all enabled', value: dropdownDisabledItemMapper_allEnabled}]"
-          [(ngModel)]=dropdownDisabledItemMapper>
-        </app-select-input>
-      </td>
-      <td></td>
-      <td>(item: Item) => boolean</td>
-      <td></td>
-      <td>(item: Item) => false</td>
     </tr>
 
     <tr>

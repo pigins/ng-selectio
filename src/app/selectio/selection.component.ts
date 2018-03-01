@@ -6,10 +6,11 @@ import {SELECTION_MODE_SINGLE} from './selectio-plugin.component';
 import {SELECTION_MODE_MULTIPLE} from './selectio-plugin.component';
 import {Item} from './types';
 import {SelectionMode} from './types';
-import {SourceItem} from './model/source';
-import {Selection, SelectionItem} from './model/selection';
+import {SourceItem} from './model/source-item';
+import {Selection} from './model/selection';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
+import {SelectionItem} from "./model/selection-item";
 
 @Component({
   selector: 'selectio-selection',
@@ -32,14 +33,14 @@ import {Subscription} from 'rxjs/Subscription';
 
       <ng-container *ngIf="selection.size() >= 1">
         <div *ngIf="singleMode() && !deletable" class="single">
-          <div [ngClass]="{'single': true, 'selected': highlightedItem === selection.get(0)}">
+          <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
             context:{item:selection.get(0)}"></ng-container>
           </div>
         </div>
 
         <div *ngIf="singleMode() && deletable" class="single deletable">
-          <div [ngClass]="{'single': true, 'selected': highlightedItem === selection.get(0)}">
+          <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
             context:{item:selection.get(0)}"></ng-container>
             <span class="clear" (click)="onDeleteClick($event, selection.get(0))">
@@ -51,7 +52,7 @@ import {Subscription} from 'rxjs/Subscription';
         <div *ngIf="multipleMode() && !deletable" class="multiple">
           <div *ngFor="let item of selection;"
                [ngStyle]="{'display': 'inline-block'}"
-               [ngClass]="{'selected': highlightedItem === item}"
+               [ngClass]="{'selected': selection.itemHighlighted(item)}"
                (click)="highlight(item)">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
             context:{item:item}"></ng-container>
@@ -61,7 +62,7 @@ import {Subscription} from 'rxjs/Subscription';
         <div *ngIf="multipleMode() && deletable" class="multiple deletable">
           <div *ngFor="let item of selection"
                [ngStyle]="{'display': 'inline-block'}"
-               [ngClass]="{'selected': highlightedItem === item}"
+               [ngClass]="{'selected': selection.itemHighlighted(item)}"
                (click)="highlight(item)">
             <span class="clear" (click)="onDeleteClick($event, item)">
               <ng-container *ngTemplateOutlet="clearTemplate ? clearTemplate : defaultClearTemplate"></ng-container>
@@ -81,7 +82,6 @@ import {Subscription} from 'rxjs/Subscription';
 })
 export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   @Input() $selections: Observable<SourceItem[]>;
-  @Input() highlightedItem: SelectionItem; // should be inside selection
   @Input() selectionMode: SelectionMode;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;
@@ -94,7 +94,6 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   @Input() emptyTemplate: TemplateRef<any>;
   @Input() clearTemplate: TemplateRef<any>;
 
-  @Output() onHighlightItem = new EventEmitter<SelectionItem>();
   @Output() onAfterSelectionChanged = new EventEmitter<Selection>();
 
   selection: Selection = new Selection();
@@ -156,9 +155,7 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
     if (this.disabled) {
       return;
     }
-    if (this.highlightedItem !== selectionItem) {
-      this.onHighlightItem.emit(selectionItem);
-    }
+    this.selection.highlightedItem = selectionItem;
   }
 
   singleMode() {

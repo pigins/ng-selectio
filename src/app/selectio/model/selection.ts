@@ -1,32 +1,10 @@
 import {Item} from '../types';
-
-export class SelectionItem {
-  private _data: Item;
-  private _markedForDelete: boolean;
-
-  constructor(data: Item, markedForDelete: boolean) {
-    this._data = data;
-    this._markedForDelete = markedForDelete;
-  }
-  get data(): Item {
-    return this._data;
-  }
-
-  set data(value: Item) {
-    this._data = value;
-  }
-
-  get markedForDelete(): boolean {
-    return this._markedForDelete;
-  }
-
-  set markedForDelete(value: boolean) {
-    this._markedForDelete = value;
-  }
-}
+import {SelectionItem} from './selection-item';
 
 export class Selection implements Iterable<SelectionItem> {
+
   private items: SelectionItem[] = [];
+  private _highlightedItem: SelectionItem | null;
   private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
 
   public setData(items: SelectionItem[]) {
@@ -103,6 +81,31 @@ export class Selection implements Iterable<SelectionItem> {
     this._equals = value;
   }
 
+  firstItemHighlighted(): boolean {
+    return this.items[0] === this._highlightedItem;
+  }
+
+  itemHighlighted(item: SelectionItem): boolean {
+    return this._highlightedItem === item;
+  }
+
+  highlightOrDeleteLastItem(): void {
+    if (!this._highlightedItem) {
+      this.highlightedItem = this.items[this.items.length - 1];
+    } else {
+      this.items = this.items.filter(item => item !== this._highlightedItem);
+      this._highlightedItem = null;
+    }
+  }
+
+  get highlightedItem(): SelectionItem | null {
+    return this._highlightedItem;
+  }
+
+  set highlightedItem(value: SelectionItem | null) {
+    this._highlightedItem = value;
+  }
+
   [Symbol.iterator](): Iterator<SelectionItem> {
     let index = 0;
     return {
@@ -110,7 +113,7 @@ export class Selection implements Iterable<SelectionItem> {
         const value = this.items[index];
         const done = index >= this.items.length;
         index++;
-        return { value, done };
+        return {value, done};
       }
     };
   }

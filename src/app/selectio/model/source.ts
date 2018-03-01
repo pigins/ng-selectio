@@ -1,5 +1,6 @@
 import {Item} from '../types';
 import {SourceType} from '../list.component';
+import {SourceItem} from './source-item';
 
 /**
  * Source of data from witch selection done.
@@ -16,6 +17,7 @@ export interface Source extends Iterable<SourceItem> {
   isHighlited(sourceItem: SourceItem): boolean;
   setHighlited(sourceItem: SourceItem): void;
   getHighlited(): SourceItem;
+  setOnItemInit(param: (sourceItem) => void): void;
 }
 
 export class ArraySource implements Source {
@@ -23,14 +25,27 @@ export class ArraySource implements Source {
   private disabledItemMapper: (item: Item) => boolean = (item: Item) => false;
   private sourceItems: SourceItem[] = [];
   private highlitedItem: SourceItem;
+  private onItemInitCallback: (sourceItem) => void | null;
+
+  setOnItemInit(param: (sourceItem) => void): void {
+    this.onItemInitCallback = param;
+  }
 
   appendDataItem(item: Item) {
     this.sourceItems = this.sourceItems.concat(new SourceItem(item));
+    if (this.onItemInitCallback) {
+      this.onItemInitCallback(item);
+    }
   }
 
   appendDataItems(items: Item[]) {
     const sourceItems = items.map(item => new SourceItem(item));
     this.sourceItems = this.sourceItems.concat(sourceItems);
+    if (this.onItemInitCallback) {
+      sourceItems.forEach((sourceItem) => {
+        this.onItemInitCallback(sourceItem);
+      });
+    }
   }
 
   getDataItems(): Item[] {
@@ -89,48 +104,13 @@ export class ArraySource implements Source {
   }
 }
 
-export class SourceItem {
-  private _data: Item;
-  private _disabled: boolean;
-  private _selected: boolean;
-
-  constructor(data: Item) {
-    this._data = data;
-    this._disabled = false;
-  }
-
-  get data(): Item {
-    return this._data;
-  }
-
-  set data(value: Item) {
-    this._data = value;
-  }
-
-  get disabled(): boolean {
-    return this._disabled;
-  }
-
-  set disabled(value: boolean) {
-    this._disabled = value;
-  }
-
-  get selected(): boolean {
-    return this._selected;
-  }
-
-  set selected(value: boolean) {
-    this._selected = value;
-  }
-}
-
 export class SourceFactory {
-  static getInstance(sourceType: SourceType, items?: Item[], disabledItemMapper?: (item: Item) => boolean): Source {
+  static getInstance(sourceType: SourceType, items?: Item[], onItemInit?: (sourceItem) => void): Source {
     if (items) {
       if (sourceType === SourceType.ARRAY) {
         const result = new ArraySource();
-        if (disabledItemMapper) {
-          result.setDisabledItemMapper(disabledItemMapper);
+        if (onItemInit) {
+          result.setOnItemInit(onItemInit);
         }
         result.appendDataItems(items);
         return result;

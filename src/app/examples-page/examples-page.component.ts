@@ -5,6 +5,7 @@ import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from '../selectio/types';
+import {SourceItem} from '../selectio/model/source-item';
 
 @Component({
   selector: 'selectio-examples-page',
@@ -33,6 +34,7 @@ import {Item} from '../selectio/types';
         [selectionEmptyTemplate]="selectioTemplate"
         [$data]="$stringArray"
         [allowClear]="true"
+        (afterSourceItemInit)="afterSourceItemInit($event)"
       ></selectio-plugin>
       <h2>Simple select array of objects</h2>
       <!--<selectio-plugin-->
@@ -97,28 +99,34 @@ import {Item} from '../selectio/types';
       font-family: "Roboto", sans-serif;
       font-weight: 300;
     }
+
     #examples-cont h2 {
       padding: 25px 0 5px;
       font-family: "Roboto Condensed", "Roboto", sans-serif;
       font-weight: 300;
       font-size: 20px;
     }
+
     .selected-item {
       padding: 5px 0 0 5px;
       font-size: 16px;
       color: #5383f8;
       text-align: center;
     }
+
     .ngs .selection .empty span {
       color: #828282;
     }
+
     .flag-wrapper {
       display: inline-block;
       vertical-align: middle;
     }
+
     .flag-wrapper svg {
       border: 1px solid #dedede;
     }
+
     #country-iso-name {
       max-height: 20px;
     }
@@ -131,7 +139,7 @@ export class ExamplesPageComponent {
   $appendUsers: Observable<any>;
   itemArray: Item[] = ['russia'];
 
-  constructor(private http: Http, public dataService: DataService ) {
+  constructor(private http: Http, public dataService: DataService) {
     this.$objectArray = this.dataService.countriesData;
   }
 
@@ -160,5 +168,9 @@ export class ExamplesPageComponent {
 
   disabledItem(item: any) {
     return item === 'canada';
+  }
+
+  afterSourceItemInit(sourceItem: SourceItem) {
+    console.log(sourceItem);
   }
 }

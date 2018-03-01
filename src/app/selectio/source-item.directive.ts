@@ -1,5 +1,5 @@
 import {Directive, ElementRef, Input} from '@angular/core';
-import {SourceItem} from './model/source';
+import {SourceItem} from './model/source-item';
 
 @Directive({
   selector: '[sourceItem]'

@@ -1,5 +1,5 @@
 import {Pipe, PipeTransform} from '@angular/core';
-import {SourceItem} from './model/source';
+import {SourceItem} from './model/source-item';
 
 @Pipe({name: 'defaultItem'})
 export class DefaultItemPipe implements PipeTransform {

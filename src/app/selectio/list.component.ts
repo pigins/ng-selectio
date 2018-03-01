@@ -5,10 +5,11 @@ import {
 import {Observable} from 'rxjs/Observable';
 import {Item} from './types';
 import {Subscription} from 'rxjs/Subscription';
-import {Source, SourceItem} from './model/source';
+import {Source} from './model/source';
 import {SourceFactory} from './model/source';
 import {SourceItemDirective} from './source-item.directive';
 import {Selection} from './model/selection';
+import {SourceItem} from "./model/source-item";
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -17,12 +18,12 @@ export enum SourceType {
 @Component({
   selector: 'selectio-list',
   template: `
-    
     <ng-template #defaultItemTemplate let-sourceItem="sourceItem">
       <span>{{sourceItem | defaultItem}}</span>
     </ng-template>
-    
-    <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination" let-appendingData="appendingData" let-searching="searching">
+
+    <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination"
+                 let-appendingData="appendingData" let-searching="searching">
       <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
       <li *ngIf="pagination && appendingData">Loading more data...</li>
       <li *ngIf="searching">Searching...</li>
@@ -34,11 +35,11 @@ export enum SourceType {
         Get more...
       </span>
     </ng-template>
-    
+
     <ul #ul
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
-        (scroll)="onUlScroll($event)" >
-      <li #itemList 
+        (scroll)="onUlScroll($event)">
+      <li #itemList
           *ngFor="let sourceItem of _source; trackBy: trackByFn"
           [sourceItem]="sourceItem"
           [ngClass]="{'active': !sourceItem.disabled && _source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
@@ -61,7 +62,6 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Input() $appendData: Observable<Item[]>;
   @Input() pagination: boolean;
   @Input() trackByFn: (index: number, sourceItem: SourceItem) => any;
-  @Input() disabledItemMapper: (item: Item) => boolean;
   @Input() sourceType: SourceType;
 
   // external context
@@ -77,6 +77,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onNextPage = new EventEmitter<void>();
   @Output() onSelectItem = new EventEmitter<SourceItem[]>();
   @Output() onChangeData = new EventEmitter<Source>();
+  @Output() afterSourceItemInit = new EventEmitter<SourceItem>();
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
@@ -95,7 +96,9 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     if (changes.$data && changes.$data.currentValue) {
       this.updatingData = true;
       this.dataSubscription = this.$data.take(1).subscribe((data: Item[]) => {
-        this._source = SourceFactory.getInstance(this.sourceType, data, this.disabledItemMapper);
+        this._source = SourceFactory.getInstance(this.sourceType, data, sourceItem => {
+          this.afterSourceItemInit.emit(sourceItem);
+        });
         this.onChangeData.emit(this._source);
         this.updatingData = false;
       });

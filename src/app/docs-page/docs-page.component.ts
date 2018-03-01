@@ -30,12 +30,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
           };`;
   selectionDefault_user: Item;
 
-  dropdownDisabledItemMapper_allDisabled(item: Item): boolean {
-    return true;
-  }
-  dropdownDisabledItemMapper_allEnabled(item: Item): boolean {
-    return false;
-  }
   trackByFn_byIndex(index: number, item: Item): any {
     return index;
   }
@@ -57,7 +51,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   closeAfterSelect: boolean = true;
   selectionMaxLength: number = -1;
 
-  dropdownDisabledItemMapper: (item: Item) => boolean = this.dropdownDisabledItemMapper_allEnabled;
   tabIndex: number = 1;
   trackByFn: ((index: number, item: Item) => any) | null = null;
   openUp: boolean = false;
