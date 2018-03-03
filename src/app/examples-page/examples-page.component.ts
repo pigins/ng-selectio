@@ -15,12 +15,21 @@ import {SourceItem} from '../selectio/model/source-item';
       Selectio...
     </ng-template>
 
-    <ng-template #countryTemplate let-countryItem="item">
+    <ng-template #countrySourceTemplate let-countryItem="sourceItem">
       <div id="country-iso-name">
         <div class="flag-wrapper">
-          <div class="icon-flag" [innerHtml]="countryItem.svgFlag | safeHtml"></div>
+          <div class="icon-flag" [innerHtml]="countryItem.data.svgFlag | safeHtml"></div>
         </div>
-        <span class="country-name">{{countryItem.name + '(' + countryItem.code + ')'}}</span>
+        <span class="country-name">{{countryItem.data.name + '(' + countryItem.data.code + ')'}}</span>
+      </div>
+    </ng-template>
+
+    <ng-template #countrySelectionTemplate let-countryItem="selectionItem">
+      <div id="country-iso-name">
+        <div class="flag-wrapper">
+          <div class="icon-flag" [innerHtml]="countryItem.data.svgFlag | safeHtml"></div>
+        </div>
+        <span class="country-name">{{countryItem.data.name + '(' + countryItem.data.code + ')'}}</span>
       </div>
     </ng-template>
 
@@ -37,20 +46,20 @@ import {SourceItem} from '../selectio/model/source-item';
         (afterSourceItemInit)="afterSourceItemInit($event)"
       ></selectio-plugin>
       <h2>Simple select array of objects</h2>
-      <!--<selectio-plugin-->
-      <!--[selectionEmptyTemplate]="selectioTemplate"-->
-      <!---->
-      <!--[listItemTemplate]="countryTemplate"-->
-      <!--[$data]="$objectArray"-->
-      <!--[selectionDefaultMapper]="selectionDefaultMapper"-->
-      <!--&gt;</ng-selectio>-->
-      <!--<h2>Simple select array of strings with search</h2>-->
-      <!--<selectio-plugin-->
-      <!--[selectionEmptyTemplate]="selectioTemplate"-->
-      <!--[$data]="$stringArray"-->
-      <!--[search]="true"-->
-      <!--(onSearch)="onSearchString($event)"-->
-      <!--&gt;</ng-selectio>-->
+      <selectio-plugin
+        [selectionEmptyTemplate]="selectioTemplate"
+        [listItemTemplate]="countrySourceTemplate"
+        [selectionItemTemplate]="countrySelectionTemplate"
+        [$data]="$objectArray"
+        [selectionDefault]="defaultCountry"
+      ></selectio-plugin>
+      <h2>Simple select array of strings with search</h2>
+      <selectio-plugin
+        [selectionEmptyTemplate]="selectioTemplate"
+        [$data]="$stringArray"
+        [search]="true"
+        (onSearch)="onSearchString($event)"
+      ></selectio-plugin>
       <!--<h2>Simple select array of strings with search and autocomplete</h2>-->
       <!--<selectio-plugin-->
       <!--[selectionEmptyTemplate]="selectioTemplate"-->
@@ -138,9 +147,13 @@ export class ExamplesPageComponent {
   $users: Observable<any>;
   $appendUsers: Observable<any>;
   itemArray: Item[] = ['russia'];
+  defaultCountry: Item;
 
   constructor(private http: Http, public dataService: DataService) {
     this.$objectArray = this.dataService.countriesData;
+    this.dataService.countriesData.subscribe((countries) => {
+      this.defaultCountry = countries[0];
+    });
   }
 
   onSearchString(term: string) {

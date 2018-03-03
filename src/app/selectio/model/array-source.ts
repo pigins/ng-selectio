@@ -68,10 +68,9 @@ export class ArraySource implements Source {
     let index: number = 0;
     return {
       next: () => {
-        index++;
         return {
-          value: this.sourceItems[index],
-          done: this.sourceItems.length === 0 || index + 1 >= this.sourceItems.length
+          value: this.sourceItems[index++],
+          done: this.sourceItems.length === 0 || index > this.sourceItems.length
         };
       },
     };

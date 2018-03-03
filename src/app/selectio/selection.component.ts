@@ -15,8 +15,8 @@ import {SelectionItem} from './model/selection-item';
   selector: 'selectio-selection',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <ng-template #defaultItemTemplate let-item="item">
-      <span>{{item | defaultItem}}</span>
+    <ng-template #defaultItemTemplate let-selectionItem="selectionItem">
+      <span>{{selectionItem.data | defaultItem}}</span>
     </ng-template>
     <ng-template #defaultEmptyTemplate>
       <span>No data</span>
@@ -34,14 +34,14 @@ import {SelectionItem} from './model/selection-item';
         <div *ngIf="singleMode() && !deletable" class="single">
           <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-            context:{item:selection.get(0)}"></ng-container>
+            context:{selectionItem:selection.get(0)}"></ng-container>
           </div>
         </div>
 
         <div *ngIf="singleMode() && deletable" class="single deletable">
           <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-            context:{item:selection.get(0)}"></ng-container>
+            context:{selectionItem:selection.get(0)}"></ng-container>
             <span class="clear" (click)="onDeleteClick($event, selection.get(0))">
               <ng-container *ngTemplateOutlet="clearTemplate ? clearTemplate : defaultClearTemplate"></ng-container>
             </span>
@@ -49,26 +49,26 @@ import {SelectionItem} from './model/selection-item';
         </div>
 
         <div *ngIf="multipleMode() && !deletable" class="multiple">
-          <div *ngFor="let item of selection;"
+          <div *ngFor="let selectionItem of selection;"
                [ngStyle]="{'display': 'inline-block'}"
-               [ngClass]="{'selected': selection.itemHighlighted(item)}"
-               (click)="highlight(item)">
+               [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+               (click)="highlight(selectionItem)">
             <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-            context:{item:item}"></ng-container>
+            context:{selectionItem:selectionItem}"></ng-container>
           </div>
         </div>
 
         <div *ngIf="multipleMode() && deletable" class="multiple deletable">
-          <div *ngFor="let item of selection"
+          <div *ngFor="let selectionItem of selection"
                [ngStyle]="{'display': 'inline-block'}"
-               [ngClass]="{'selected': selection.itemHighlighted(item)}"
-               (click)="highlight(item)">
-            <span class="clear" (click)="onDeleteClick($event, item)">
+               [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+               (click)="highlight(selectionItem)">
+            <span class="clear" (click)="onDeleteClick($event, selectionItem)">
               <ng-container *ngTemplateOutlet="clearTemplate ? clearTemplate : defaultClearTemplate"></ng-container>
             </span>
             <span>
               <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-              context:{item:item}"></ng-container>
+              context:{selectionItem:selectionItem}"></ng-container>
             </span>
           </div>
         </div>

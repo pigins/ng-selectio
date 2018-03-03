@@ -7,7 +7,7 @@ import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
 import {TextWidthService} from './text-width.service';
 import {ClickOutsideDirective} from './click-outside.directive';
-import {DefaultItemPipe} from './defaultItem.pipe';
+import {DefaultItemPipe} from './default-item.pipe';
 import {SelectioRequiredValidator} from './selectio-required.validator';
 import {SourceItemDirective} from './source-item.directive';
 

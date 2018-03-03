@@ -19,14 +19,14 @@ export enum SourceType {
   selector: 'selectio-list',
   template: `
     <ng-template #defaultItemTemplate let-sourceItem="sourceItem">
-      <span>{{sourceItem | defaultItem}}</span>
+      <span>{{sourceItem.data | defaultItem}}</span>
     </ng-template>
 
     <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination"
-                 let-appendingData="appendingData" let-searching="searching">
+                 let-appendingData="appendingData" let-updatingData="updatingData">
       <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
       <li *ngIf="pagination && appendingData">Loading more data...</li>
-      <li *ngIf="searching">Searching...</li>
+      <li *ngIf="updatingData">Searching...</li>
     </ng-template>
 
     <ng-template #defaultAfterUlTemplate let-source="source" let-pagination="pagination" let-hasScroll="hasScroll">
@@ -49,7 +49,7 @@ export enum SourceType {
         context:{sourceItem: sourceItem}"></ng-container>
       </li>
       <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
-      context:{source: _source, pagination: pagination, appendingData: appendingData, searching: searching}"></ng-container>
+      context:{source: _source, pagination: pagination, appendingData: appendingData, updatingData: updatingData}"></ng-container>
     </ul>
     <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
     context:{source: _source, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
@@ -66,7 +66,6 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // external context
   @Input() $selection: Observable<Selection>;
-  @Input() searching: boolean;
 
   // templates
   @Input() itemTemplate: TemplateRef<any>;

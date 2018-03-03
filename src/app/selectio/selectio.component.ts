@@ -98,7 +98,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                       [$appendData]="$appendData"
                       [$selection]="_onAfterSelectionChanged"
                       [sourceType]="sourceType"
-                      [searching]="searching"
                       [pagination]="pagination"
                       [trackByFn]="trackByFn"
                       [itemTemplate]="listItemTemplate"
@@ -213,7 +212,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onSearchValueChanges(value: string): void {
     this.onSearch.emit(value);
-    this.searching = true;
   }
 
   onClickSelection(): void {
