@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {Item} from '../selectio/types';
+import {Item} from '../selectio/model/item';
 
 export const COUNTRIES_DATA = [
     {
@@ -43,15 +43,15 @@ export const COUNTRIES_DATA = [
 
 @Injectable()
 export class DataService {
-  get countriesData():Observable<Item[]> {
+  get countriesData(): Observable<Item[]> {
     return Observable.of(COUNTRIES_DATA);
   }
 
-  get countriesStrings():Observable<Item[]> {
+  get countriesStrings(): Observable<Item[]> {
     return Observable.of(['russia', 'canada', 'usa', 'germany', 'france' , 'china', 'uk', 'australia', 'bolivia', 'india', 'romania']);
   }
 
-  get exampleRandomUsers():Item[] {
+  get exampleRandomUsers(): Item[] {
     return [
       {"gender":"male","name":{"title":"mr","first":"christian","last":"bennett"},"picture":{"large":"https://randomuser.me/api/portraits/men/80.jpg","medium":"https://randomuser.me/api/portraits/med/men/80.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/80.jpg"}},
       {"gender":"male","name":{"title":"mr","first":"benedikt","last":"hein"},"picture":{"large":"https://randomuser.me/api/portraits/men/76.jpg","medium":"https://randomuser.me/api/portraits/med/men/76.jpg","thumbnail":"https://randomuser.me/api/portraits/thumb/men/76.jpg"}}

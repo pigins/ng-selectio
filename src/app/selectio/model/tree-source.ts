@@ -1,19 +1,24 @@
+import {Source} from './source';
+import {Item} from './item';
+import {SourceItem} from './source-item';
 import {Stack} from './stack';
 
-export class TreeNode<T> implements Iterable<TreeNode<T>> {
-  private data: T;
-  private parent: TreeNode<T>;
-  private children: TreeNode<T>[] = [];
+export class TreeSource implements SourceItem, Source {
+  private parent: TreeSource;
+  private children: TreeSource[] = [];
+  data: Item;
+  disabled: boolean;
+  selected: boolean;
 
-  public static fromFlatArray<T>(arr: T[], idProp: string, parentIdProp: string): TreeNode<T> {
+  public static fromFlatArray(arr: Item[], idProp: string, parentIdProp: string): TreeSource {
     const mappedArr = {};
-    let arrElem: T;
+    let arrElem: Item;
     for (let i = 0, len = arr.length; i < len; i++) {
       arrElem = arr[i];
-      mappedArr[arrElem[idProp]] = new TreeNode<T>(arrElem);
+      mappedArr[arrElem[idProp]] = new TreeSource(arrElem);
     }
-    let mappedElem: TreeNode<T>;
-    const root: TreeNode<T> = new TreeNode<T>(<T>{});
+    let mappedElem: TreeSource;
+    const root: TreeSource = new TreeSource({});
     for (const prop in mappedArr) {
       if (mappedArr.hasOwnProperty(prop)) {
         mappedElem = mappedArr[prop];
@@ -30,7 +35,7 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
     return root;
   }
 
-  constructor(data: T) {
+  constructor(data: Item) {
     this.data = data;
   }
 
@@ -46,14 +51,14 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
     return this.children;
   }
 
-  public addChild(child: T): TreeNode<T> {
-    const childNode = new TreeNode<T>(child);
+  public addChild(child: Item): TreeSource {
+    const childNode = new TreeSource(child);
     childNode.parent = this;
     this.children.push(childNode);
     return childNode;
   }
 
-  public addChildNode(childNode: TreeNode<T>): void {
+  public addChildNode(childNode: TreeSource): void {
     childNode.parent = this;
     this.children.push(childNode);
   }
@@ -71,7 +76,7 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
   }
 
   public traverseToRoot(fn: Function): void {
-    let node: TreeNode<T> = this;
+    let node: TreeSource = this;
     while (!node.isRoot()) {
       fn(node);
       node = node.parent;
@@ -79,14 +84,14 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
   }
 
   public traverseChildren(fn: Function): void {
-    this.children.forEach((node: TreeNode<T>) => {
+    this.children.forEach((node: TreeSource) => {
       fn(node);
       node.traverseChildren(fn);
     });
   }
 
-  [Symbol.iterator](): Iterator<TreeNode<T>> {
-    const nodeStack = new Stack<TreeNode<T>>();
+  [Symbol.iterator](): Iterator<TreeSource> {
+    const nodeStack = new Stack<TreeSource>();
     // use nodeStack.push(this.root) to start from root;
     for (let i = this.children.length - 1; i >= 0; i--) {
       nodeStack.push(this.children[i]);
@@ -108,5 +113,45 @@ export class TreeNode<T> implements Iterable<TreeNode<T>> {
         };
       }
     };
+  }
+
+  size(): number {
+    throw new Error('not implemented');
+  }
+
+  appendDataItem(item: Item) {
+    throw new Error('not implemented');
+  }
+
+  appendDataItems(items: Item[]) {
+    throw new Error('not implemented');
+  }
+
+  getDataItems(): Item[] {
+    throw new Error('not implemented');
+  }
+
+  getEnabledSourceItems(): SourceItem[] {
+    throw new Error('not implemented');
+  }
+
+  updateSelection(selection: Item[]): void {
+    throw new Error('not implemented');
+  }
+
+  isHighlited(sourceItem: SourceItem): boolean {
+    throw new Error('not implemented');
+  }
+
+  setHighlited(sourceItem: SourceItem): void {
+    throw new Error('not implemented');
+  }
+
+  getHighlited(): SourceItem {
+    throw new Error('not implemented');
+  }
+
+  setOnItemInit(param: (sourceItem) => void): void {
+    throw new Error('not implemented');
   }
 }

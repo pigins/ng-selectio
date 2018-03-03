@@ -2,15 +2,14 @@ import {
   Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
-import {SELECTION_MODE_SINGLE} from './selectio-plugin.component';
-import {SELECTION_MODE_MULTIPLE} from './selectio-plugin.component';
-import {Item} from './types';
-import {SelectionMode} from './types';
+import {SELECTION_MODE_SINGLE} from './selectio.component';
+import {SELECTION_MODE_MULTIPLE} from './selectio.component';
+import {Item} from './model/item';
 import {SourceItem} from './model/source-item';
 import {Selection} from './model/selection';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
-import {SelectionItem} from "./model/selection-item";
+import {SelectionItem} from './model/selection-item';
 
 @Component({
   selector: 'selectio-selection',
@@ -82,7 +81,7 @@ import {SelectionItem} from "./model/selection-item";
 })
 export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   @Input() $selections: Observable<SourceItem[]>;
-  @Input() selectionMode: SelectionMode;
+  @Input() selectionMode: string;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;
   @Input() arrowDirection: boolean;

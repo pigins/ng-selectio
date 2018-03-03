@@ -3,10 +3,10 @@ import {
   ViewChild, ViewChildren
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
-import {Item} from './types';
+import {Item} from './model/item';
 import {Subscription} from 'rxjs/Subscription';
 import {Source} from './model/source';
-import {SourceFactory} from './model/source';
+import {SourceFactory} from './model/source-factory';
 import {SourceItemDirective} from './source-item.directive';
 import {Selection} from './model/selection';
 import {SourceItem} from "./model/source-item";

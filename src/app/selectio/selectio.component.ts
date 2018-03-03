@@ -11,16 +11,15 @@ import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
 import {ListComponent, SourceType} from './list.component';
-import {Item} from './types';
+import {Item} from './model/item';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
-import {SelectionMode} from './types';
 import {Source} from './model/source';
 import {KeyboardStrategy} from './model/keyboard-strategy';
 import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
 import {SelectionComponent} from './selection.component';
 import {Selection} from './model/selection';
-import {SourceItem} from "./model/source-item";
+import {SourceItem} from './model/source-item';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -122,7 +121,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   @Input() $data: Observable<Item[]> = Observable.of([]);
   @Input() $appendData: Observable<Item[]> = Observable.of([]);
-  @Input() selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
+  @Input() selectionMode: string = SELECTION_MODE_SINGLE;
   @Input() selectionDefault: Item | Item[] | null = null;
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;

@@ -1,5 +1,5 @@
 import {NgModule} from '@angular/core';
-import {SelectioPluginComponent} from './selectio-plugin.component';
+import {SelectioPluginComponent} from './selectio.component';
 import {SelectionComponent} from './selection.component';
 import {ListComponent} from './list.component';
 import {SearchComponent} from './search.component';

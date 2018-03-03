@@ -2,7 +2,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {NgModule} from '@angular/core';
 import {AppComponent} from './app.component';
 import {HttpModule} from '@angular/http';
-import {SelectioPluginModule} from './selectio/selectio-plugin.module';
+import {SelectioPluginModule} from './selectio/selectio.module';
 import {ExamplesPageComponent} from './examples-page/examples-page.component';
 import {DocsPageComponent} from './docs-page/docs-page.component';
 import {routes} from './routes';

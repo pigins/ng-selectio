@@ -1,4 +1,4 @@
-import {Item} from '../types';
+import {Item} from './item';
 import {SelectionItem} from './selection-item';
 
 export class Selection implements Iterable<SelectionItem> {

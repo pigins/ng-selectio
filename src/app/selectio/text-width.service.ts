@@ -5,7 +5,7 @@ export class TextWidthService {
   context: CanvasRenderingContext2D | null;
 
   constructor() {
-    let canvas = document.createElement('canvas');
+    const canvas = document.createElement('canvas');
     this.context = canvas.getContext('2d');
   }
 

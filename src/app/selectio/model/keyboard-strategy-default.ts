@@ -1,5 +1,5 @@
 import {KeyboardStrategy} from './keyboard-strategy';
-import {KEY_CODE, SelectioPluginComponent} from '../selectio-plugin.component';
+import {KEY_CODE, SelectioPluginComponent} from '../selectio.component';
 
 export class KeyboardStrategyDefault implements KeyboardStrategy {
   // TODO

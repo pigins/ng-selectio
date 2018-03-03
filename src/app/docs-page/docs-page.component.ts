@@ -4,9 +4,8 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../selectio/types';
-import {SelectioPluginComponent, SELECTION_MODE_SINGLE} from '../selectio/selectio-plugin.component';
-import {SelectionMode} from '../selectio/types';
+import {Item} from '../selectio/model/item';
+import {SelectioPluginComponent, SELECTION_MODE_SINGLE} from '../selectio/selectio.component';
 import {NavigationEnd, Router} from '@angular/router';
 
 @Component({
@@ -37,7 +36,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   $data: Observable<Item[]> = this.dataService.countriesData;
   $appendData: Observable<Item[]> = Observable.of([]);
 
-  selectionMode: SelectionMode = SELECTION_MODE_SINGLE;
+  selectionMode: string = SELECTION_MODE_SINGLE;
   selectionDefault: Item | Item[] | null = null;
   allowClear: boolean = false;
 

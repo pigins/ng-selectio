@@ -1,4 +1,4 @@
-import {Item} from '../types';
+import {Item} from './item';
 
 export class SelectionItem {
   private _data: Item;
