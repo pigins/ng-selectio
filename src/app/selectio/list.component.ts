@@ -9,7 +9,7 @@ import {Source} from './model/source';
 import {SourceFactory} from './model/source-factory';
 import {SourceItemDirective} from './source-item.directive';
 import {Selection} from './model/selection';
-import {SourceItem} from "./model/source-item";
+import {SourceItem} from './model/source-item';
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -18,24 +18,8 @@ export enum SourceType {
 @Component({
   selector: 'selectio-list',
   template: `
-    <ng-template #defaultItemTemplate let-sourceItem="sourceItem">
-      <span>{{sourceItem.data | defaultItem}}</span>
-    </ng-template>
-
-    <ng-template #defaultLastLiTemplate let-source="source" let-pagination="pagination"
-                 let-appendingData="appendingData" let-updatingData="updatingData">
-      <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
-      <li *ngIf="pagination && appendingData">Loading more data...</li>
-      <li *ngIf="updatingData">Searching...</li>
-    </ng-template>
-
-    <ng-template #defaultAfterUlTemplate let-source="source" let-pagination="pagination" let-hasScroll="hasScroll">
-      <span *ngIf="pagination && source.size > 0 && !hasScroll"
-            (mousedown)="onPaginationClick($event)">
-        Get more...
-      </span>
-    </ng-template>
-
+    <ng-container *ngTemplateOutlet="aboveUlTemplate;
+    context:{source: _source, pagination: pagination, hasScroll: hasScroll(), appendingData: appendingData, updatingData: updatingData}"></ng-container>
     <ul #ul
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)">
@@ -45,14 +29,11 @@ export enum SourceType {
           [ngClass]="{'active': !sourceItem.disabled && _source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
           (mouseenter)="_source.setHighlited(sourceItem)"
           (click)="onClickItem(sourceItem)">
-        <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
-        context:{sourceItem: sourceItem}"></ng-container>
+        <ng-container *ngTemplateOutlet="itemTemplate;context:{sourceItem: sourceItem}"></ng-container>
       </li>
-      <ng-container *ngTemplateOutlet="lastLiTemplate ? lastLiTemplate : defaultLastLiTemplate;
-      context:{source: _source, pagination: pagination, appendingData: appendingData, updatingData: updatingData}"></ng-container>
     </ul>
-    <ng-container *ngTemplateOutlet="afterUlTemplate ? afterUlTemplate : defaultAfterUlTemplate;
-    context:{source: _source, pagination: pagination, hasScroll: hasScroll()}"></ng-container>
+    <ng-container *ngTemplateOutlet="underUlTemplate;
+    context:{source: _source, pagination: pagination, hasScroll: hasScroll(), appendingData: appendingData, updatingData: updatingData}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
@@ -69,8 +50,8 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // templates
   @Input() itemTemplate: TemplateRef<any>;
-  @Input() lastLiTemplate: TemplateRef<any>;
-  @Input() afterUlTemplate: TemplateRef<any>;
+  @Input() aboveUlTemplate: TemplateRef<any>;
+  @Input() underUlTemplate: TemplateRef<any>;
 
   // outputs
   @Output() onNextPage = new EventEmitter<void>();
@@ -136,8 +117,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     this.onSelectItem.emit([sourceItem]);
   }
 
-  onPaginationClick($event: MouseEvent): void {
-    $event.preventDefault();
+  emitNextPageEvent() {
     this.onNextPage.emit();
   }
 

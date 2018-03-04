@@ -36,6 +36,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   @Output() onSearchBlur = new EventEmitter<Event>();
   @Output() onSearchKeyDown = new EventEmitter<KeyboardEvent>();
   @Output() onSearchValueChanges = new EventEmitter<string>();
+  @Output() onSearchMinLengthBorderCrossing = new EventEmitter<boolean>();
 
   @ViewChild('search') search: ElementRef;
 
@@ -50,6 +51,7 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   textInput: FormControl;
   private textChangeSubscription: Subscription;
   private searchTextChangeSubscription: Subscription;
+  private searchMinLengthBorderCrossingSubscription: Subscription;
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.disabled) {
@@ -75,11 +77,30 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
       .subscribe((v: string) => {
         this.onSearchValueChanges.emit(v);
       });
+
+    if (this.autocomplete) {
+      let inside: boolean = false;
+      this.searchMinLengthBorderCrossingSubscription = this.textInput.valueChanges
+        .debounceTime(this.searchDelay)
+        .subscribe((v: string) => {
+          if (this.textInput.value.length >= this.searchMinLength) {
+            if (!inside) {
+              this.onSearchMinLengthBorderCrossing.emit(true);
+              inside = true;
+            }
+          }
+          if (this.textInput.value.length <= this.searchMinLength && inside) {
+            this.onSearchMinLengthBorderCrossing.emit(false);
+            inside = false;
+          }
+        });
+    }
   }
 
   ngOnDestroy(): void {
     this.searchTextChangeSubscription.unsubscribe();
     this.textChangeSubscription.unsubscribe();
+    this.searchMinLengthBorderCrossingSubscription.unsubscribe();
   }
 
   public notEmpty(): boolean {

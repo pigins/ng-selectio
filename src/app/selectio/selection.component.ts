@@ -15,35 +15,25 @@ import {SelectionItem} from './model/selection-item';
   selector: 'selectio-selection',
   encapsulation: ViewEncapsulation.None,
   template: `
-    <ng-template #defaultItemTemplate let-selectionItem="selectionItem">
-      <span>{{selectionItem.data | defaultItem}}</span>
-    </ng-template>
-    <ng-template #defaultEmptyTemplate>
-      <span>No data</span>
-    </ng-template>
-    <ng-template #defaultClearTemplate>
-      <span [innerHtml]="cross"></span>
-    </ng-template>
-
     <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true}">
       <div *ngIf="selection.size() === 0" class="empty">
-        <ng-container *ngTemplateOutlet="emptyTemplate ? emptyTemplate : defaultEmptyTemplate"></ng-container>
+        <ng-container *ngTemplateOutlet="emptyTemplate"></ng-container>
       </div>
 
       <ng-container *ngIf="selection.size() >= 1">
         <div *ngIf="singleMode() && !deletable" class="single">
           <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
-            <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
+            <ng-container *ngTemplateOutlet="itemTemplate;
             context:{selectionItem:selection.get(0)}"></ng-container>
           </div>
         </div>
 
         <div *ngIf="singleMode() && deletable" class="single deletable">
           <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
-            <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
+            <ng-container *ngTemplateOutlet="itemTemplate;
             context:{selectionItem:selection.get(0)}"></ng-container>
             <span class="clear" (click)="onDeleteClick($event, selection.get(0))">
-              <ng-container *ngTemplateOutlet="clearTemplate ? clearTemplate : defaultClearTemplate"></ng-container>
+              <ng-container *ngTemplateOutlet="clearTemplate"></ng-container>
             </span>
           </div>
         </div>
@@ -53,7 +43,7 @@ import {SelectionItem} from './model/selection-item';
                [ngStyle]="{'display': 'inline-block'}"
                [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
                (click)="highlight(selectionItem)">
-            <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
+            <ng-container *ngTemplateOutlet="itemTemplate;
             context:{selectionItem:selectionItem}"></ng-container>
           </div>
         </div>
@@ -64,10 +54,10 @@ import {SelectionItem} from './model/selection-item';
                [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
                (click)="highlight(selectionItem)">
             <span class="clear" (click)="onDeleteClick($event, selectionItem)">
-              <ng-container *ngTemplateOutlet="clearTemplate ? clearTemplate : defaultClearTemplate"></ng-container>
+              <ng-container *ngTemplateOutlet="clearTemplate"></ng-container>
             </span>
             <span>
-              <ng-container *ngTemplateOutlet="itemTemplate ? itemTemplate : defaultItemTemplate;
+              <ng-container *ngTemplateOutlet="itemTemplate;
               context:{selectionItem:selectionItem}"></ng-container>
             </span>
           </div>
@@ -97,8 +87,6 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
 
   selection: Selection = new Selection();
   private selectionChangeSubscription: Subscription;
-
-  cross = '&#10005';
 
   constructor() {
   }

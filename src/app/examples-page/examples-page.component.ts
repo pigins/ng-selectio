@@ -60,14 +60,14 @@ import {SourceItem} from '../selectio/model/source-item';
         [search]="true"
         (onSearch)="onSearchString($event)"
       ></selectio-plugin>
-      <!--<h2>Simple select array of strings with search and autocomplete</h2>-->
-      <!--<selectio-plugin-->
-      <!--[selectionEmptyTemplate]="selectioTemplate"-->
-      <!--[$data]="$stringArray"-->
-      <!--[search]="true"-->
-      <!--[autocomplete]="true"-->
-      <!--(onSearch)="onSearchString($event)"-->
-      <!--&gt;</ng-selectio>-->
+      <h2>Simple select array of strings with search and autocomplete</h2>
+      <selectio-plugin
+        [selectionEmptyTemplate]="selectioTemplate"
+        [$data]="$stringArray"
+        [search]="true"
+        [autocomplete]="true"
+        (onSearch)="onSearchString($event)"
+      ></selectio-plugin>
       <!--<h2>Remote data select with search and pagination</h2>-->
       <!--<selectio-plugin-->
       <!--[selectionItemTemplate]="personTemplate"-->
@@ -184,6 +184,6 @@ export class ExamplesPageComponent {
   }
 
   afterSourceItemInit(sourceItem: SourceItem) {
-    console.log(sourceItem);
+    // console.log(sourceItem);
   }
 }

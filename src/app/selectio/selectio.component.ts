@@ -38,6 +38,36 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true}
   ],
   template: `
+    <ng-template #defaultListItemTemplate let-sourceItem="sourceItem">
+      <span>{{sourceItem.data | defaultItem}}</span>
+    </ng-template>
+
+    <ng-template #defaultListAboveUlTemplate>
+    </ng-template>
+
+    <ng-template #defaultListUnderUlTemplate let-hasScroll="hasScroll" let-source="source" let-pagination="pagination"
+                 let-appendingData="appendingData" let-updatingData="updatingData">
+      <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
+      <li *ngIf="pagination && appendingData">Loading more data...</li>
+      <li *ngIf="updatingData">Searching...</li>
+      <span *ngIf="pagination && source.size > 0 && !hasScroll"
+            (mousedown)="onPaginationClick($event)">
+        Get more...
+      </span>
+    </ng-template>
+
+    <ng-template #defaultSelectionItemTemplate let-selectionItem="selectionItem">
+      <span>{{selectionItem.data | defaultItem}}</span>
+    </ng-template>
+
+    <ng-template #defaultSelectionEmptyTemplate>
+      <span>No data</span>
+    </ng-template>
+
+    <ng-template #defaultSelectionClearTemplate>
+      <span [innerHtml]="cross"></span>
+    </ng-template>
+
     <div class="ngs" #ngs
          [attr.tabindex]="tabIndex"
          [ngClass]="{'expanded': expanded, 'open-up': openUp, 'autocomplete': autocomplete, 'disabled': disabled, 'focus': focus}"
@@ -50,9 +80,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         <div class="selection-wrapper" *ngIf="order===1">
           <selectio-selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                               [$selections]="_onSelectItem"
-                              [itemTemplate]="selectionItemTemplate"
-                              [clearTemplate]="selectionClearTemplate"
-                              [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate"
                               [selectionMode]="selectionMode"
                               [selectionMaxLength]="selectionMaxLength"
                               [showArrow]="!autocomplete"
@@ -60,6 +87,9 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               [deletable]="allowClear"
                               [disabled]="disabled"
                               [selectionDefault]="selectionDefault"
+                              [itemTemplate]="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate"
+                              [clearTemplate]="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"
+                              [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"
                               (click)="onClickSelection($event)"
                               (onAfterSelectionChanged)="afterSelectionChanged($event)"
           >
@@ -74,6 +104,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                   (onSearchFocus)="onSearchFocus($event)"
                   (onSearchKeyDown)="onTextInputKeyDown($event)"
                   (onSearchValueChanges)="onSearchValueChanges($event)"
+                  (onSearchMinLengthBorderCrossing)="onSearchBorderCrossing($event)"
           ></selectio-search>
         </div>
         <div class="dropdown-wrapper" *ngIf="order===2"
@@ -94,18 +125,18 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></selectio-search>
                 <selectio-list #listComponent *ngIf="order===2"
-                      [$data]="$data"
-                      [$appendData]="$appendData"
-                      [$selection]="_onAfterSelectionChanged"
-                      [sourceType]="sourceType"
-                      [pagination]="pagination"
-                      [trackByFn]="trackByFn"
-                      [itemTemplate]="listItemTemplate"
-                      [lastLiTemplate]="listLastLiTemplate"
-                      [afterUlTemplate]="listAfterUlTemplate"
-                      (onSelectItem)="onSelectItem($event)"
-                      (onNextPage)="onNextPageStart()"
-                      (afterSourceItemInit)="afterSourceItemInit.emit($event)"
+                               [$data]="$data"
+                               [$appendData]="$appendData"
+                               [$selection]="_onAfterSelectionChanged"
+                               [sourceType]="sourceType"
+                               [pagination]="pagination"
+                               [trackByFn]="trackByFn"
+                               [itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"
+                               [aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"
+                               [underUlTemplate]="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate"
+                               (onSelectItem)="onSelectItem($event)"
+                               (onNextPage)="onNextPageStart()"
+                               (afterSourceItemInit)="afterSourceItemInit.emit($event)"
                 >
                 </selectio-list>
               </ng-container>
@@ -146,8 +177,8 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
-  @Input() listLastLiTemplate: TemplateRef<any>;
-  @Input() listAfterUlTemplate: TemplateRef<any>;
+  @Input() listAboveUlTemplate: TemplateRef<any>;
+  @Input() listUnderUlTemplate: TemplateRef<any>;
   @Input() selectionItemTemplate: TemplateRef<any>;
   @Input() selectionEmptyTemplate: TemplateRef<any>;
   @Input() selectionClearTemplate: TemplateRef<any>;
@@ -163,7 +194,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @ViewChild('selectionComponent') _selectionComponent: SelectionComponent;
 
 
-
+  cross = '&#10005';
   expanded: boolean;
   focus: boolean = false;
   searching: boolean = false;
@@ -212,6 +243,10 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onSearchValueChanges(value: string): void {
     this.onSearch.emit(value);
+  }
+
+  onSearchBorderCrossing(fromLeftToRight: boolean) {
+    this.expandedChanged.emit(fromLeftToRight);
   }
 
   onClickSelection(): void {
@@ -271,12 +306,19 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }, this.paginationDelay);
   }
 
+  onPaginationClick($event: MouseEvent): void {
+    $event.preventDefault();
+    this._listComponent.emitNextPageEvent();
+  }
+
   onTextInputKeyDown(event: KeyboardEvent) {
     if (this.autocomplete && event.keyCode === KEY_CODE.BACKSPACE && !this._searchComponent.getValue()) {
       this._selectionComponent.selection.highlightOrDeleteLastItem();
       this.modelChange();
     }
   }
+
+
 
   trackByOpenUp(index, item) {
     return item;
