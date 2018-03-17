@@ -44,11 +44,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     <ng-template #defaultListAboveUlTemplate>
     </ng-template>
 
-    <ng-template #defaultListUnderUlTemplate let-hasScroll="hasScroll" let-source="source"
-                 let-appendingData="appendingData" let-updatingData="updatingData">
+    <ng-template #defaultListUnderUlTemplate let-hasScroll="hasScroll" let-source="source">
       <span *ngIf="(source.size() === 0)">Enter 1 or more characters</span>
-      <span *ngIf="pagination && appendingData">Loading more data...</span>
-      <span *ngIf="updatingData">Searching...</span>
       <span *ngIf="pagination && source.size > 0 && !hasScroll"
             (mousedown)="onPaginationClick($event)">
         Get more...
@@ -126,7 +123,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                 <selectio-list #listComponent *ngIf="order===2"
                                [data]="data"
                                [appendData]="appendData"
-                               [$selection]="_onAfterSelectionChanged"
+                               [selection]="selection"
                                [sourceType]="sourceType"
                                [trackByFn]="trackByFn"
                                [itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"
@@ -200,13 +197,13 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
   verticalOrder = [1, 2];
+  selection: Selection;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
   private changed: Array<(value: Item[]) => void> = [];
   private touched: Array<() => void> = [];
 
   _onSelectItem = new EventEmitter<SourceItem[]>();
-  _onAfterSelectionChanged = new EventEmitter<Selection>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
@@ -262,7 +259,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   afterSelectionChanged(selection: Selection): void {
-    this._onAfterSelectionChanged.emit(selection);
+    this.selection = selection;
   }
 
   onNgsFocus($event: Event): void {

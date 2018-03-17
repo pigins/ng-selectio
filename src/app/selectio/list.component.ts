@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -20,6 +21,7 @@ import {SourceFactory} from './model/source-factory';
 import {SourceItemDirective} from './source-item.directive';
 import {Selection} from './model/selection';
 import {SourceItem} from './model/source-item';
+import {Subscription} from 'rxjs/Subscription';
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -34,7 +36,7 @@ export enum SourceType {
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)">
       <li #itemList
-          *ngFor="let sourceItem of _source; trackBy: trackByFn"
+          *ngFor="let sourceItem of _source | selectionPipe:selection; trackBy: trackByFn"
           [sourceItem]="sourceItem"
           [ngClass]="{'active': !sourceItem.disabled && _source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
           (mouseenter)="_source.setHighlited(sourceItem)"
@@ -49,13 +51,13 @@ export enum SourceType {
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // inputs
-  @Input() data: Observable<Item[]>;
-  @Input() appendData: Observable<Item[]>;
+  @Input() data: Item[];
+  @Input() appendData: Item[];
   @Input() trackByFn: (index: number, sourceItem: SourceItem) => any;
   @Input() sourceType: SourceType;
 
   // external context
-  @Input() $selection: Observable<Selection>;
+  @Input() selection: Selection;
 
   // templates
   @Input() itemTemplate: TemplateRef<any>;
@@ -88,12 +90,12 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
       this._source.appendDataItems(changes.appendData.currentValue);
       this.onChangeData.emit(this._source);
     }
+    if (changes.selection && changes.selection.currentValue) {
+      this._source.updateSelection(changes.selection.currentValue.toDataArray());
+    }
   }
 
   ngOnInit() {
-    this.$selection.subscribe((selection: Selection) => {
-      this._source.updateSelection(selection.toDataArray());
-    });
   }
 
   ngOnDestroy(): void {

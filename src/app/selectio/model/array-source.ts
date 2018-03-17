@@ -45,9 +45,14 @@ export class ArraySource implements Source {
 
   // TODO rewrite with hash
   public updateSelection(selection: Item[]): void {
+    if (selection.length === 0) {
+      for (let j = 0; j < this.sourceItems.length; j++) {
+        this.sourceItems[j].selected = false;
+      }
+    }
     for (let i = 0; i < selection.length; i++) {
       for (let j = 0; j < this.sourceItems.length; j++) {
-        this.sourceItems[j].selected = selection[i] === this.sourceItems[j].data;
+        this.sourceItems[j].selected = (selection[i] === this.sourceItems[j].data);
       }
     }
   }
