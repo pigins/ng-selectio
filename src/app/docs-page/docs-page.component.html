@@ -9,8 +9,8 @@
     <div id="selectio-container">
       <h1>Selectio</h1>
       <selectio-plugin *ngIf="showSelectio" #selectio
-                   [$data]="$data"
-                   [$appendData]="$appendData"
+                   [data]="data"
+                   [appendData]="appendData"
                    [selectionMode]="selectionMode"
                    [selectionDefault]="selectionDefault"
                    [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
@@ -51,30 +51,30 @@
     <tr><td colspan="6">Behavior</td></tr>
 
     <tr>
-      <td>$data</td>
+      <td>data</td>
       <td>
         <app-select-input
           [options]="[{label: 'array of countries', value: DATA_LOCAL_ID}, {label: 'remote users', value: DATA_REMOTE_ID}]"
           [ngModel]="datasourceId"
           (ngModelChange)="onChangeRadioDatasource($event)">
         </app-select-input>
-        <span *ngIf="isRemote()">Change $data after onSearch event</span>
+        <span *ngIf="isRemote()">Change data after onSearch event</span>
       </td>
       <td>Set data for dropdown list</td>
-      <td>Observable&lt;Item[]&gt;</td>
+      <td>Item[]</td>
       <td></td>
-      <td>Observable.of([])</td>
+      <td>[]</td>
     </tr>
 
     <tr>
-      <td>$appendData</td>
+      <td>appendData</td>
       <td>
         <button *ngIf="isRemote()" (click)="onManualAppend()">append users</button>
       </td>
       <td>After change appends data to list. Useful for pagination.</td>
-      <td>Observable&lt;Item[]&gt;</td>
+      <td>Item[]</td>
       <td></td>
-      <td>Observable.of([])</td>
+      <td>[]</td>
     </tr>
 
     <tr>

@@ -1,11 +1,11 @@
-import {Component, ViewEncapsulation} from '@angular/core';
-import {Observable} from 'rxjs/Observable';
+import {Component, ViewChild, ViewEncapsulation} from '@angular/core';
 import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from '../selectio/model/item';
 import {SourceItem} from '../selectio/model/source-item';
+import {SelectioPluginComponent} from '../selectio/selectio.component';
 
 @Component({
   selector: 'selectio-examples-page',
@@ -33,15 +33,19 @@ import {SourceItem} from '../selectio/model/source-item';
       </div>
     </ng-template>
 
-    <ng-template #personTemplate let-item="item">
-      {{item.name.first}}
+    <ng-template #personSourceTemplate let-item="sourceItem">
+      {{item.data.name.first}}
+    </ng-template>
+
+    <ng-template #personSelectionTemplate let-item="selectionItem">
+      {{item.data.name.first}}
     </ng-template>
 
     <div id="examples-cont">
       <h2>Simple select array of strings</h2>
       <selectio-plugin
         [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$stringArray"
+        [data]="stringArray"
         [allowClear]="true"
         (afterSourceItemInit)="afterSourceItemInit($event)"
       ></selectio-plugin>
@@ -50,40 +54,40 @@ import {SourceItem} from '../selectio/model/source-item';
         [selectionEmptyTemplate]="selectioTemplate"
         [listItemTemplate]="countrySourceTemplate"
         [selectionItemTemplate]="countrySelectionTemplate"
-        [$data]="$objectArray"
+        [data]="objectArray"
         [selectionDefault]="defaultCountry"
       ></selectio-plugin>
       <h2>Simple select array of strings with search</h2>
       <selectio-plugin
         [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$stringArray"
+        [data]="stringArray"
         [search]="true"
         (onSearch)="onSearchString($event)"
       ></selectio-plugin>
       <h2>Simple select array of strings with search and autocomplete</h2>
       <selectio-plugin
         [selectionEmptyTemplate]="selectioTemplate"
-        [$data]="$stringArray"
+        [data]="stringArray"
         [search]="true"
         [autocomplete]="true"
         (onSearch)="onSearchString($event)"
       ></selectio-plugin>
-      <!--<h2>Remote data select with search and pagination</h2>-->
-      <!--<selectio-plugin-->
-      <!--[selectionItemTemplate]="personTemplate"-->
-      <!--[listItemTemplate]="personTemplate"-->
-      <!--[selectionEmptyTemplate]="selectioTemplate"-->
-      <!--[$data]="$users"-->
-      <!--[$appendData]="$appendUsers"-->
-      <!--[selectionDefault]="this.dataService.exampleRandomUsers"-->
-      <!--[selectionMode]="'multiple'"-->
-      <!--[search]="true"-->
-      <!--[allowClear]="true"-->
-      <!--[pagination]="true"-->
-      <!--[paginationDelay]="500"-->
-      <!--(onSearch)="onSearch($event)"-->
-      <!--(onNextPage)="onNextPage($event)"-->
-      <!--&gt;</ng-selectio>-->
+      <h2>Remote data select with search and pagination</h2>
+      <selectio-plugin #remoteSelectio
+        [selectionEmptyTemplate]="selectioTemplate"
+        [listItemTemplate]="personSourceTemplate"
+        [selectionItemTemplate]="personSelectionTemplate"
+        [data]="users"
+        [appendData]="appendUsers"
+        [selectionDefault]="this.dataService.exampleRandomUsers"
+        [selectionMode]="'multiple'"
+        [search]="true"
+        [allowClear]="true"
+        [pagination]="true"
+        [paginationDelay]="500"
+        (onSearch)="onSearch($event)"
+        (listScrollExhausted)="onListScrollExhausted()"
+      ></selectio-plugin>
 
       <!--<h2>ngmodel</h2>-->
       <!--<div>-->
@@ -142,41 +146,36 @@ import {SourceItem} from '../selectio/model/source-item';
   `],
 })
 export class ExamplesPageComponent {
-  $stringArray: Observable<any> = this.dataService.countriesStrings;
-  $objectArray: Observable<any>;
-  $users: Observable<any>;
-  $appendUsers: Observable<any>;
+  stringArray: any = this.dataService.countriesStrings;
+  objectArray: any;
+  users: any;
+  appendUsers: any;
   itemArray: Item[] = ['russia'];
   defaultCountry: Item;
 
+  @ViewChild('remoteSelectio') remoteSelectio: SelectioPluginComponent;
+
   constructor(private http: Http, public dataService: DataService) {
-    this.$objectArray = this.dataService.countriesData;
-    this.dataService.countriesData.subscribe((countries) => {
-      this.defaultCountry = countries[0];
-    });
+    this.objectArray = this.dataService.countriesData;
+    this.defaultCountry = this.dataService.countriesData[0];
   }
 
   onSearchString(term: string) {
-    this.$stringArray = this.dataService.countriesStrings.mergeMap((arr) => {
-      return Observable.of(arr.filter((elem) => {
-        return (<string>elem).includes(term);
-      }));
+    this.stringArray = this.dataService.countriesStrings.filter(elem => {
+      return (<string>elem).includes(term);
     });
   }
 
   // IE 9 BUG https://github.com/angular/angular-cli/issues/6110
   onSearch(term: string) {
     if (term === '') {
-      this.$users = Observable.of([]);
+      this.users = [];
     } else {
-      this.$users = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
-        .map(r => r.json()).map(r => r.results);
+      this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
+        .map(r => r.json()).map(r => r.results).subscribe(r => {
+        this.users = r;
+      });
     }
-  }
-
-  onNextPage(pagination) {
-    this.$appendUsers = this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
-      .map(r => r.json()).map(r => r.results);
   }
 
   disabledItem(item: any) {
@@ -185,5 +184,18 @@ export class ExamplesPageComponent {
 
   afterSourceItemInit(sourceItem: SourceItem) {
     // console.log(sourceItem);
+  }
+
+  onListScrollExhausted() {
+    const term = this.remoteSelectio.searchComponent.getValue();
+    const page = this.remoteSelectio.listComponent.source.size() / 10 + 1;
+    this.http.get(`https://randomuser.me/api?seed=${term}&results=${10}&page=${page}&nat=uk&inc=gender,name,picture`)
+      .map(r => r.json()).map(r => r.results).subscribe(r => {
+      this.appendUsers = r;
+      this.remoteSelectio.listComponent.scrollToTheBottom();
+    });
+    // setTimeout(() => {
+    //   this.onNextPage.emit({currentLength: this.listComponent.source.size(), search: this._searchComponent.getValue()});
+    // }, this.paginationDelay);
   }
 }

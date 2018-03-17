@@ -1,10 +1,20 @@
 import {
-  Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, QueryList, SimpleChanges, TemplateRef,
-  ViewChild, ViewChildren
+  Component,
+  ElementRef,
+  EventEmitter,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  SimpleChanges,
+  TemplateRef,
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import {Item} from './model/item';
-import {Subscription} from 'rxjs/Subscription';
 import {Source} from './model/source';
 import {SourceFactory} from './model/source-factory';
 import {SourceItemDirective} from './source-item.directive';
@@ -19,7 +29,7 @@ export enum SourceType {
   selector: 'selectio-list',
   template: `
     <ng-container *ngTemplateOutlet="aboveUlTemplate;
-    context:{source: _source, pagination: pagination, hasScroll: hasScroll(), appendingData: appendingData, updatingData: updatingData}"></ng-container>
+    context:{source: _source, hasScroll: hasScroll()}"></ng-container>
     <ul #ul
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)">
@@ -33,15 +43,14 @@ export enum SourceType {
       </li>
     </ul>
     <ng-container *ngTemplateOutlet="underUlTemplate;
-    context:{source: _source, pagination: pagination, hasScroll: hasScroll(), appendingData: appendingData, updatingData: updatingData}"></ng-container>
+    context:{source: _source, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // inputs
-  @Input() $data: Observable<Item[]>;
-  @Input() $appendData: Observable<Item[]>;
-  @Input() pagination: boolean;
+  @Input() data: Observable<Item[]>;
+  @Input() appendData: Observable<Item[]>;
   @Input() trackByFn: (index: number, sourceItem: SourceItem) => any;
   @Input() sourceType: SourceType;
 
@@ -58,38 +67,26 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   @Output() onSelectItem = new EventEmitter<SourceItem[]>();
   @Output() onChangeData = new EventEmitter<Source>();
   @Output() afterSourceItemInit = new EventEmitter<SourceItem>();
+  @Output() scrollExhausted = new EventEmitter<void>();
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
   _source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
-  updatingData: boolean;
-  appendingData: boolean;
-
-  dataSubscription: Subscription;
-  appendDataSubscription: Subscription;
 
   constructor() {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.$data && changes.$data.currentValue) {
-      this.updatingData = true;
-      this.dataSubscription = this.$data.take(1).subscribe((data: Item[]) => {
-        this._source = SourceFactory.getInstance(this.sourceType, data, sourceItem => {
-          this.afterSourceItemInit.emit(sourceItem);
-        });
-        this.onChangeData.emit(this._source);
-        this.updatingData = false;
+    if (changes.data && changes.data.currentValue) {
+      this._source = SourceFactory.getInstance(this.sourceType, changes.data.currentValue, sourceItem => {
+        this.afterSourceItemInit.emit(sourceItem);
       });
+      this.onChangeData.emit(this._source);
     }
-    if (changes.$appendData && changes.$appendData.currentValue) {
-      this.appendingData = true;
-      this.appendDataSubscription = this.$appendData.take(1).subscribe(data => {
-        this._source.appendDataItems(data);
-        this.onChangeData.emit(this._source);
-        this.appendingData = false;
-      });
+    if (changes.appendData && changes.appendData.currentValue) {
+      this._source.appendDataItems(changes.appendData.currentValue);
+      this.onChangeData.emit(this._source);
     }
   }
 
@@ -100,13 +97,11 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.dataSubscription.unsubscribe();
-    this.appendDataSubscription.unsubscribe();
   }
 
   onUlScroll(event: Event) {
-    if (this.pagination && this.scrollExhausted() && !this.appendingData) {
-      this.onNextPage.emit();
+    if (this.checkScrollExhausted()) {
+      this.scrollExhausted.emit();
     }
   }
 
@@ -140,7 +135,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
   }
 
-  public scrollExhausted(): boolean {
+  private checkScrollExhausted(): boolean {
     const ul = this.ul.nativeElement;
     return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }

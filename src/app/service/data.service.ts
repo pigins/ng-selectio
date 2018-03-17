@@ -43,12 +43,12 @@ export const COUNTRIES_DATA = [
 
 @Injectable()
 export class DataService {
-  get countriesData(): Observable<Item[]> {
-    return Observable.of(COUNTRIES_DATA);
+  get countriesData(): Item[] {
+    return COUNTRIES_DATA;
   }
 
-  get countriesStrings(): Observable<Item[]> {
-    return Observable.of(['russia', 'canada', 'usa', 'germany', 'france' , 'china', 'uk', 'australia', 'bolivia', 'india', 'romania']);
+  get countriesStrings(): Item[] {
+    return ['russia', 'canada', 'usa', 'germany', 'france' , 'china', 'uk', 'australia', 'bolivia', 'india', 'romania'];
   }
 
   get exampleRandomUsers(): Item[] {

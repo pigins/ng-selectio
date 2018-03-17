@@ -100,7 +100,9 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.searchTextChangeSubscription.unsubscribe();
     this.textChangeSubscription.unsubscribe();
-    this.searchMinLengthBorderCrossingSubscription.unsubscribe();
+    if (this.searchMinLengthBorderCrossingSubscription) {
+      this.searchMinLengthBorderCrossingSubscription.unsubscribe();
+    }
   }
 
   public notEmpty(): boolean {

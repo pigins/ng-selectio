@@ -4,7 +4,6 @@ import {
   Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
   ViewChild
 } from '@angular/core';
-import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
@@ -45,11 +44,11 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     <ng-template #defaultListAboveUlTemplate>
     </ng-template>
 
-    <ng-template #defaultListUnderUlTemplate let-hasScroll="hasScroll" let-source="source" let-pagination="pagination"
+    <ng-template #defaultListUnderUlTemplate let-hasScroll="hasScroll" let-source="source"
                  let-appendingData="appendingData" let-updatingData="updatingData">
-      <li *ngIf="(source.size() === 0)">Enter 1 or more characters</li>
-      <li *ngIf="pagination && appendingData">Loading more data...</li>
-      <li *ngIf="updatingData">Searching...</li>
+      <span *ngIf="(source.size() === 0)">Enter 1 or more characters</span>
+      <span *ngIf="pagination && appendingData">Loading more data...</span>
+      <span *ngIf="updatingData">Searching...</span>
       <span *ngIf="pagination && source.size > 0 && !hasScroll"
             (mousedown)="onPaginationClick($event)">
         Get more...
@@ -125,11 +124,10 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                         (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></selectio-search>
                 <selectio-list #listComponent *ngIf="order===2"
-                               [$data]="$data"
-                               [$appendData]="$appendData"
+                               [data]="data"
+                               [appendData]="appendData"
                                [$selection]="_onAfterSelectionChanged"
                                [sourceType]="sourceType"
-                               [pagination]="pagination"
                                [trackByFn]="trackByFn"
                                [itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"
                                [aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"
@@ -137,6 +135,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                (onSelectItem)="onSelectItem($event)"
                                (onNextPage)="onNextPageStart()"
                                (afterSourceItemInit)="afterSourceItemInit.emit($event)"
+                               (scrollExhausted)="listScrollExhausted.emit()"
                 >
                 </selectio-list>
               </ng-container>
@@ -149,8 +148,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 })
 export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
 
-  @Input() $data: Observable<Item[]> = Observable.of([]);
-  @Input() $appendData: Observable<Item[]> = Observable.of([]);
+  @Input() data: Item[] = [];
+  @Input() appendData: Item[] = [];
   @Input() selectionMode: string = SELECTION_MODE_SINGLE;
   @Input() selectionDefault: Item | Item[] | null = null;
   @Input() searchDelay: number = 0;
@@ -187,6 +186,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @Output() onNextPage = new EventEmitter<{ currentLength: number, search: string }>();
   @Output() onSelect = new EventEmitter<Item>();
   @Output() afterSourceItemInit = new EventEmitter<SourceItem>();
+  @Output() listScrollExhausted = new EventEmitter<void>();
 
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('searchComponent') _searchComponent: SearchComponent;
@@ -212,12 +212,10 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.openUp) {
-      if (changes.openUp.currentValue) {
-        this.verticalOrder = [2, 1];
-      } else {
-        this.verticalOrder = [1, 2];
-      }
+    if (changes.openUp && changes.openUp.currentValue) {
+      this.verticalOrder = [2, 1];
+    } else {
+      this.verticalOrder = [1, 2];
     }
   }
 
@@ -317,8 +315,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       this.modelChange();
     }
   }
-
-
 
   trackByOpenUp(index, item) {
     return item;

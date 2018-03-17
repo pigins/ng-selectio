@@ -1,4 +1,13 @@
-import {Component, ElementRef, EventEmitter, HostListener, OnDestroy, OnInit, ViewChild, ViewEncapsulation} from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  EventEmitter,
+  HostListener,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  ViewEncapsulation
+} from '@angular/core';
 import {Observable} from 'rxjs/Observable';
 import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
@@ -33,8 +42,8 @@ export class DocsPageComponent implements OnInit, OnDestroy {
     return index;
   }
 
-  $data: Observable<Item[]> = this.dataService.countriesData;
-  $appendData: Observable<Item[]> = Observable.of([]);
+  data: Item[] = this.dataService.countriesData;
+  appendData: Item[] = [];
 
   selectionMode: string = SELECTION_MODE_SINGLE;
   selectionDefault: Item | Item[] | null = null;
@@ -79,8 +88,10 @@ export class DocsPageComponent implements OnInit, OnDestroy {
       if (s instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);
         if (tree.fragment) {
-          const element = document.querySelector("#" + tree.fragment);
-          if (element) { element.scrollIntoView(true); }
+          const element = document.querySelector('#' + tree.fragment);
+          if (element) {
+            element.scrollIntoView(true);
+          }
         }
       }
     });
@@ -116,7 +127,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
 
   recreateSelectio() {
     this.showSelectio = false;
-    setTimeout(()=> {
+    setTimeout(() => {
       this.showSelectio = true;
     }, 100);
   }
@@ -124,27 +135,29 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   onChangeRadioDatasource(id: string) {
     if (id === this.DATA_LOCAL_ID) {
       this.datasourceId = id;
-      this.$data = this.dataService.countriesData;
+      this.data = this.dataService.countriesData;
     } else if (id === this.DATA_REMOTE_ID) {
       this.datasourceId = id;
-      this.$data = Observable.of([]);
+      this.data = [];
     }
   }
 
   onSearch(term: string) {
     if (this.isRemote()) {
       if (term === '') {
-        this.$data = Observable.of([]);
+        this.data = [];
       } else {
-        this.$data = this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
-          .map(r => r.json()).map(r => r.results);
+        this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
+          .map(r => r.json()).map(r => r.results).subscribe(r => {
+          this.data = r;
+        });
       }
     } else if (this.isLocal()) {
-      this.$data = this.dataService.countriesData.mergeMap((arr) => {
-        return Observable.of(arr.filter((elem) => {
-          return ((<any>elem).name).includes(term);
-        }));
-      });
+      // this.data = this.dataService.countriesData.mergeMap((arr) => {
+      //   return Observable.of(arr.filter((elem) => {
+      //     return ((<any>elem).name).includes(term);
+      //   }));
+      // });
     }
   }
 
@@ -155,16 +168,18 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   }
 
   onManualAppend() {
-   let term = '';
-   if (this.selectio.searchComponent) {
-     term = this.selectio.searchComponent.getValue();
-   }
-   this.appendUser({term: term, currentLength: this.selectio.source.size()});
+    let term = '';
+    if (this.selectio.searchComponent) {
+      term = this.selectio.searchComponent.getValue();
+    }
+    this.appendUser({term: term, currentLength: this.selectio.source.size()});
   }
 
   appendUser(pagination) {
-    this.$appendData = this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
-      .map(r => r.json()).map(r => r.results);
+    this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
+      .map(r => r.json()).map(r => r.results).subscribe(r => {
+      this.appendData = r;
+    });
   }
 
   isLocal(): boolean {
