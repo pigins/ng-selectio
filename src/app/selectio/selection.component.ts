@@ -152,4 +152,8 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   multipleMode() {
     return this.selectionMode === SELECTION_MODE_MULTIPLE;
   }
+
+  setSelection(selection: Selection) {
+    this.selection = selection;
+  }
 }

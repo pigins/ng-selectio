@@ -200,8 +200,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   selection: Selection;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
-  private changed: Array<(value: Item[]) => void> = [];
-  private touched: Array<() => void> = [];
+
 
   _onSelectItem = new EventEmitter<SourceItem[]>();
 
@@ -255,11 +254,11 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     if (this.closeAfterSelect) {
       this.expandedChanged.emit(false);
     }
-    this.modelChange();
   }
 
   afterSelectionChanged(selection: Selection): void {
     this.selection = selection;
+    this.modelChange();
   }
 
   onNgsFocus($event: Event): void {
@@ -278,6 +277,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       this.expandedChanged.emit(false);
     }
     this.focus = false;
+    this.touch();
   }
 
   onClickOutside() {
@@ -285,6 +285,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       this.expandedChanged.emit(false);
     }
     this.focus = false;
+    this.touch();
   }
 
   onKeyPress(event: KeyboardEvent) {
@@ -309,7 +310,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   onTextInputKeyDown(event: KeyboardEvent) {
     if (this.autocomplete && event.keyCode === KEY_CODE.BACKSPACE && !this._searchComponent.getValue()) {
       this._selectionComponent.selection.highlightOrDeleteLastItem();
-      this.modelChange();
     }
   }
 
@@ -333,37 +333,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     this.expandedChanged.emit(false);
   }
 
-  // control value accessor
-  touch() {
-    this.touched.forEach(f => f());
-  }
-
-  modelChange() {
-    // this.changed.forEach(f => f(this.selection));
-  }
-
-  writeValue(obj: Item[]): void {
-    // if (obj === null) {
-    //   this._selectionComponent.selection = [];
-    //   this.modelChange();
-    // } else {
-    //   this.selection = obj;
-    //   this.modelChange();
-    // }
-  }
-
-  registerOnChange(fn: (value: Item[]) => void): void {
-    this.changed.push(fn);
-  }
-
-  registerOnTouched(fn: () => void): void {
-    this.touched.push(fn);
-  }
-
-  setDisabledState(isDisabled: boolean): void {
-    this.disabled = isDisabled;
-  }
-
   // getters
   get listComponent(): ListComponent {
     return this._listComponent;
@@ -380,4 +349,38 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   get source(): Source {
     return this.listComponent.source;
   }
+
+
+  // control value accessor
+  private changed: (value: null | Item | Item[]) => void;
+  private touched: () => void;
+
+  touch() {
+    if (this.touched) {
+      this.touched();
+    }
+  }
+
+  modelChange() {
+    if (this.changed) {
+      this.changed(this.selection);
+    }
+  }
+
+  writeValue(selection: Selection): void {
+    this._selectionComponent.setSelection(selection);
+  }
+
+  registerOnChange(fn: (value: Item[]) => void): void {
+    this.changed = fn;
+  }
+
+  registerOnTouched(fn: () => void): void {
+    this.touched = fn;
+  }
+
+  setDisabledState(isDisabled: boolean): void {
+    this.disabled = isDisabled;
+  }
+
 }

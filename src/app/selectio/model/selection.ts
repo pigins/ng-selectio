@@ -2,10 +2,17 @@ import {Item} from './item';
 import {SelectionItem} from './selection-item';
 
 export class Selection implements Iterable<SelectionItem> {
-
   private items: SelectionItem[] = [];
   private _highlightedItem: SelectionItem | null;
   private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
+
+  constructor(items?: Item[]) {
+    if (items) {
+      items.forEach((item) => {
+        this.push(item);
+      });
+    }
+  }
 
   public setData(items: SelectionItem[]) {
     this.items = items;
@@ -43,7 +50,7 @@ export class Selection implements Iterable<SelectionItem> {
     this.items.splice(this.items.indexOf(item), 1);
   }
 
-  public push(data: any): void {
+  public push(data: Item): void {
     this.items.push(new SelectionItem(data, false));
   }
 

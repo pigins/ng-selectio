@@ -6,6 +6,7 @@ import {DataService} from '../service/data.service';
 import {Item} from '../selectio/model/item';
 import {SourceItem} from '../selectio/model/source-item';
 import {SelectioPluginComponent} from '../selectio/selectio.component';
+import {Selection} from '../selectio/model/selection';
 
 @Component({
   selector: 'selectio-examples-page',
@@ -89,18 +90,17 @@ import {SelectioPluginComponent} from '../selectio/selectio.component';
         (listScrollExhausted)="onListScrollExhausted()"
       ></selectio-plugin>
 
-      <!--<h2>ngmodel</h2>-->
-      <!--<div>-->
-      <!--<selectio-plugin-->
-      <!--[selectionEmptyTemplate]="selectioTemplate"-->
-      <!--[(ngModel)]="itemArray"-->
-      <!--[$data]="$stringArray"-->
-      <!--[dropdownDisabledItemMapper]="disabledItem"-->
-      <!--[allowClear]="true"-->
-      <!--&gt;-->
-      <!--</ng-selectio>-->
-      <!--<div class="selected-item">{{itemArray}}</div>-->
-      <!--</div>-->
+      <h2>ngmodel</h2>
+      <div>
+      <selectio-plugin
+        [selectionEmptyTemplate]="selectioTemplate"
+        [(ngModel)]="itemArray"
+        [data]="stringArray"
+        [allowClear]="true"
+      >
+      </selectio-plugin>
+      <div class="selected-item">{{itemArray}}</div>
+      </div>
     </div>
   `,
   styles: [`
@@ -150,7 +150,7 @@ export class ExamplesPageComponent {
   objectArray: any;
   users: any;
   appendUsers: any;
-  itemArray: Item[] = ['russia'];
+  itemArray: Selection = new Selection(['russia']);
   defaultCountry: Item;
 
   @ViewChild('remoteSelectio') remoteSelectio: SelectioPluginComponent;
