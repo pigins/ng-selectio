@@ -94,12 +94,13 @@ import {Selection} from '../selectio/model/selection';
       <div>
       <selectio-plugin
         [selectionEmptyTemplate]="selectioTemplate"
+        [selectionMode]="'multiple'"
         [(ngModel)]="itemArray"
         [data]="stringArray"
         [allowClear]="true"
       >
       </selectio-plugin>
-      <div class="selected-item">{{itemArray}}</div>
+      <div class="selected-item">{{itemArray | json}}</div>
       </div>
     </div>
   `,

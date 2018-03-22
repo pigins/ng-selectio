@@ -76,6 +76,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
         <div class="selection-wrapper" *ngIf="order===1">
           <selectio-selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
                               [$selections]="_onSelectItem"
+                              [$ngModelSelection]="$ngModelSelection"
                               [selectionMode]="selectionMode"
                               [selectionMaxLength]="selectionMaxLength"
                               [showArrow]="!autocomplete"
@@ -197,12 +198,11 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   searching: boolean = false;
   keyEvents = new EventEmitter<KeyboardEvent>();
   verticalOrder = [1, 2];
-  selection: Selection;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
-
-
+  $ngModelSelection = new EventEmitter<Selection>();
   _onSelectItem = new EventEmitter<SourceItem[]>();
+  selection: Selection;
 
   constructor(private changeDetectorRef: ChangeDetectorRef) {
   }
@@ -258,7 +258,9 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   afterSelectionChanged(selection: Selection): void {
     this.selection = selection;
-    this.modelChange();
+    if (this.changed) {
+      this.changed(selection);
+    }
   }
 
   onNgsFocus($event: Event): void {
@@ -361,14 +363,8 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  modelChange() {
-    if (this.changed) {
-      this.changed(this.selection);
-    }
-  }
-
   writeValue(selection: Selection): void {
-    this._selectionComponent.setSelection(selection);
+    this.$ngModelSelection.emit(selection);
   }
 
   registerOnChange(fn: (value: Item[]) => void): void {

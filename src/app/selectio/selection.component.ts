@@ -71,6 +71,7 @@ import {SelectionItem} from './model/selection-item';
 })
 export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   @Input() $selections: Observable<SourceItem[]>;
+  @Input() $ngModelSelection: Observable<Selection>;
   @Input() selectionMode: string;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;
@@ -123,6 +124,10 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
         this.onAfterSelectionChanged.emit(this.selection);
       }
     }
+
+    this.$ngModelSelection.subscribe((selection: Selection) => {
+      this.selection = selection;
+    });
   }
 
   ngOnDestroy(): void {
