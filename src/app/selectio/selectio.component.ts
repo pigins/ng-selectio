@@ -19,6 +19,7 @@ import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
 import {SelectionComponent} from './selection.component';
 import {Selection} from './model/selection';
 import {SourceItem} from './model/source-item';
+import {ModelService} from './model.service';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -34,7 +35,8 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
   changeDetection: ChangeDetectionStrategy.OnPush,
   selector: 'selectio-plugin',
   providers: [
-    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true}
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true},
+    ModelService
   ],
   template: `
     <ng-template #defaultListItemTemplate let-sourceItem="sourceItem">
@@ -88,7 +90,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                               [clearTemplate]="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"
                               [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"
                               (click)="onClickSelection($event)"
-                              (onAfterSelectionChanged)="afterSelectionChanged($event)"
           >
           </selectio-selection>
           <selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
@@ -204,7 +205,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   _onSelectItem = new EventEmitter<SourceItem[]>();
   selection: Selection;
 
-  constructor(private changeDetectorRef: ChangeDetectorRef) {
+  constructor(private changeDetectorRef: ChangeDetectorRef, private model: ModelService) {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -216,6 +217,14 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   ngOnInit(): void {
+    this.model.$selectionsObservable.subscribe(selection => {
+      this.selection = selection;
+      if (this.changed) {
+        this.changed(selection);
+      }
+    });
+
+
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this._searchComponent) {
@@ -253,13 +262,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     this._onSelectItem.emit(sourceItems);
     if (this.closeAfterSelect) {
       this.expandedChanged.emit(false);
-    }
-  }
-
-  afterSelectionChanged(selection: Selection): void {
-    this.selection = selection;
-    if (this.changed) {
-      this.changed(selection);
     }
   }
 

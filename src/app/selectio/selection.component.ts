@@ -1,5 +1,5 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
+  Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
 import {SELECTION_MODE_SINGLE} from './selectio.component';
@@ -10,6 +10,7 @@ import {Selection} from './model/selection';
 import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {SelectionItem} from './model/selection-item';
+import {ModelService} from './model.service';
 
 @Component({
   selector: 'selectio-selection',
@@ -84,30 +85,32 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   @Input() emptyTemplate: TemplateRef<any>;
   @Input() clearTemplate: TemplateRef<any>;
 
-  @Output() onAfterSelectionChanged = new EventEmitter<Selection>();
-
   selection: Selection = new Selection();
   private selectionChangeSubscription: Subscription;
 
-  constructor() {
+  constructor(private model: ModelService) {
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
   }
 
   ngOnInit(): void {
+    // show selection
+    this.model.$selectionsObservable.subscribe((selection) => {
+      this.selection = selection;
+    });
+
     this.selectionChangeSubscription = this.$selections.subscribe((sourceItems: SourceItem[]) => {
       if (this.selectionMode === SELECTION_MODE_SINGLE) {
         const dataItem = sourceItems[0].data;
-        this.selection.setData([new SelectionItem(dataItem, false)]);
-        this.onAfterSelectionChanged.emit(this.selection);
+        this.model.pushSelectionItems([new SelectionItem(dataItem, false)]);
       } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
         if (this.selectionMaxLength < 0 || (this.selection.size() + 1 <= this.selectionMaxLength)) {
           const selectionItems = sourceItems.map((sourceItem: SourceItem) => {
             return new SelectionItem(sourceItem.data, false);
           });
-          this.selection.pushAll(selectionItems);
-          this.onAfterSelectionChanged.emit(this.selection);
+          this.model.pushSelectionItems(selectionItems);
         }
       }
     });
@@ -117,16 +120,15 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
         const selectionItems = this.selectionDefault.map((dataItem: Item) => {
           return new SelectionItem(dataItem, false);
         });
-        this.selection.setData(selectionItems);
-        this.onAfterSelectionChanged.emit(this.selection);
+        this.model.pushSelectionItems(selectionItems);
       } else {
-        this.selection.setData([new SelectionItem(this.selectionDefault, false)]);
-        this.onAfterSelectionChanged.emit(this.selection);
+        const items = [new SelectionItem(this.selectionDefault, false)];
+        this.model.pushSelectionItems(items);
       }
     }
 
     this.$ngModelSelection.subscribe((selection: Selection) => {
-      this.selection = selection;
+      this.model.setSelection(selection);
     });
   }
 
@@ -139,15 +141,14 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
       return;
     }
     event.stopPropagation();
-    this.selection.remove(selectionItem);
-    this.onAfterSelectionChanged.emit(this.selection);
+    this.model.removeSelectionItem(selectionItem);
   }
 
   highlight(selectionItem: SelectionItem) {
     if (this.disabled) {
       return;
     }
-    this.selection.highlightedItem = selectionItem;
+    this.model.highlightSelectionItem(selectionItem);
   }
 
   singleMode() {
@@ -156,9 +157,5 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
 
   multipleMode() {
     return this.selectionMode === SELECTION_MODE_MULTIPLE;
-  }
-
-  setSelection(selection: Selection) {
-    this.selection = selection;
   }
 }
