@@ -1,5 +1,4 @@
 import {
-  ChangeDetectorRef,
   Component,
   ElementRef,
   EventEmitter,
@@ -14,14 +13,15 @@ import {
   ViewChild,
   ViewChildren
 } from '@angular/core';
-import {Observable} from 'rxjs/Observable';
-import {Item} from './model/item';
 import {Source} from './model/source';
 import {SourceFactory} from './model/source-factory';
 import {SourceItemDirective} from './source-item.directive';
 import {Selection} from './model/selection';
 import {SourceItem} from './model/source-item';
 import {Subscription} from 'rxjs/Subscription';
+import {ModelService} from './model.service';
+import {SelectionItem} from './model/selection-item';
+import {SELECTION_MODE_MULTIPLE, SELECTION_MODE_SINGLE} from './selectio.component';
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -31,34 +31,25 @@ export enum SourceType {
   selector: 'selectio-list',
   template: `
     <ng-container *ngTemplateOutlet="aboveUlTemplate;
-    context:{source: _source, hasScroll: hasScroll()}"></ng-container>
+    context:{source: source, hasScroll: hasScroll()}"></ng-container>
     <ul #ul
         [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
         (scroll)="onUlScroll($event)">
       <li #itemList
-          *ngFor="let sourceItem of _source | selectionPipe:selection; trackBy: trackByFn"
+          *ngFor="let sourceItem of source | selectionPipe:selection; trackBy: trackByFn"
           [sourceItem]="sourceItem"
-          [ngClass]="{'active': !sourceItem.disabled && _source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
-          (mouseenter)="_source.setHighlited(sourceItem)"
+          [ngClass]="{'active': !sourceItem.disabled && source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
+          (mouseenter)="source.setHighlited(sourceItem)"
           (click)="onClickItem(sourceItem)">
         <ng-container *ngTemplateOutlet="itemTemplate;context:{sourceItem: sourceItem}"></ng-container>
       </li>
     </ul>
     <ng-container *ngTemplateOutlet="underUlTemplate;
-    context:{source: _source, hasScroll: hasScroll()}"></ng-container>
+    context:{source: source, hasScroll: hasScroll()}"></ng-container>
   `
 })
 export class ListComponent implements OnInit, OnChanges, OnDestroy {
-
-  // inputs
-  @Input() data: Item[];
-  @Input() appendData: Item[];
   @Input() trackByFn: (index: number, sourceItem: SourceItem) => any;
-  @Input() sourceType: SourceType;
-
-  // external context
-  @Input() selection: Selection;
-
   // templates
   @Input() itemTemplate: TemplateRef<any>;
   @Input() aboveUlTemplate: TemplateRef<any>;
@@ -66,39 +57,35 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // outputs
   @Output() onNextPage = new EventEmitter<void>();
-  @Output() onSelectItem = new EventEmitter<SourceItem[]>();
-  @Output() onChangeData = new EventEmitter<Source>();
-  @Output() afterSourceItemInit = new EventEmitter<SourceItem>();
+  @Output() onSelectItems = new EventEmitter<SourceItem[]>();
   @Output() scrollExhausted = new EventEmitter<void>();
+  @Output() onListInit = new EventEmitter<void>();
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
-  _source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
+  source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
+  selection: Selection;
+  private selectionsSubscription: Subscription;
+  private sourceSubscription: Subscription;
 
-  constructor() {
+  constructor(private model: ModelService) {
+
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.data && changes.data.currentValue) {
-      this._source = SourceFactory.getInstance(this.sourceType, changes.data.currentValue, sourceItem => {
-        this.afterSourceItemInit.emit(sourceItem);
-      });
-      this.onChangeData.emit(this._source);
-    }
-    if (changes.appendData && changes.appendData.currentValue) {
-      this._source.appendDataItems(changes.appendData.currentValue);
-      this.onChangeData.emit(this._source);
-    }
-    if (changes.selection && changes.selection.currentValue) {
-      this._source.updateSelection(changes.selection.currentValue.toDataArray());
-    }
+
   }
 
   ngOnInit() {
+    this.sourceSubscription = this.model.$sourceObservable.subscribe(source => this.source = source);
+    this.selectionsSubscription = this.model.$selectionsObservable.subscribe(selection => this.selection = selection);
+    this.onListInit.emit();
   }
 
   ngOnDestroy(): void {
+    this.sourceSubscription.unsubscribe();
+    this.selectionsSubscription.unsubscribe();
   }
 
   onUlScroll(event: Event) {
@@ -111,7 +98,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     if (sourceItem.disabled) {
       return;
     }
-    this.onSelectItem.emit([sourceItem]);
+    this.onSelectItems.emit([sourceItem]);
   }
 
   emitNextPageEvent() {
@@ -144,7 +131,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   public getHighlited(): SourceItemDirective | null {
     const activeList = this.itemList.filter((li: SourceItemDirective) => {
-      return this._source.getHighlited() === li.sourceItem;
+      return this.source.getHighlited() === li.sourceItem;
     });
     if (activeList.length > 0) {
       return activeList[0];
@@ -157,7 +144,7 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     return (this.ul.nativeElement.offsetParent === null);
   }
 
-  public get source(): Source {
-    return this._source;
+  public getSource(): Source {
+    return this.source;
   }
 }

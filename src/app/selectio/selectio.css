@@ -105,7 +105,7 @@
   left: 22px;
   background: #5383f8;
 }
-.ngs .selection .multiple.deletable > div span:not(.clear) {
+.ngs .selection .multiple.deletable > div > span:not(.clear) {
   padding-left: 10px;
 }
 

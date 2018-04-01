@@ -1,5 +1,5 @@
 import {
-  Component, Input, OnChanges, OnDestroy, OnInit, SimpleChanges, TemplateRef,
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
   ViewEncapsulation
 } from '@angular/core';
 import {SELECTION_MODE_SINGLE} from './selectio.component';
@@ -71,19 +71,18 @@ import {ModelService} from './model.service';
   `
 })
 export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
-  @Input() $selections: Observable<SourceItem[]>;
-  @Input() $ngModelSelection: Observable<Selection>;
   @Input() selectionMode: string;
   @Input() deletable: boolean;
   @Input() showArrow: boolean;
   @Input() arrowDirection: boolean;
   @Input() disabled: boolean;
   @Input() selectionMaxLength: number;
-  @Input() selectionDefault: Item | Item[] | null;
 
   @Input() itemTemplate: TemplateRef<any>;
   @Input() emptyTemplate: TemplateRef<any>;
   @Input() clearTemplate: TemplateRef<any>;
+
+  @Output() init = new EventEmitter();
 
   selection: Selection = new Selection();
   private selectionChangeSubscription: Subscription;
@@ -96,40 +95,10 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    // show selection
-    this.model.$selectionsObservable.subscribe((selection) => {
+    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe((selection) => {
       this.selection = selection;
     });
-
-    this.selectionChangeSubscription = this.$selections.subscribe((sourceItems: SourceItem[]) => {
-      if (this.selectionMode === SELECTION_MODE_SINGLE) {
-        const dataItem = sourceItems[0].data;
-        this.model.pushSelectionItems([new SelectionItem(dataItem, false)]);
-      } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-        if (this.selectionMaxLength < 0 || (this.selection.size() + 1 <= this.selectionMaxLength)) {
-          const selectionItems = sourceItems.map((sourceItem: SourceItem) => {
-            return new SelectionItem(sourceItem.data, false);
-          });
-          this.model.pushSelectionItems(selectionItems);
-        }
-      }
-    });
-
-    if (this.selectionDefault) {
-      if (Array.isArray(this.selectionDefault)) {
-        const selectionItems = this.selectionDefault.map((dataItem: Item) => {
-          return new SelectionItem(dataItem, false);
-        });
-        this.model.pushSelectionItems(selectionItems);
-      } else {
-        const items = [new SelectionItem(this.selectionDefault, false)];
-        this.model.pushSelectionItems(items);
-      }
-    }
-
-    this.$ngModelSelection.subscribe((selection: Selection) => {
-      this.model.setSelection(selection);
-    });
+    this.init.emit();
   }
 
   ngOnDestroy(): void {
