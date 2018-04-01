@@ -11,6 +11,7 @@ import {DefaultItemPipe} from './default-item.pipe';
 import {SelectioRequiredValidator} from './selectio-required.validator';
 import {SourceItemDirective} from './source-item.directive';
 import {SelectionPipe} from './selection.pipe';
+import {FilterPipe} from './filter.pipe';
 
 @NgModule({
   declarations: [
@@ -22,7 +23,8 @@ import {SelectionPipe} from './selection.pipe';
     ClickOutsideDirective,
     SelectioRequiredValidator,
     SourceItemDirective,
-    SelectionPipe
+    SelectionPipe,
+    FilterPipe
   ],
   imports: [
     CommonModule,
