@@ -88,16 +88,13 @@ export class SelectionComponent implements OnChanges, OnInit, OnDestroy {
   private selectionChangeSubscription: Subscription;
 
   constructor(private model: ModelService) {
-
   }
 
   ngOnChanges(changes: SimpleChanges): void {
   }
 
   ngOnInit(): void {
-    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe((selection) => {
-      this.selection = selection;
-    });
+    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => this.selection = selection);
     this.init.emit();
   }
 

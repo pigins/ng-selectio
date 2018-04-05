@@ -18,9 +18,8 @@ import {KeyboardStrategy} from './model/keyboard-strategy';
 import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
 import {SelectionComponent} from './selection.component';
 import {Selection} from './model/selection';
-import {SourceItem} from './model/source-item';
 import {ModelService} from './model.service';
-import {SelectionItem} from './model/selection-item';
+import {SourceItem} from './model/source-item';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -92,16 +91,16 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
           >
           </selectio-selection>
           <selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
-                  [autocomplete]="autocomplete"
-                  [searchPlaceholder]="searchPlaceholder"
-                  [disabled]="disabled"
-                  [searchDelay]="searchDelay"
-                  [searchMinLength]="searchMinLength"
-                  [tabIndex]="tabIndex"
-                  (onSearchFocus)="onSearchFocus($event)"
-                  (onSearchKeyDown)="onTextInputKeyDown($event)"
-                  (onSearchValueChanges)="onSearchValueChanges($event)"
-                  (onSearchMinLengthBorderCrossing)="onSearchBorderCrossing($event)"
+                           [autocomplete]="autocomplete"
+                           [searchPlaceholder]="searchPlaceholder"
+                           [disabled]="disabled"
+                           [searchDelay]="searchDelay"
+                           [searchMinLength]="searchMinLength"
+                           [tabIndex]="tabIndex"
+                           (onSearchFocus)="onSearchFocus($event)"
+                           (onSearchKeyDown)="onTextInputKeyDown($event)"
+                           (onSearchValueChanges)="onSearchValueChanges($event)"
+                           (onSearchMinLengthBorderCrossing)="onSearchBorderCrossing($event)"
           ></selectio-search>
         </div>
         <div class="dropdown-wrapper" *ngIf="order===2"
@@ -111,22 +110,22 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
             <div>
               <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
                 <selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
-                        [autocomplete]="autocomplete"
-                        [searchPlaceholder]="searchPlaceholder"
-                        [disabled]="disabled"
-                        [searchDelay]="searchDelay"
-                        [searchMinLength]="searchMinLength"
-                        [tabIndex]="tabIndex"
-                        (onSearchFocus)="onSearchFocus($event)"
-                        (onSearchKeyDown)="onTextInputKeyDown($event)"
-                        (onSearchValueChanges)="onSearchValueChanges($event)"
+                                 [autocomplete]="autocomplete"
+                                 [searchPlaceholder]="searchPlaceholder"
+                                 [disabled]="disabled"
+                                 [searchDelay]="searchDelay"
+                                 [searchMinLength]="searchMinLength"
+                                 [tabIndex]="tabIndex"
+                                 (onSearchFocus)="onSearchFocus($event)"
+                                 (onSearchKeyDown)="onTextInputKeyDown($event)"
+                                 (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></selectio-search>
                 <selectio-list #listComponent *ngIf="order===2"
                                [trackByFn]="trackByFn"
                                [itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"
                                [aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"
                                [underUlTemplate]="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate"
-                               (onSelectItems)="onSelectItems($event)"
+                               (afterSelectItems)="afterSelectItems($event)"
                                (onNextPage)="onNextPageStart()"
                                (scrollExhausted)="listScrollExhausted.emit()"
                                (onListInit)="onListInit()"
@@ -163,9 +162,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @Input() searchPlaceholder: string = '';
   @Input() sourceType: SourceType = SourceType.ARRAY;
   @Input() keyboardStrategy: KeyboardStrategy = new KeyboardStrategyDefault();
-  // TODO
-  @Input() equals;
-  @Input() hashcode;
+  @Input() equals: string | ((item1: Item, item2: Item) => boolean) = ((item1, item2) => item1 === item2);
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
@@ -199,6 +196,21 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (changes.equals) {
+      const value = changes.equals.currentValue;
+      if (typeof changes.equals === 'function') {
+        this.model.setEquals(value);
+      } else {
+        const fn = ((item1, item2) => item1[<string>value] === item2[<string>value]);
+        this.model.setEquals(fn);
+      }
+    }
+    if (changes.selectionMode) {
+      this.model.setSelectionMode(changes.selectionMode.currentValue);
+    }
+    if (changes.selectionMaxLength) {
+      this.model.setSelectionMaxLength(changes.selectionMaxLength.currentValue);
+    }
     if (changes.openUp && changes.openUp.currentValue) {
       this.verticalOrder = [2, 1];
     } else {
@@ -239,13 +251,9 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   onSelectionInit(): void {
     if (this.selectionDefault) {
       if (Array.isArray(this.selectionDefault)) {
-        const selectionItems = this.selectionDefault.map((dataItem: Item) => {
-          return new SelectionItem(dataItem, false);
-        });
-        this.model.pushSelectionItems(selectionItems);
+        this.model.pushItemsToSelection(this.selectionDefault);
       } else {
-        const items = [new SelectionItem(this.selectionDefault, false)];
-        this.model.pushSelectionItems(items);
+        this.model.pushItemsToSelection([this.selectionDefault]);
       }
     }
   }
@@ -277,20 +285,9 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  onSelectItems(sourceItems: SourceItem[]): void {
-    if (this.selectionMode === SELECTION_MODE_SINGLE) {
-      const dataItem = sourceItems[0].data;
-      this.model.setSelection(new Selection([dataItem]));
-    } else if (this.selectionMode === SELECTION_MODE_MULTIPLE) {
-      if (this.selectionMaxLength < 0 || (this.model.selectionSize() + 1 <= this.selectionMaxLength)) {
-        const selectionItems = sourceItems.map((sourceItem: SourceItem) => {
-          return new SelectionItem(sourceItem.data, false);
-        });
-        this.model.pushSelectionItems(selectionItems);
-      }
-    }
+  afterSelectItems(): void {
     if (this.closeAfterSelect) {
-      this.expandedChanged.emit(false);
+      this.collapse();
     }
   }
 
@@ -307,7 +304,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onTab() {
     if (this.expanded) {
-      this.expandedChanged.emit(false);
+      this.collapse();
     }
     this.focus = false;
     this.touch();
@@ -315,7 +312,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onClickOutside() {
     if (this.expanded) {
-      this.expandedChanged.emit(false);
+      this.collapse();
     }
     this.focus = false;
     this.touch();

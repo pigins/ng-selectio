@@ -4,6 +4,7 @@ import {Source} from './source';
 import {ArraySourceItem} from './array-source-item';
 
 export class ArraySource implements Source {
+  itemEquals: (item1: Item, item2: Item) => boolean;
   private sourceItems: ArraySourceItem[] = [];
   private highlitedItem: ArraySourceItem;
   private onItemInitCallback: (sourceItem) => void | null;
@@ -13,14 +14,14 @@ export class ArraySource implements Source {
   }
 
   appendDataItem(item: Item) {
-    this.sourceItems = this.sourceItems.concat(new ArraySourceItem(item));
+    this.sourceItems = this.sourceItems.concat(new ArraySourceItem(item, this.itemEquals));
     if (this.onItemInitCallback) {
       this.onItemInitCallback(item);
     }
   }
 
   appendDataItems(items: Item[]) {
-    const sourceItems = items.map(item => new ArraySourceItem(item));
+    const sourceItems = items.map(item => new ArraySourceItem(item, this.itemEquals));
     this.sourceItems = this.sourceItems.concat(sourceItems);
     if (this.onItemInitCallback) {
       sourceItems.forEach((sourceItem) => {
@@ -63,6 +64,10 @@ export class ArraySource implements Source {
 
   setHighlited(sourceItem: ArraySourceItem): void {
     this.highlitedItem = sourceItem;
+  }
+
+  setItemEquals(itemEquals: (item1: Item, item2: Item) => boolean) {
+    this.itemEquals = itemEquals;
   }
 
   getHighlited(): SourceItem {

@@ -20,8 +20,6 @@ import {Selection} from './model/selection';
 import {SourceItem} from './model/source-item';
 import {Subscription} from 'rxjs/Subscription';
 import {ModelService} from './model.service';
-import {SelectionItem} from './model/selection-item';
-import {SELECTION_MODE_MULTIPLE, SELECTION_MODE_SINGLE} from './selectio.component';
 
 export enum SourceType {
   TREE = 'tree', ARRAY = 'array'
@@ -57,14 +55,14 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
 
   // outputs
   @Output() onNextPage = new EventEmitter<void>();
-  @Output() onSelectItems = new EventEmitter<SourceItem[]>();
+  @Output() afterSelectItems = new EventEmitter<SourceItem[]>();
   @Output() scrollExhausted = new EventEmitter<void>();
   @Output() onListInit = new EventEmitter<void>();
 
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
-  source: Source = SourceFactory.getInstance(SourceType.ARRAY, []);
+  source: Source;
   selection: Selection;
   private selectionsSubscription: Subscription;
   private sourceSubscription: Subscription;
@@ -98,7 +96,9 @@ export class ListComponent implements OnInit, OnChanges, OnDestroy {
     if (sourceItem.disabled) {
       return;
     }
-    this.onSelectItems.emit([sourceItem]);
+    const sourceItems = [sourceItem];
+    this.model.selectItems(sourceItems);
+    this.afterSelectItems.emit(sourceItems);
   }
 
   emitNextPageEvent() {

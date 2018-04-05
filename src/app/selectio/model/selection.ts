@@ -51,7 +51,7 @@ export class Selection implements Iterable<SelectionItem> {
   }
 
   public push(data: Item): void {
-    this.items.push(new SelectionItem(data, false));
+    this.items.push(new SelectionItem(data, false, this._equals));
   }
 
   public pushAll(items: SelectionItem[]): void {

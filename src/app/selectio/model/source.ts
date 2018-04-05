@@ -6,6 +6,7 @@ import {SourceItem} from './source-item';
  * recursive and list data structures.
  */
 export interface Source extends Iterable<SourceItem> {
+  itemEquals: ((item1: Item, item2: Item) => boolean);
   size(): number;
   appendDataItem(item: Item);
   appendDataItems(items: Item[]);

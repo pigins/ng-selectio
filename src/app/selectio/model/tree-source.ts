@@ -4,6 +4,7 @@ import {SourceItem} from './source-item';
 import {Stack} from './stack';
 
 export class TreeSource implements SourceItem, Source {
+  itemEquals: (item1: Item, item2: Item) => boolean;
   private parent: TreeSource;
   private children: TreeSource[] = [];
   data: Item;
@@ -35,6 +36,10 @@ export class TreeSource implements SourceItem, Source {
     return root;
   }
 
+
+  equals(other: SourceItem): boolean {
+    return true;
+  }
   constructor(data: Item) {
     this.data = data;
   }
