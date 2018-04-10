@@ -7,7 +7,6 @@ import {TextWidthService} from './text-width.service';
 
 @Component({
   selector: 'selectio-search',
-  encapsulation: ViewEncapsulation.None,
   template: `
     <div [ngClass]="{'search': true}"
          [formGroup]="textInputGroup">

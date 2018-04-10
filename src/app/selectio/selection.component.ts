@@ -14,7 +14,6 @@ import {ModelService} from './model.service';
 
 @Component({
   selector: 'selectio-selection',
-  encapsulation: ViewEncapsulation.None,
   template: `
     <div [ngStyle]="{'position': 'relative'}" [ngClass]="{'selection': true}">
       <div *ngIf="selection.size() === 0" class="empty">
