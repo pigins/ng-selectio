@@ -1,13 +1,9 @@
 import {
-  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
-  ViewEncapsulation
+  Component, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef
 } from '@angular/core';
 import {SELECTION_MODE_SINGLE} from './selectio.component';
 import {SELECTION_MODE_MULTIPLE} from './selectio.component';
-import {Item} from './model/item';
-import {SourceItem} from './model/source-item';
 import {Selection} from './model/selection';
-import {Observable} from 'rxjs/Observable';
 import {Subscription} from 'rxjs/Subscription';
 import {SelectionItem} from './model/selection-item';
 import {ModelService} from './model.service';

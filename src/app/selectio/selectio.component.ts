@@ -285,7 +285,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  afterSelectItems(): void {
+  afterSelectItems($event: SourceItem[]): void {
     if (this.closeAfterSelect) {
       this.collapse();
     }
