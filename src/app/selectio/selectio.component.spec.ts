@@ -4,7 +4,6 @@ import {SelectioRequiredValidator} from './selectio-required.validator';
 import {TextWidthService} from './text-width.service';
 import {ListComponent} from './list.component';
 import {SelectionPipe} from './selection.pipe';
-import {SelectionComponent} from './selection.component';
 import {DefaultItemPipe} from './default-item.pipe';
 import {FilterPipe} from './filter.pipe';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -24,7 +23,6 @@ describe('SelectionComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         SelectioPluginComponent,
-        SelectionComponent,
         ListComponent,
         DefaultItemPipe,
         SearchComponent,

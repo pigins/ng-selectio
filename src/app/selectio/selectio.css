@@ -84,10 +84,10 @@
 .ngs .selection .multiple {
   /*single selection mode*/
 }
-.ngs .selection .single.deletable {
+.ngs .selection .single.allow-clear {
 
 }
-.ngs .selection .multiple.deletable > div {
+.ngs .selection .multiple.allow-clear > div {
   position: relative;
   padding: 5px 7px;
   margin: 0 5px 0;
@@ -95,7 +95,7 @@
   border: 1px solid #5383f8;
   border-radius: 2px;
 }
-.ngs .selection .multiple.deletable > div::before {
+.ngs .selection .multiple.allow-clear > div::before {
   content: "";
   display: inline-block;
   position: absolute;
@@ -105,7 +105,7 @@
   left: 22px;
   background: #5383f8;
 }
-.ngs .selection .multiple.deletable > div > span:not(.clear) {
+.ngs .selection .multiple.allow-clear > div > span:not(.clear) {
   padding-left: 10px;
 }
 

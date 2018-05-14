@@ -16,10 +16,10 @@ import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {Source} from './model/source';
 import {KeyboardStrategy} from './model/keyboard-strategy';
 import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
-import {SelectionComponent} from './selection.component';
 import {Selection} from './model/selection';
 import {ModelService} from './model.service';
 import {SourceItem} from './model/source-item';
+import {SelectionItem} from './model/selection-item';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -76,20 +76,50 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
     >
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
-          <selectio-selection #selectionComponent [ngStyle]="{'display': autocomplete ? 'inline-block' : 'block'}"
-                              [selectionMode]="selectionMode"
-                              [selectionMaxLength]="selectionMaxLength"
-                              [showArrow]="!autocomplete"
-                              [arrowDirection]="openUp ? !expanded : expanded"
-                              [deletable]="allowClear"
-                              [disabled]="disabled"
-                              [itemTemplate]="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate"
-                              [clearTemplate]="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"
-                              [emptyTemplate]="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"
-                              (click)="onClickSelection($event)"
-                              (init)="onSelectionInit()"
-          >
-          </selectio-selection>
+          <!-------------------SELECTION------------------------>
+          <div (click)="onClickSelection()" [ngStyle]="{'position': 'relative', 'display': autocomplete ? 'inline-block' : 'block'}" [ngClass]="{'selection': true}">
+            <div *ngIf="selection.size() === 0" class="empty">
+              <ng-container *ngTemplateOutlet="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"></ng-container>
+            </div>
+            <ng-container *ngIf="selection.size() >= 1">
+              <div *ngIf="singleMode() && !allowClear" class="single">
+                <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
+                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
+                </div>
+              </div>
+              <div *ngIf="singleMode() && allowClear" class="single allow-clear">
+                <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
+                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
+                  <span class="clear" (click)="onDeleteClick($event, selection.get(0))">
+                    <ng-container *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
+                  </span>
+                </div>
+              </div>
+              <div *ngIf="multipleMode() && !allowClear" class="multiple">
+                <div *ngFor="let selectionItem of selection;"
+                     [ngStyle]="{'display': 'inline-block'}"
+                     [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+                     (click)="highlight(selectionItem)">
+                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
+                </div>
+              </div>
+              <div *ngIf="multipleMode() && allowClear" class="multiple allow-clear">
+                <div *ngFor="let selectionItem of selection"
+                     [ngStyle]="{'display': 'inline-block'}"
+                     [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+                     (click)="highlight(selectionItem)">
+                  <span class="clear" (click)="onDeleteClick($event, selectionItem)">
+                    <ng-container *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
+                  </span>
+                  <span>
+                    <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
+                  </span>
+                </div>
+              </div>
+            </ng-container>
+            <span *ngIf="!autocomplete" [ngClass]="{'arrow': true, 'up-arrow': openUp ? !expanded : expanded}"></span>
+          </div>
+          <!-------------------AUTOCOMPLETE SEARCH------------------------>
           <selectio-search #searchComponent *ngIf="autocomplete" style="display: inline-block"
                            [autocomplete]="autocomplete"
                            [searchPlaceholder]="searchPlaceholder"
@@ -181,7 +211,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('searchComponent') _searchComponent: SearchComponent;
   @ViewChild('listComponent') _listComponent: ListComponent;
-  @ViewChild('selectionComponent') _selectionComponent: SelectionComponent;
 
   cross = '&#10005';
   expanded: boolean;
@@ -189,10 +218,15 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   searching: boolean = false;
   verticalOrder = [1, 2];
   keyEvents = new EventEmitter<KeyboardEvent>();
+  selection: Selection = new Selection();
+  private selectionChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef, private model: ModelService) {
+    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
+      this.selection = selection;
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -246,9 +280,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
           this.listComponent.scrollToSelection();
       }
     });
-  }
-
-  onSelectionInit(): void {
     if (this.selectionDefault) {
       if (Array.isArray(this.selectionDefault)) {
         this.model.pushItemsToSelection(this.selectionDefault);
@@ -269,6 +300,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   ngOnDestroy(): void {
     this.expandedChangedSubscription.unsubscribe();
+    this.selectionChangeSubscription.unsubscribe();
   }
 
   onSearchValueChanges(value: string): void {
@@ -339,8 +371,31 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onTextInputKeyDown(event: KeyboardEvent) {
     if (this.autocomplete && event.keyCode === KEY_CODE.BACKSPACE && !this._searchComponent.getValue()) {
-      this._selectionComponent.selection.highlightOrDeleteLastItem();
+      this.selection.highlightOrDeleteLastItem();
     }
+  }
+
+  onDeleteClick(event: MouseEvent, selectionItem: SelectionItem) {
+    if (this.disabled) {
+      return;
+    }
+    event.stopPropagation();
+    this.model.removeSelectionItem(selectionItem);
+  }
+
+  highlight(selectionItem: SelectionItem) {
+    if (this.disabled) {
+      return;
+    }
+    this.model.highlightSelectionItem(selectionItem);
+  }
+
+  singleMode() {
+    return this.selectionMode === SELECTION_MODE_SINGLE;
+  }
+
+  multipleMode() {
+    return this.selectionMode === SELECTION_MODE_MULTIPLE;
   }
 
   trackByOpenUp(index, item) {
@@ -372,10 +427,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     return this._searchComponent;
   }
 
-  get selectionComponent(): SelectionComponent {
-    return this._selectionComponent;
-  }
-
   get source(): Source {
     return this.listComponent.source;
   }
@@ -392,6 +443,10 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   writeValue(selection: Selection): void {
+    if (selection === null || selection === undefined) {
+      this.model.setSelection(new Selection());
+      return;
+    }
     this.model.setSelection(selection);
   }
 
