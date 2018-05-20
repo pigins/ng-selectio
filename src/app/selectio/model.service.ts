@@ -4,10 +4,9 @@ import {Selection} from './model/selection';
 import {Subject} from 'rxjs/Subject';
 import {Observable} from 'rxjs/Observable';
 import {SelectionItem} from './model/selection-item';
-import {SourceType} from './list.component';
 import {SourceFactory} from './model/source-factory';
 import {Item} from './model/item';
-import {SELECTION_MODE_MULTIPLE, SELECTION_MODE_SINGLE} from './selectio.component';
+import {SELECTION_MODE_MULTIPLE, SELECTION_MODE_SINGLE, SourceType} from './selectio.component';
 import {SourceItem} from './model/source-item';
 
 @Injectable()

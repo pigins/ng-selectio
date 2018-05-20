@@ -2,7 +2,6 @@ import {ComponentFixture, TestBed} from '@angular/core/testing';
 import {SelectioPluginComponent} from './selectio.component';
 import {SelectioRequiredValidator} from './selectio-required.validator';
 import {TextWidthService} from './text-width.service';
-import {ListComponent} from './list.component';
 import {SelectionPipe} from './selection.pipe';
 import {DefaultItemPipe} from './default-item.pipe';
 import {FilterPipe} from './filter.pipe';
@@ -23,7 +22,6 @@ describe('SelectionComponent', () => {
     TestBed.configureTestingModule({
       declarations: [
         SelectioPluginComponent,
-        ListComponent,
         DefaultItemPipe,
         SearchComponent,
         ClickOutsideDirective,

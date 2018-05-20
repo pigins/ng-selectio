@@ -189,11 +189,11 @@ export class ExamplesPageComponent {
 
   onListScrollExhausted() {
     const term = this.remoteSelectio.searchComponent.getValue();
-    const page = this.remoteSelectio.listComponent.getSource().size() / 10 + 1;
+    const page = this.remoteSelectio.getSource().size() / 10 + 1;
     this.http.get(`https://randomuser.me/api?seed=${term}&results=${10}&page=${page}&nat=uk&inc=gender,name,picture`)
       .map(r => r.json()).map(r => r.results).subscribe(r => {
       this.appendUsers = r;
-      this.remoteSelectio.listComponent.scrollToTheBottom();
+      this.remoteSelectio.scrollToTheBottom();
     });
     // setTimeout(() => {
     //   this.onNextPage.emit({currentLength: this.listComponent.source.size(), search: this._searchComponent.getValue()});

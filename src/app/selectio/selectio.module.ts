@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {SelectioPluginComponent} from './selectio.component';
-import {ListComponent} from './list.component';
 import {SearchComponent} from './search.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
@@ -15,7 +14,6 @@ import {FilterPipe} from './filter.pipe';
 @NgModule({
   declarations: [
     SelectioPluginComponent,
-    ListComponent,
     DefaultItemPipe,
     SearchComponent,
     ClickOutsideDirective,

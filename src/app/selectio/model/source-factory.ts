@@ -1,7 +1,7 @@
 import {ArraySource} from './array-source';
 import {Source} from './source';
-import {SourceType} from '../list.component';
 import {Item} from './item';
+import {SourceType} from '../selectio.component';
 
 export class SourceFactory {
   static getInstance(sourceType: SourceType,

@@ -1,15 +1,25 @@
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
-  Component, ElementRef, EventEmitter, forwardRef, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges, TemplateRef,
-  ViewChild
+  Component,
+  ElementRef,
+  EventEmitter,
+  forwardRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  OnInit,
+  Output,
+  QueryList,
+  SimpleChanges,
+  TemplateRef,
+  ViewChild, ViewChildren
 } from '@angular/core';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/take';
 import {Subscription} from 'rxjs/Subscription';
-import {ListComponent, SourceType} from './list.component';
 import {Item} from './model/item';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -20,6 +30,8 @@ import {Selection} from './model/selection';
 import {ModelService} from './model.service';
 import {SourceItem} from './model/source-item';
 import {SelectionItem} from './model/selection-item';
+import {ArraySource} from './model/array-source';
+import {SourceItemDirective} from './source-item.directive';
 
 export enum KEY_CODE {
   UP_ARROW = 38,
@@ -27,7 +39,9 @@ export enum KEY_CODE {
   ENTER = 13,
   BACKSPACE = 8
 }
-
+export enum SourceType {
+  TREE = 'tree', ARRAY = 'array'
+}
 export const SELECTION_MODE_SINGLE = 'single';
 export const SELECTION_MODE_MULTIPLE = 'multiple';
 
@@ -150,17 +164,35 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                                  (onSearchKeyDown)="onTextInputKeyDown($event)"
                                  (onSearchValueChanges)="onSearchValueChanges($event)"
                 ></selectio-search>
-                <selectio-list #listComponent *ngIf="order===2"
-                               [trackByFn]="trackByFn"
-                               [itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"
-                               [aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"
-                               [underUlTemplate]="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate"
-                               (afterSelectItems)="afterSelectItems($event)"
-                               (onNextPage)="onNextPageStart()"
-                               (scrollExhausted)="listScrollExhausted.emit()"
-                               (onListInit)="onListInit()"
-                >
-                </selectio-list>
+                <div *ngIf="order===2">
+                  <ng-container *ngTemplateOutlet="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate;
+                  context:{source: source, hasScroll: hasScroll()}"></ng-container>
+                  <ul #ul
+                      [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
+                      (scroll)="onUlScroll($event)">
+                    <li #itemList
+                        *ngFor="let sourceItem of source | selectionPipe:selection; trackBy: trackByFn"
+                        [sourceItem]="sourceItem"
+                        [ngClass]="{'active': !sourceItem.disabled && source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
+                        (mouseenter)="source.setHighlited(sourceItem)"
+                        (click)="onClickItem(sourceItem)">
+                      <ng-container *ngTemplateOutlet="listItemTemplate ? listItemTemplate : defaultListItemTemplate;context:{sourceItem: sourceItem}"></ng-container>
+                    </li>
+                  </ul>
+                  <ng-container *ngTemplateOutlet="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate;
+                  context:{source: source, hasScroll: hasScroll()}"></ng-container>
+                </div>
+                <!--<selectio-list #listComponent *ngIf="order===2"-->
+                               <!--[trackByFn]="trackByFn"-->
+                               <!--[itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"-->
+                               <!--[aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"-->
+                               <!--[underUlTemplate]="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate"-->
+                               <!--(afterSelectItems)="afterSelectItems($event)"-->
+                               <!--(onNextPage)="onNextPageStart()"-->
+                               <!--(scrollExhausted)="listScrollExhausted.emit()"-->
+                               <!--(onListInit)="onListInit()"-->
+                <!--&gt;-->
+                <!--</selectio-list>-->
               </ng-container>
             </div>
           </div>
@@ -210,7 +242,9 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('searchComponent') _searchComponent: SearchComponent;
-  @ViewChild('listComponent') _listComponent: ListComponent;
+  // @ViewChild('listComponent') _listComponent: ListComponent;
+  @ViewChild('ul') ul: ElementRef;
+  @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
   cross = '&#10005';
   expanded: boolean;
@@ -219,14 +253,17 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   verticalOrder = [1, 2];
   keyEvents = new EventEmitter<KeyboardEvent>();
   selection: Selection = new Selection();
+  source: Source = new ArraySource();
   private selectionChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
+  private sourceSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef, private model: ModelService) {
     this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
       this.selection = selection;
     });
+    this.sourceSubscription = this.model.$sourceObservable.subscribe(source => this.source = source);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -277,7 +314,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       }
       if (this.expanded && this.scrollToSelectionAfterOpen) {
           this.changeDetectorRef.detectChanges();
-          this.listComponent.scrollToSelection();
+          this.scrollToSelection();
       }
     });
     if (this.selectionDefault) {
@@ -287,9 +324,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
         this.model.pushItemsToSelection([this.selectionDefault]);
       }
     }
-  }
-
-  onListInit(): void {
     this.model.setSource(this.sourceType, this.data, sourceItem => {
       this.afterSourceItemInit.emit(sourceItem);
     });
@@ -301,6 +335,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   ngOnDestroy(): void {
     this.expandedChangedSubscription.unsubscribe();
     this.selectionChangeSubscription.unsubscribe();
+    this.sourceSubscription.unsubscribe();
   }
 
   onSearchValueChanges(value: string): void {
@@ -358,15 +393,15 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onNextPageStart() {
     this.changeDetectorRef.detectChanges();
-    this._listComponent.scrollToTheBottom();
+    this.scrollToTheBottom();
     setTimeout(() => {
-      this.onNextPage.emit({currentLength: this.listComponent.source.size(), search: this._searchComponent.getValue()});
+      this.onNextPage.emit({currentLength: this.source.size(), search: this._searchComponent.getValue()});
     }, this.paginationDelay);
   }
 
   onPaginationClick($event: MouseEvent): void {
     $event.preventDefault();
-    this._listComponent.emitNextPageEvent();
+    this.onNextPageStart();
   }
 
   onTextInputKeyDown(event: KeyboardEvent) {
@@ -418,20 +453,65 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     this.expandedChanged.emit(false);
   }
 
-  // getters
-  get listComponent(): ListComponent {
-    return this._listComponent;
-  }
-
   get searchComponent(): SearchComponent {
     return this._searchComponent;
   }
 
-  get source(): Source {
-    return this.listComponent.source;
+  hasScroll(): boolean {
+    if (this.ul) {
+      const ul = this.ul.nativeElement;
+      return ul.scrollHeight > ul.clientHeight;
+    } else {
+      return false;
+    }
+  }
+  onUlScroll(event: Event) {
+    if (this.checkScrollExhausted()) {
+      this.listScrollExhausted.emit();
+    }
+  }
+  private checkScrollExhausted(): boolean {
+    const ul = this.ul.nativeElement;
+    return Math.abs(Math.round(ul.offsetHeight + ul.scrollTop) - Math.round(ul.scrollHeight)) === 0;
   }
 
+  onClickItem(sourceItem: SourceItem) {
+    if (sourceItem.disabled) {
+      return;
+    }
+    const sourceItems = [sourceItem];
+    this.model.selectItems(sourceItems);
+    if (this.closeAfterSelect) {
+      this.collapse();
+    }
+  }
 
+  public scrollToTheBottom(): void {
+    this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
+  }
+
+  scrollToSelection(): void {
+    const selectionList = this.itemList.filter((li: SourceItemDirective) => {
+      return li.sourceItem.selected;
+    });
+    if (selectionList.length > 0) {
+      const lastSelectedLi = selectionList[selectionList.length - 1];
+      this.ul.nativeElement.scrollTop = lastSelectedLi.topPosition;
+    }
+  }
+  public getHighlited(): SourceItemDirective | null {
+    const activeList = this.itemList.filter((li: SourceItemDirective) => {
+      return this.source.getHighlited() === li.sourceItem;
+    });
+    if (activeList.length > 0) {
+      return activeList[0];
+    } else {
+      return null;
+    }
+  }
+  getSource(): Source {
+    return this.source;
+  }
   // control value accessor
   private changed: (value: null | Item | Item[]) => void;
   private touched: () => void;
