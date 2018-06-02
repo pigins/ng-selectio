@@ -36,8 +36,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
             return JSON.stringify(item);
           }
           };`;
-  selectionDefault_user: Item;
-
   trackByFn_byIndex(index: number, item: Item): any {
     return index;
   }
@@ -46,7 +44,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   appendData: Item[] = [];
 
   selectionMode: string = SelectionMode.SINGLE;
-  selectionDefault: Item | Item[] | null = null;
   allowClear: boolean = false;
 
   searchDelay: number = 0;
@@ -82,8 +79,6 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   @ViewChild('container') container: ElementRef;
 
   constructor(private http: Http, private dataService: DataService, private router: Router) {
-    this.selectionDefault_user = this.dataService.exampleRandomUsers[0];
-
     router.events.subscribe(s => {
       if (s instanceof NavigationEnd) {
         const tree = router.parseUrl(router.url);

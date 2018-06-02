@@ -187,7 +187,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @Input() data: Item[] = [];
   @Input() appendData: Item[] = [];
   @Input() selectionMode: SelectionMode = SelectionMode.SINGLE;
-  @Input() selectionDefault: Item | Item[] | null = null;
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;
   @Input() search: boolean = false;
@@ -287,13 +286,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
           this.scrollToSelection();
       }
     });
-    if (this.selectionDefault) {
-      if (Array.isArray(this.selectionDefault)) {
-        this.model.pushItemsToSelection(this.selectionDefault);
-      } else {
-        this.model.pushItemsToSelection([this.selectionDefault]);
-      }
-    }
     this.model.setSource(this.sourceType, this.data, sourceItem => {
       this.afterSourceItemInit.emit(sourceItem);
     });

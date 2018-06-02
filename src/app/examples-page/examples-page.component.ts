@@ -56,7 +56,6 @@ import {Selection} from '../selectio/model/selection';
         [listItemTemplate]="countrySourceTemplate"
         [selectionItemTemplate]="countrySelectionTemplate"
         [data]="objectArray"
-        [selectionDefault]="defaultCountry"
       ></selectio-plugin>
       <h2>Simple select array of strings with search</h2>
       <selectio-plugin
@@ -80,7 +79,6 @@ import {Selection} from '../selectio/model/selection';
         [selectionItemTemplate]="personSelectionTemplate"
         [data]="users"
         [appendData]="appendUsers"
-        [selectionDefault]="this.dataService.exampleRandomUsers"
         [selectionMode]="'multiple'"
         [search]="true"
         [allowClear]="true"

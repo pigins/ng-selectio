@@ -97,8 +97,8 @@ export class ModelService {
     return this.selection;
   }
 
-  pushItemsToSelection(selectionDefault: Item[]) {
-    const selectionItems = selectionDefault.map((dataItem: Item) => {
+  pushItemsToSelection(selection: Item[]) {
+    const selectionItems = selection.map((dataItem: Item) => {
       return new SelectionItem(dataItem, false, this.equals);
     });
     this.pushSelectionItems(selectionItems);

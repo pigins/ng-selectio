@@ -12,7 +12,6 @@
                    [data]="data"
                    [appendData]="appendData"
                    [selectionMode]="selectionMode"
-                   [selectionDefault]="selectionDefault"
                    [scrollToSelectionAfterOpen]="scrollToSelectionAfterOpen"
                    [searchDelay]="searchDelay"
                    [searchMinLength]="searchMinLength"
@@ -230,19 +229,6 @@
       <td>number</td>
       <td></td>
       <td>-1</td>
-    </tr>
-
-    <tr>
-      <td>selectionDefault</td>
-      <td>
-        <app-select-input [options]="[{label: 'null', value: null}, {label: 'user', value: selectionDefault_user}]"
-                          [(ngModel)]=selectionDefault>
-        </app-select-input>
-      </td>
-      <td>Default selection</td>
-      <td>Item | Item[] | null</td>
-      <td></td>
-      <td>null</td>
     </tr>
 
     <tr>
