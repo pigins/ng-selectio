@@ -1,19 +1,23 @@
 import {KeyboardStrategy} from './keyboard-strategy';
-import {KEY_CODE, SelectioPluginComponent} from '../selectio.component';
+import {SelectioPluginComponent} from '../selectio.component';
+import {KEY_CODE} from './key-codes';
+import {ModelService} from './model.service';
 
 export class KeyboardStrategyDefault implements KeyboardStrategy {
-  // TODO
-  onKeyPress(event: KeyboardEvent, selectio: SelectioPluginComponent): void {
 
-    // if (event.keyCode === KEY_CODE.DOWN_ARROW && !selectio.expanded && selectio.hasFocus()) {
-    //   selectio.expand();
-    // }
-    // selectio.keyEvents.emit(event);
-    //
-    // let list = selectio.listComponent;
-    // if (event.keyCode === KEY_CODE.ENTER && list.source.getHighlited() && !list.isHidden()) {
-    //   list.onSelectItem.emit(list.source.getHighlited());
-    // }
+  onKeyPress(event: KeyboardEvent, selectio: SelectioPluginComponent, model: ModelService): void {
+    console.log(event);
+    console.log(selectio);
+    if (event.keyCode === KEY_CODE.DOWN_ARROW && !selectio.expanded && selectio.hasFocus()) {
+      selectio.expand();
+    }
+    if (event.keyCode === KEY_CODE.ESC && selectio.expanded && selectio.hasFocus()) {
+      selectio.collapse();
+    }
+    if (event.keyCode === KEY_CODE.ENTER && selectio.source.getHighlited() && selectio.expanded) {
+      model.selectHighlitedItem();
+    }
+    // TODO
     // if (event.keyCode === KEY_CODE.UP_ARROW) {
     //   const currentIndex = list.source.getEnabledSourceItems().indexOf(list.source.getHighlited());
     //   if (currentIndex && currentIndex > 0) {

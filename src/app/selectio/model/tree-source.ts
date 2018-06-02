@@ -124,15 +124,15 @@ export class TreeSource implements SourceItem, Source {
     throw new Error('not implemented');
   }
 
-  appendDataItem(item: Item) {
+  appendItem(item: Item) {
     throw new Error('not implemented');
   }
 
-  appendDataItems(items: Item[]) {
+  appendItems(items: Item[]) {
     throw new Error('not implemented');
   }
 
-  getDataItems(): Item[] {
+  getItems(): Item[] {
     throw new Error('not implemented');
   }
 
@@ -140,7 +140,7 @@ export class TreeSource implements SourceItem, Source {
     throw new Error('not implemented');
   }
 
-  updateSelection(selection: Item[]): void {
+  setSelection(selection: Item[]): void {
     throw new Error('not implemented');
   }
 

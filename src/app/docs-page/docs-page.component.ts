@@ -13,8 +13,9 @@ import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from '../selectio/model/item';
-import {SelectioPluginComponent, SELECTION_MODE_SINGLE} from '../selectio/selectio.component';
+import {SelectioPluginComponent} from '../selectio/selectio.component';
 import {NavigationEnd, Router} from '@angular/router';
+import {SelectionMode} from '../selectio/model/selection-modes';
 
 @Component({
   selector: 'app-docs-page',
@@ -44,7 +45,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   data: Item[] = this.dataService.countriesData;
   appendData: Item[] = [];
 
-  selectionMode: string = SELECTION_MODE_SINGLE;
+  selectionMode: string = SelectionMode.SINGLE;
   selectionDefault: Item | Item[] | null = null;
   allowClear: boolean = false;
 
@@ -117,8 +118,8 @@ export class DocsPageComponent implements OnInit, OnDestroy {
 
   @HostListener('window:scroll', ['$event'])
   onWindowScroll($event) {
-    let fixed = window.pageYOffset > this.menu.nativeElement.offsetHeight;
-    if (this.fixed != fixed) {
+    const fixed = window.pageYOffset > this.menu.nativeElement.offsetHeight;
+    if (this.fixed !== fixed) {
       this.menuPositionChange.emit(fixed);
     }
     this.fixed = fixed;

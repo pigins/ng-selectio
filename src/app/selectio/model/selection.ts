@@ -1,17 +1,24 @@
 import {Item} from './item';
 import {SelectionItem} from './selection-item';
+import {SelectionMode} from './selection-modes';
 
 export class Selection implements Iterable<SelectionItem> {
   private items: SelectionItem[] = [];
   private _highlightedItem: SelectionItem | null;
+  private selectionMode: SelectionMode;
   private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
 
+  // передавать параметры через конструктор!
   constructor(items?: Item[]) {
     if (items) {
       items.forEach((item) => {
         this.push(item);
       });
     }
+  }
+
+  setSelectionMode(selectionMode: SelectionMode) {
+    this.selectionMode = selectionMode;
   }
 
   public setData(items: SelectionItem[]) {
@@ -46,6 +53,12 @@ export class Selection implements Iterable<SelectionItem> {
     return this.items[index];
   }
 
+  setItems(items: Item[]) {
+    this.items = items.map(item => {
+      return new SelectionItem(item, false, this._equals);
+    });
+  }
+
   public remove(item: SelectionItem): void {
     this.items.splice(this.items.indexOf(item), 1);
   }
@@ -66,7 +79,7 @@ export class Selection implements Iterable<SelectionItem> {
     this.items.length = 0;
   }
 
-  public toDataArray(): Item[] {
+  public getItems(): Item[] {
     return this.items
       .filter(item => !item.markedForDelete)
       .map(item => item.data);
@@ -98,18 +111,18 @@ export class Selection implements Iterable<SelectionItem> {
 
   highlightOrDeleteLastItem(): void {
     if (!this._highlightedItem) {
-      this.highlightedItem = this.items[this.items.length - 1];
+      this.setHighlightedItem(this.items[this.items.length - 1]);
     } else {
       this.items = this.items.filter(item => item !== this._highlightedItem);
       this._highlightedItem = null;
     }
   }
 
-  get highlightedItem(): SelectionItem | null {
+  getHighlightedItem(): SelectionItem | null {
     return this._highlightedItem;
   }
 
-  set highlightedItem(value: SelectionItem | null) {
+  setHighlightedItem(value: SelectionItem | null) {
     this._highlightedItem = value;
   }
 

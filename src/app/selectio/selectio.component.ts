@@ -13,7 +13,8 @@ import {
   QueryList,
   SimpleChanges,
   TemplateRef,
-  ViewChild, ViewChildren
+  ViewChild,
+  ViewChildren
 } from '@angular/core';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
@@ -27,23 +28,15 @@ import {Source} from './model/source';
 import {KeyboardStrategy} from './model/keyboard-strategy';
 import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
 import {Selection} from './model/selection';
-import {ModelService} from './model.service';
+import {ModelService} from './model/model.service';
 import {SourceItem} from './model/source-item';
 import {SelectionItem} from './model/selection-item';
 import {ArraySource} from './model/array-source';
 import {SourceItemDirective} from './source-item.directive';
+import {KEY_CODE} from './model/key-codes';
+import {SourceType} from './model/source-types';
+import {SelectionMode} from './model/selection-modes';
 
-export enum KEY_CODE {
-  UP_ARROW = 38,
-  DOWN_ARROW = 40,
-  ENTER = 13,
-  BACKSPACE = 8
-}
-export enum SourceType {
-  TREE = 'tree', ARRAY = 'array'
-}
-export const SELECTION_MODE_SINGLE = 'single';
-export const SELECTION_MODE_MULTIPLE = 'multiple';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -182,17 +175,6 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
                   <ng-container *ngTemplateOutlet="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate;
                   context:{source: source, hasScroll: hasScroll()}"></ng-container>
                 </div>
-                <!--<selectio-list #listComponent *ngIf="order===2"-->
-                               <!--[trackByFn]="trackByFn"-->
-                               <!--[itemTemplate]="listItemTemplate ? listItemTemplate : defaultListItemTemplate"-->
-                               <!--[aboveUlTemplate]="listAboveUlTemplate ? listAboveUlTemplate : defaultListAboveUlTemplate"-->
-                               <!--[underUlTemplate]="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate"-->
-                               <!--(afterSelectItems)="afterSelectItems($event)"-->
-                               <!--(onNextPage)="onNextPageStart()"-->
-                               <!--(scrollExhausted)="listScrollExhausted.emit()"-->
-                               <!--(onListInit)="onListInit()"-->
-                <!--&gt;-->
-                <!--</selectio-list>-->
               </ng-container>
             </div>
           </div>
@@ -204,7 +186,7 @@ export const SELECTION_MODE_MULTIPLE = 'multiple';
 export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() data: Item[] = [];
   @Input() appendData: Item[] = [];
-  @Input() selectionMode: string = SELECTION_MODE_SINGLE;
+  @Input() selectionMode: SelectionMode = SelectionMode.SINGLE;
   @Input() selectionDefault: Item | Item[] | null = null;
   @Input() searchDelay: number = 0;
   @Input() searchMinLength: number = 0;
@@ -242,28 +224,22 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   @ViewChild('ngs') ngs: ElementRef;
   @ViewChild('searchComponent') _searchComponent: SearchComponent;
-  // @ViewChild('listComponent') _listComponent: ListComponent;
   @ViewChild('ul') ul: ElementRef;
   @ViewChildren('itemList', {read: SourceItemDirective}) itemList: QueryList<SourceItemDirective>;
 
   cross = '&#10005';
   expanded: boolean;
   focus: boolean = false;
-  searching: boolean = false;
   verticalOrder = [1, 2];
   keyEvents = new EventEmitter<KeyboardEvent>();
-  selection: Selection = new Selection();
-  source: Source = new ArraySource();
+  selection: Selection;
+  source: Source;
   private selectionChangeSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private sourceSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
   constructor(private changeDetectorRef: ChangeDetectorRef, private model: ModelService) {
-    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
-      this.selection = selection;
-    });
-    this.sourceSubscription = this.model.$sourceObservable.subscribe(source => this.source = source);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -298,12 +274,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   ngOnInit(): void {
-    this.model.$selectionsObservable.subscribe(selection => {
-      if (this.changed) {
-        this.changed(selection);
-      }
-    });
-
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this._searchComponent) {
@@ -330,6 +300,15 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     if (this.appendData) {
       this.model.appendToSource(this.appendData);
     }
+    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
+      this.selection = selection;
+      if (this.changed) {
+        this.changed(selection.getItems());
+      }
+    });
+    this.sourceSubscription = this.model.$sourceObservable.subscribe(source => this.source = source);
+    this.model.nextSource();
+    this.model.nextSelection();
   }
 
   ngOnDestroy(): void {
@@ -387,7 +366,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onKeyPress(event: KeyboardEvent) {
     if (this.keyboardStrategy) {
-      this.keyboardStrategy.onKeyPress(event, this);
+      this.keyboardStrategy.onKeyPress(event, this, this.model);
     }
   }
 
@@ -426,18 +405,18 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   singleMode() {
-    return this.selectionMode === SELECTION_MODE_SINGLE;
+    return this.selectionMode === SelectionMode.SINGLE;
   }
 
   multipleMode() {
-    return this.selectionMode === SELECTION_MODE_MULTIPLE;
+    return this.selectionMode === SelectionMode.MULTIPLE;
   }
 
   trackByOpenUp(index, item) {
     return item;
   }
 
-  public hasFocus(): boolean {
+  hasFocus(): boolean {
     if (document.activeElement) {
       return document.activeElement === this.ngs.nativeElement || document.activeElement === this._searchComponent.getNativeElement();
     } else {
@@ -445,11 +424,11 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  public expand() {
+  expand() {
     this.expandedChanged.emit(true);
   }
 
-  public collapse() {
+  collapse() {
     this.expandedChanged.emit(false);
   }
 
@@ -486,7 +465,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  public scrollToTheBottom(): void {
+  scrollToTheBottom(): void {
     this.ul.nativeElement.scrollTop = this.ul.nativeElement.scrollHeight;
   }
 
@@ -499,7 +478,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       this.ul.nativeElement.scrollTop = lastSelectedLi.topPosition;
     }
   }
-  public getHighlited(): SourceItemDirective | null {
+  getHighlited(): SourceItemDirective | null {
     const activeList = this.itemList.filter((li: SourceItemDirective) => {
       return this.source.getHighlited() === li.sourceItem;
     });
@@ -522,12 +501,12 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
   }
 
-  writeValue(selection: Selection): void {
-    if (selection === null || selection === undefined) {
-      this.model.setSelection(new Selection());
+  writeValue(items: Item[]): void {
+    if (items === null || items === undefined) {
+      this.model.clearSelection();
       return;
     }
-    this.model.setSelection(selection);
+    this.model.setSelectionItems(items);
   }
 
   registerOnChange(fn: (value: Item[]) => void): void {

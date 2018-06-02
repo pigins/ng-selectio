@@ -10,7 +10,7 @@ import {SearchComponent} from './search.component';
 import {SourceItemDirective} from './source-item.directive';
 import {ClickOutsideDirective} from './click-outside.directive';
 import {Selection} from './model/selection';
-import {ModelService} from './model.service';
+import {ModelService} from './model/model.service';
 import {ChangeDetectionStrategy} from '@angular/core';
 
 describe('SelectionComponent', () => {
@@ -54,7 +54,7 @@ describe('SelectionComponent', () => {
     component.data = [selectItem];
     fixture.detectChanges();
     const selectioElement: HTMLElement = fixture.nativeElement;
-    component.writeValue(new Selection([selectItem]));
+    component.writeValue(['test']);
     fixture.detectChanges();
     const listItem = selectioElement.querySelector('.selection .single span');
     expect(listItem.textContent).toEqual(selectItem);

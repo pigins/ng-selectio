@@ -12,7 +12,7 @@ import {Source} from './model/source';
 export class SelectionPipe implements PipeTransform {
   transform(source: Source, selection: Selection): Source {
     if (selection) {
-      source.updateSelection(selection.toDataArray());
+      source.setSelection(selection.getItems());
     }
     return source;
   }

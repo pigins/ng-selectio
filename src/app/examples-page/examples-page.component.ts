@@ -151,7 +151,7 @@ export class ExamplesPageComponent {
   objectArray: any;
   users: any;
   appendUsers: any;
-  itemArray: Selection = new Selection(['russia']);
+  itemArray: Item[] = ['russia'];
   defaultCountry: Item;
 
   @ViewChild('remoteSelectio') remoteSelectio: SelectioPluginComponent;

@@ -1,7 +1,7 @@
 import {ArraySource} from './array-source';
 import {Source} from './source';
 import {Item} from './item';
-import {SourceType} from '../selectio.component';
+import {SourceType} from './source-types';
 
 export class SourceFactory {
   static getInstance(sourceType: SourceType,
@@ -15,7 +15,7 @@ export class SourceFactory {
         result.setOnItemInit(onItemInit);
       }
       if (items) {
-        result.appendDataItems(items);
+        result.appendItems(items);
       }
       return result;
     } else if (sourceType === SourceType.TREE) {

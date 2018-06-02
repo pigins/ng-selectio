@@ -13,14 +13,14 @@ export class ArraySource implements Source {
     this.onItemInitCallback = param;
   }
 
-  appendDataItem(item: Item) {
+  appendItem(item: Item) {
     this.sourceItems = this.sourceItems.concat(new ArraySourceItem(item, this.itemEquals));
     if (this.onItemInitCallback) {
       this.onItemInitCallback(item);
     }
   }
 
-  appendDataItems(items: Item[]) {
+  appendItems(items: Item[]) {
     const sourceItems = items.map(item => new ArraySourceItem(item, this.itemEquals));
     this.sourceItems = this.sourceItems.concat(sourceItems);
     if (this.onItemInitCallback) {
@@ -30,7 +30,7 @@ export class ArraySource implements Source {
     }
   }
 
-  getDataItems(): Item[] {
+  getItems(): Item[] {
     return this.sourceItems.map(sourceItem => {
       return sourceItem.data;
     });
@@ -45,7 +45,7 @@ export class ArraySource implements Source {
   }
 
   // TODO rewrite with hash
-  public updateSelection(selection: Item[]): void {
+  public setSelection(selection: Item[]): void {
     if (selection.length === 0) {
       for (let j = 0; j < this.sourceItems.length; j++) {
         this.sourceItems[j].selected = false;

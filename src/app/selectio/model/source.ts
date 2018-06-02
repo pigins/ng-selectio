@@ -8,15 +8,13 @@ import {SourceItem} from './source-item';
 export interface Source extends Iterable<SourceItem> {
   itemEquals: ((item1: Item, item2: Item) => boolean);
   size(): number;
-  appendDataItem(item: Item);
-  appendDataItems(items: Item[]);
-  getDataItems(): Item[];
+  appendItem(item: Item);
+  appendItems(items: Item[]);
+  getItems(): Item[];
   getEnabledSourceItems(): SourceItem[];
-  updateSelection(selection: Item[]): void;
+  setSelection(selection: Item[]): void;
   isHighlited(sourceItem: SourceItem): boolean;
   setHighlited(sourceItem: SourceItem): void;
   getHighlited(): SourceItem;
   setOnItemInit(param: (sourceItem) => void): void;
 }
-
-
