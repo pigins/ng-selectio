@@ -4,7 +4,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  forwardRef,
+  forwardRef, Inject,
   Input,
   OnChanges,
   OnDestroy,
@@ -36,6 +36,7 @@ import {SourceItemDirective} from './source-item.directive';
 import {KEY_CODE} from './model/key-codes';
 import {SourceType} from './model/source-types';
 import {SelectionMode} from './model/selection-modes';
+import {SELECTIO_DEFAULTS, SELECTIO_DEFAULTS_OVERRIDE, SelectioSettings, SelectioSettingsOverride} from './model/defaults';
 
 
 @Component({
@@ -184,28 +185,28 @@ import {SelectionMode} from './model/selection-modes';
   `
 })
 export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
-  @Input() data: Item[] = [];
-  @Input() appendData: Item[] = [];
-  @Input() selectionMode: SelectionMode = SelectionMode.SINGLE;
-  @Input() searchDelay: number = 0;
-  @Input() searchMinLength: number = 0;
-  @Input() search: boolean = false;
-  @Input() paginationDelay: number = 0;
-  @Input() pagination: boolean = false;
-  @Input() autocomplete: boolean = false;
-  @Input() disabled: boolean = false;
-  @Input() closeAfterSelect: boolean = true;
-  @Input() selectionMaxLength: number = -1;
-  @Input() allowClear: boolean = false;
-  @Input() tabIndex: number = 1;
-  @Input() trackByFn: ((index: number, item: Item) => any) | null = null;
-  @Input() openUp: boolean = false;
-  @Input() scrollToSelectionAfterOpen: boolean = true;
-  @Input() clearSearchAfterCollapse: boolean = true;
-  @Input() searchPlaceholder: string = '';
-  @Input() sourceType: SourceType = SourceType.ARRAY;
-  @Input() keyboardStrategy: KeyboardStrategy = new KeyboardStrategyDefault();
-  @Input() equals: string | ((item1: Item, item2: Item) => boolean) = ((item1, item2) => item1 === item2);
+  @Input() data: Item[];
+  @Input() appendData: Item[];
+  @Input() selectionMode: SelectionMode;
+  @Input() searchDelay: number;
+  @Input() searchMinLength: number;
+  @Input() search: boolean;
+  @Input() paginationDelay: number;
+  @Input() pagination: boolean;
+  @Input() autocomplete: boolean;
+  @Input() disabled: boolean;
+  @Input() closeAfterSelect: boolean;
+  @Input() selectionMaxLength: number;
+  @Input() allowClear: boolean;
+  @Input() tabIndex: number;
+  @Input() trackByFn: ((index: number, item: Item) => any) | null;
+  @Input() openUp: boolean;
+  @Input() scrollToSelectionAfterOpen: boolean;
+  @Input() clearSearchAfterCollapse: boolean;
+  @Input() searchPlaceholder: string;
+  @Input() sourceType: SourceType;
+  @Input() keyboardStrategy: KeyboardStrategy;
+  @Input() equals: string | ((item1: Item, item2: Item) => boolean);
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
@@ -238,18 +239,24 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   private sourceSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
 
-  constructor(private changeDetectorRef: ChangeDetectorRef, private model: ModelService) {
+  constructor(
+    private changeDetectorRef: ChangeDetectorRef,
+    private model: ModelService,
+    @Inject(SELECTIO_DEFAULTS_OVERRIDE) override: SelectioSettingsOverride
+  ) {
+    Object.assign(this, SELECTIO_DEFAULTS, override);
+    this.model.setEquals(<any>this.equals);
+    this.model.setSelectionMode(this.selectionMode);
+    this.model.setSelectionMaxLength(this.selectionMaxLength);
+    this.model.setSource(this.sourceType, this.data, sourceItem => {
+      this.afterSourceItemInit.emit(sourceItem);
+    });
+    this.model.appendToSource(this.appendData);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes.equals) {
-      const value = changes.equals.currentValue;
-      if (typeof changes.equals === 'function') {
-        this.model.setEquals(value);
-      } else {
-        const fn = ((item1, item2) => item1[<string>value] === item2[<string>value]);
-        this.model.setEquals(fn);
-      }
+      this.model.setEquals(changes.equals.currentValue);
     }
     if (changes.selectionMode) {
       this.model.setSelectionMode(changes.selectionMode.currentValue);
@@ -257,18 +264,18 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     if (changes.selectionMaxLength) {
       this.model.setSelectionMaxLength(changes.selectionMaxLength.currentValue);
     }
-    if (changes.openUp && changes.openUp.currentValue) {
-      this.verticalOrder = [2, 1];
-    } else {
-      this.verticalOrder = [1, 2];
-    }
-    if (changes.data && changes.data.currentValue && changes.data.previousValue) {
+    if (changes.data && changes.data.currentValue) {
       this.model.setSource(this.sourceType, changes.data.currentValue, sourceItem => {
         this.afterSourceItemInit.emit(sourceItem);
       });
     }
     if (changes.appendData && changes.appendData.currentValue && changes.appendData.previousValue) {
       this.model.appendToSource(changes.appendData.currentValue);
+    }
+    if (changes.openUp && changes.openUp.currentValue) {
+      this.verticalOrder = [2, 1];
+    } else {
+      this.verticalOrder = [1, 2];
     }
   }
 
@@ -286,12 +293,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
           this.scrollToSelection();
       }
     });
-    this.model.setSource(this.sourceType, this.data, sourceItem => {
-      this.afterSourceItemInit.emit(sourceItem);
-    });
-    if (this.appendData) {
-      this.model.appendToSource(this.appendData);
-    }
     this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
       this.selection = selection;
       if (this.changed) {

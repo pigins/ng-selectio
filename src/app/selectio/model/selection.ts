@@ -8,7 +8,6 @@ export class Selection implements Iterable<SelectionItem> {
   private selectionMode: SelectionMode;
   private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
 
-  // передавать параметры через конструктор!
   constructor(items?: Item[]) {
     if (items) {
       items.forEach((item) => {
@@ -59,16 +58,16 @@ export class Selection implements Iterable<SelectionItem> {
     });
   }
 
-  public remove(item: SelectionItem): void {
-    this.items.splice(this.items.indexOf(item), 1);
-  }
-
   public push(data: Item): void {
     this.items.push(new SelectionItem(data, false, this._equals));
   }
 
   public pushAll(items: SelectionItem[]): void {
     this.items = this.items.concat(items);
+  }
+
+  public remove(item: SelectionItem): void {
+    this.items.splice(this.items.indexOf(item), 1);
   }
 
   public size(): number {

@@ -1,3 +1,4 @@
+
 import {Injectable} from '@angular/core';
 import {Source} from './source';
 import {Selection} from './selection';
@@ -14,13 +15,12 @@ import {SourceType} from './source-types';
 export class ModelService {
   private selection = new Selection();
   private source: Source;
-
   private selectionsSubject: Subject<Selection> = new Subject();
   private sourceSubject: Subject<Source> = new Subject();
 
-  private equals: (item1: Item, item2: Item) => boolean = ((item1, item2) => item1 === item2);
-  private selectionMode: SelectionMode = SelectionMode.SINGLE;
-  private selectionMaxLength: number = -1;
+  private equals: (item1: Item, item2: Item) => boolean;
+  private selectionMode: SelectionMode;
+  private selectionMaxLength: number;
 
   constructor() {
   }
@@ -35,11 +35,14 @@ export class ModelService {
 
   selectHighlitedItem() {
     const sourceItem = this.source.getHighlited();
-    this.selection.push(sourceItem.data);
-    this.nextSelection();
-    if (this.source) {
-      this.source.setSelection(this.selection.getItems());
+    if (this.selectionMode === SelectionMode.SINGLE) {
+      this.selection.setItems([sourceItem.data]);
+    } else {
+      this.selection.push(sourceItem.data);
     }
+    this.source.setSelection(this.selection.getItems());
+    this.nextSelection();
+    this.nextSource();
   }
 
   clearSelection() {
@@ -104,8 +107,12 @@ export class ModelService {
     this.pushSelectionItems(selectionItems);
   }
 
-  setEquals(equals: (item1: Item, item2: Item) => boolean) {
-    this.equals = equals;
+  setEquals(equals: (item1: Item, item2: Item) => boolean | 'string') {
+    if (typeof equals === 'function') {
+      this.equals = <any>equals;
+    } else {
+      this.equals = ((item1, item2) => item1[<string>equals] === item2[<string>equals]);
+    }
   }
 
   setSelectionMode(selectionMode: SelectionMode) {

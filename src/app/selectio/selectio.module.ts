@@ -1,4 +1,4 @@
-import {NgModule} from '@angular/core';
+import {ModuleWithProviders, NgModule} from '@angular/core';
 import {SelectioPluginComponent} from './selectio.component';
 import {SearchComponent} from './search.component';
 import {ReactiveFormsModule} from '@angular/forms';
@@ -10,6 +10,7 @@ import {SelectioRequiredValidator} from './selectio-required.validator';
 import {SourceItemDirective} from './source-item.directive';
 import {SelectionPipe} from './selection.pipe';
 import {FilterPipe} from './filter.pipe';
+import {SELECTIO_DEFAULTS_OVERRIDE, SelectioSettingsOverride} from './model/defaults';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,9 @@ import {FilterPipe} from './filter.pipe';
     CommonModule,
     ReactiveFormsModule
   ],
-  providers: [TextWidthService],
+  providers: [
+    TextWidthService
+  ],
   exports: [
     ReactiveFormsModule,
     SelectioPluginComponent,
@@ -35,5 +38,10 @@ import {FilterPipe} from './filter.pipe';
   ]
 })
 export class SelectioPluginModule {
-
+  static forRoot(defaults: SelectioSettingsOverride): ModuleWithProviders {
+    return {
+      ngModule: SelectioPluginModule,
+      providers: [{provide: SELECTIO_DEFAULTS_OVERRIDE, useValue: defaults}]
+    };
+  }
 }
