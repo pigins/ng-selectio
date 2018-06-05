@@ -4,5 +4,4 @@ export interface SourceItem {
   data: Item;
   disabled: boolean;
   selected: boolean;
-  equals(other: SourceItem): boolean;
 }

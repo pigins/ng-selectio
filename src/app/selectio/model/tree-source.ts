@@ -159,4 +159,8 @@ export class TreeSource implements SourceItem, Source {
   setOnItemInit(param: (sourceItem) => void): void {
     throw new Error('not implemented');
   }
+
+  setItems(items: Item[]): void {
+    throw new Error('not implemented');
+  }
 }

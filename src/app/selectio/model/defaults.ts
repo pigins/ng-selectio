@@ -30,7 +30,7 @@ export interface SelectioSettings {
   equals: string | ((item1: Item, item2: Item) => boolean); // CONST
 }
 
-export interface SelectioSettingsOverride {
+export interface SelectioDefaultsOverride {
   data?: Item[];
   appendData?: Item[];
   selectionMode?: SelectionMode;
@@ -79,5 +79,5 @@ export const SELECTIO_DEFAULTS: SelectioSettings = {
   keyboardStrategy: new KeyboardStrategyDefault(),
   equals: ((item1, item2) => item1 === item2),
 };
-export const SELECTIO_DEFAULTS_OVERRIDE = new InjectionToken<SelectioSettingsOverride>('defaults override');
+export const SELECTIO_DEFAULTS_OVERRIDE = new InjectionToken<SelectioDefaultsOverride>('defaults override');
 

@@ -17,4 +17,5 @@ export interface Source extends Iterable<SourceItem> {
   setHighlited(sourceItem: SourceItem): void;
   getHighlited(): SourceItem;
   setOnItemInit(param: (sourceItem) => void): void;
+  setItems(items: Item[]): void;
 }

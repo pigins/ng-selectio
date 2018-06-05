@@ -1,5 +1,5 @@
 
-import {Injectable} from '@angular/core';
+import {EventEmitter, Injectable, Output} from '@angular/core';
 import {Source} from './source';
 import {Selection} from './selection';
 import {Subject} from 'rxjs/Subject';
@@ -13,14 +13,11 @@ import {SourceType} from './source-types';
 
 @Injectable()
 export class ModelService {
-  private selection = new Selection();
+  private selection: Selection;
   private source: Source;
+
   private selectionsSubject: Subject<Selection> = new Subject();
   private sourceSubject: Subject<Source> = new Subject();
-
-  private equals: (item1: Item, item2: Item) => boolean;
-  private selectionMode: SelectionMode;
-  private selectionMaxLength: number;
 
   constructor() {
   }
@@ -33,13 +30,20 @@ export class ModelService {
     return this.sourceSubject.asObservable();
   }
 
+  setSelection(selection: Selection) {
+    this.selection = selection;
+  }
+
+  setSource(instance: Source) {
+    this.source = instance;
+  }
+
   selectHighlitedItem() {
-    const sourceItem = this.source.getHighlited();
-    if (this.selectionMode === SelectionMode.SINGLE) {
-      this.selection.setItems([sourceItem.data]);
-    } else {
-      this.selection.push(sourceItem.data);
-    }
+    this.selectItem(this.source.getHighlited());
+  }
+
+  selectItem(sourceItem: SourceItem) {
+    this.selection.updateItems([sourceItem.data]);
     this.source.setSelection(this.selection.getItems());
     this.nextSelection();
     this.nextSource();
@@ -52,14 +56,6 @@ export class ModelService {
 
   pushSelectionItems(selectionItems: SelectionItem[]) {
     this.selection.pushAll(selectionItems);
-    this.nextSelection();
-    if (this.source) {
-      this.source.setSelection(this.selection.getItems());
-    }
-  }
-
-  setSelection(selection: Selection) {
-    this.selection = selection;
     this.nextSelection();
     if (this.source) {
       this.source.setSelection(this.selection.getItems());
@@ -81,12 +77,10 @@ export class ModelService {
       this.source.setSelection(this.selection.getItems());
     }
   }
-
-  setSource(sourceType: SourceType, data: Item[], itemInitCallback: (sourceItem) => void) {
-    this.source = SourceFactory.getInstance(sourceType, this.equals, data, itemInitCallback);
+  setSourceData(items: Item[]) {
+    this.source.setItems(items);
     this.nextSource();
   }
-
   appendToSource(data: Item[]) {
     this.source.appendItems(data);
     this.nextSource();
@@ -102,40 +96,24 @@ export class ModelService {
 
   pushItemsToSelection(selection: Item[]) {
     const selectionItems = selection.map((dataItem: Item) => {
-      return new SelectionItem(dataItem, false, this.equals);
+      return new SelectionItem(dataItem, false);
     });
     this.pushSelectionItems(selectionItems);
   }
 
-  setEquals(equals: (item1: Item, item2: Item) => boolean | 'string') {
-    if (typeof equals === 'function') {
-      this.equals = <any>equals;
-    } else {
-      this.equals = ((item1, item2) => item1[<string>equals] === item2[<string>equals]);
-    }
-  }
-
   setSelectionMode(selectionMode: SelectionMode) {
-    this.selectionMode = selectionMode;
     this.selection.setSelectionMode(selectionMode);
+    this.nextSelection();
   }
 
   setSelectionMaxLength(selectionMaxLength: number) {
-    this.selectionMaxLength = selectionMaxLength;
+    this.selection.setSelectionMaxLength(selectionMaxLength);
+    this.nextSelection();
   }
 
-  selectItems(sourceItems: SourceItem[]) {
-    if (this.selectionMode === SelectionMode.SINGLE) {
-      const dataItem = sourceItems[0].data;
-      this.setSelection(new Selection([dataItem]));
-    } else if (this.selectionMode === SelectionMode.MULTIPLE) {
-      if (this.selectionMaxLength < 0 || (this.selectionSize() + 1 <= this.selectionMaxLength)) {
-        const selectionItems = sourceItems.map((sourceItem: SourceItem) => {
-          return new SelectionItem(sourceItem.data, false, this.equals);
-        });
-        this.pushSelectionItems(selectionItems);
-      }
-    }
+  setSelectionItems(items: Item[]) {
+    this.selection.setItems(items);
+    this.nextSelection();
   }
 
   nextSelection() {
@@ -146,10 +124,11 @@ export class ModelService {
     this.sourceSubject.next(this.source);
   }
 
-  setSelectionItems(items: Item[]) {
-    this.selection.setItems(items);
-    this.nextSelection();
+  setAfterSourceItemInit(currentValue: any) {
+
   }
+
+
 }
 
 

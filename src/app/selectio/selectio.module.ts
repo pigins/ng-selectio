@@ -10,7 +10,7 @@ import {SelectioRequiredValidator} from './selectio-required.validator';
 import {SourceItemDirective} from './source-item.directive';
 import {SelectionPipe} from './selection.pipe';
 import {FilterPipe} from './filter.pipe';
-import {SELECTIO_DEFAULTS_OVERRIDE, SelectioSettingsOverride} from './model/defaults';
+import {SELECTIO_DEFAULTS_OVERRIDE, SelectioDefaultsOverride} from './model/defaults';
 
 @NgModule({
   declarations: [
@@ -38,7 +38,7 @@ import {SELECTIO_DEFAULTS_OVERRIDE, SelectioSettingsOverride} from './model/defa
   ]
 })
 export class SelectioPluginModule {
-  static forRoot(defaults: SelectioSettingsOverride): ModuleWithProviders {
+  static forRoot(defaults: SelectioDefaultsOverride): ModuleWithProviders {
     return {
       ngModule: SelectioPluginModule,
       providers: [{provide: SELECTIO_DEFAULTS_OVERRIDE, useValue: defaults}]

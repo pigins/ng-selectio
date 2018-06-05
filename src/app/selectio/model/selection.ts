@@ -3,17 +3,18 @@ import {SelectionItem} from './selection-item';
 import {SelectionMode} from './selection-modes';
 
 export class Selection implements Iterable<SelectionItem> {
-  private items: SelectionItem[] = [];
-  private _highlightedItem: SelectionItem | null;
+  private items: SelectionItem[];
+  private highlightedItem: SelectionItem | null;
   private selectionMode: SelectionMode;
-  private _equals: (item1: Item, item2: Item) => boolean = (item1: Item, item2: Item) => item1 === item2;
+  private equals: (item1: Item, item2: Item) => boolean;
+  private selectionMaxLength: number;
 
-  constructor(items?: Item[]) {
-    if (items) {
-      items.forEach((item) => {
-        this.push(item);
-      });
-    }
+  constructor(selectionMode: SelectionMode, selectionMaxLength: number, equals: (item1: Item, item2: Item) => boolean) {
+    this.items = [];
+    this.highlightedItem = null;
+    this.selectionMode = selectionMode;
+    this.selectionMaxLength = selectionMaxLength;
+    this.equals = equals;
   }
 
   setSelectionMode(selectionMode: SelectionMode) {
@@ -32,7 +33,7 @@ export class Selection implements Iterable<SelectionItem> {
 
   public removeData(data: Item): void {
     for (let i = 0; i < this.items.length; i++) {
-      if (this._equals(this.items[i].data, data)) {
+      if (this.equals(this.items[i].data, data)) {
         this.items.splice(this.items.indexOf(this.items[i]), 1);
         break;
       }
@@ -41,7 +42,7 @@ export class Selection implements Iterable<SelectionItem> {
 
   public contains(data: Item): boolean {
     for (let i = 0; i < this.items.length; i++) {
-      if (this._equals(this.items[i].data, data)) {
+      if (this.equals(this.items[i].data, data)) {
         return true;
       }
     }
@@ -54,12 +55,12 @@ export class Selection implements Iterable<SelectionItem> {
 
   setItems(items: Item[]) {
     this.items = items.map(item => {
-      return new SelectionItem(item, false, this._equals);
+      return new SelectionItem(item, false);
     });
   }
 
   public push(data: Item): void {
-    this.items.push(new SelectionItem(data, false, this._equals));
+    this.items.push(new SelectionItem(data, false));
   }
 
   public pushAll(items: SelectionItem[]): void {
@@ -93,36 +94,36 @@ export class Selection implements Iterable<SelectionItem> {
   }
 
   getEquals(): (item1: Item, item2: Item) => boolean {
-    return this._equals;
+    return this.equals;
   }
 
   setEquals(value: (item1: Item, item2: Item) => boolean) {
-    this._equals = value;
+    this.equals = value;
   }
 
   firstItemHighlighted(): boolean {
-    return this.items[0] === this._highlightedItem;
+    return this.items[0] === this.highlightedItem;
   }
 
   itemHighlighted(item: SelectionItem): boolean {
-    return this._highlightedItem === item;
+    return this.highlightedItem === item;
   }
 
   highlightOrDeleteLastItem(): void {
-    if (!this._highlightedItem) {
+    if (!this.highlightedItem) {
       this.setHighlightedItem(this.items[this.items.length - 1]);
     } else {
-      this.items = this.items.filter(item => item !== this._highlightedItem);
-      this._highlightedItem = null;
+      this.items = this.items.filter(item => item !== this.highlightedItem);
+      this.highlightedItem = null;
     }
   }
 
   getHighlightedItem(): SelectionItem | null {
-    return this._highlightedItem;
+    return this.highlightedItem;
   }
 
   setHighlightedItem(value: SelectionItem | null) {
-    this._highlightedItem = value;
+    this.highlightedItem = value;
   }
 
   [Symbol.iterator](): Iterator<SelectionItem> {
@@ -135,5 +136,23 @@ export class Selection implements Iterable<SelectionItem> {
         return {value, done};
       }
     };
+  }
+
+  updateItems(items: Item[]) {
+    if (this.selectionMode === SelectionMode.SINGLE) {
+      this.setItems(items);
+    } else {
+      if (this.selectionMaxLength < 0 || (this.size() + 1 <= this.selectionMaxLength)) {
+        this.pushItems(items);
+      }
+    }
+  }
+
+  setSelectionMaxLength(selectionMaxLength: number) {
+    this.selectionMaxLength = selectionMaxLength;
+  }
+
+  private pushItems(items: Item[]) {
+    this.items = this.items.concat(items.map(item => new SelectionItem(item, false)));
   }
 }

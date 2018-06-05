@@ -13,15 +13,25 @@ export class ArraySource implements Source {
     this.onItemInitCallback = param;
   }
 
+  setItems(items: Item[]): void {
+    const sourceItems = items.map(item => new ArraySourceItem(item));
+    this.sourceItems = sourceItems;
+    if (this.onItemInitCallback) {
+      sourceItems.forEach((sourceItem) => {
+        this.onItemInitCallback(sourceItem);
+      });
+    }
+  }
+
   appendItem(item: Item) {
-    this.sourceItems = this.sourceItems.concat(new ArraySourceItem(item, this.itemEquals));
+    this.sourceItems = this.sourceItems.concat(new ArraySourceItem(item));
     if (this.onItemInitCallback) {
       this.onItemInitCallback(item);
     }
   }
 
   appendItems(items: Item[]) {
-    const sourceItems = items.map(item => new ArraySourceItem(item, this.itemEquals));
+    const sourceItems = items.map(item => new ArraySourceItem(item));
     this.sourceItems = this.sourceItems.concat(sourceItems);
     if (this.onItemInitCallback) {
       sourceItems.forEach((sourceItem) => {

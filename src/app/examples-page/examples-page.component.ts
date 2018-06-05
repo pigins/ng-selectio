@@ -147,8 +147,8 @@ import {Selection} from '../selectio/model/selection';
 export class ExamplesPageComponent {
   stringArray: any = this.dataService.countriesStrings;
   objectArray: any;
-  users: any;
-  appendUsers: any;
+  users: any = [];
+  appendUsers: any = [];
   itemArray: Item[] = ['russia'];
   defaultCountry: Item;
 

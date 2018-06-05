@@ -4,7 +4,7 @@ import {
   Component,
   ElementRef,
   EventEmitter,
-  forwardRef, Inject,
+  forwardRef, Inject, Injector,
   Input,
   OnChanges,
   OnDestroy,
@@ -26,7 +26,6 @@ import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
 import {Source} from './model/source';
 import {KeyboardStrategy} from './model/keyboard-strategy';
-import {KeyboardStrategyDefault} from './model/keyboard-strategy-default';
 import {Selection} from './model/selection';
 import {ModelService} from './model/model.service';
 import {SourceItem} from './model/source-item';
@@ -36,8 +35,8 @@ import {SourceItemDirective} from './source-item.directive';
 import {KEY_CODE} from './model/key-codes';
 import {SourceType} from './model/source-types';
 import {SelectionMode} from './model/selection-modes';
-import {SELECTIO_DEFAULTS, SELECTIO_DEFAULTS_OVERRIDE, SelectioSettings, SelectioSettingsOverride} from './model/defaults';
-
+import {SELECTIO_DEFAULTS, SELECTIO_DEFAULTS_OVERRIDE, SelectioSettings, SelectioDefaultsOverride} from './model/defaults';
+import {SourceFactory} from './model/source-factory';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -204,9 +203,9 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   @Input() scrollToSelectionAfterOpen: boolean;
   @Input() clearSearchAfterCollapse: boolean;
   @Input() searchPlaceholder: string;
-  @Input() sourceType: SourceType;
+  @Input() sourceType: SourceType; // no runtime change
   @Input() keyboardStrategy: KeyboardStrategy;
-  @Input() equals: string | ((item1: Item, item2: Item) => boolean);
+  @Input() equals: string | ((item1: Item, item2: Item) => boolean); // no runtime change
 
   // Templates
   @Input() listItemTemplate: TemplateRef<any>;
@@ -231,46 +230,28 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   expanded: boolean;
   focus: boolean = false;
   verticalOrder = [1, 2];
-  keyEvents = new EventEmitter<KeyboardEvent>();
   selection: Selection;
   source: Source;
-  private selectionChangeSubscription: Subscription;
+  private selectionSubscription: Subscription;
   private expandedChangedSubscription: Subscription;
   private sourceSubscription: Subscription;
   private expandedChanged = new EventEmitter<boolean>();
+  private model: ModelService;
 
   constructor(
     private changeDetectorRef: ChangeDetectorRef,
-    private model: ModelService,
-    @Inject(SELECTIO_DEFAULTS_OVERRIDE) override: SelectioSettingsOverride
+    private injector: Injector,
+    @Inject(SELECTIO_DEFAULTS_OVERRIDE) override: SelectioDefaultsOverride
   ) {
     Object.assign(this, SELECTIO_DEFAULTS, override);
-    this.model.setEquals(<any>this.equals);
-    this.model.setSelectionMode(this.selectionMode);
-    this.model.setSelectionMaxLength(this.selectionMaxLength);
-    this.model.setSource(this.sourceType, this.data, sourceItem => {
-      this.afterSourceItemInit.emit(sourceItem);
-    });
-    this.model.appendToSource(this.appendData);
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes.equals) {
-      this.model.setEquals(changes.equals.currentValue);
-    }
-    if (changes.selectionMode) {
-      this.model.setSelectionMode(changes.selectionMode.currentValue);
-    }
-    if (changes.selectionMaxLength) {
-      this.model.setSelectionMaxLength(changes.selectionMaxLength.currentValue);
-    }
-    if (changes.data && changes.data.currentValue) {
-      this.model.setSource(this.sourceType, changes.data.currentValue, sourceItem => {
-        this.afterSourceItemInit.emit(sourceItem);
-      });
-    }
-    if (changes.appendData && changes.appendData.currentValue && changes.appendData.previousValue) {
-      this.model.appendToSource(changes.appendData.currentValue);
+    if (this.model) {
+      if (changes.selectionMode) {this.model.setSelectionMode(changes.selectionMode.currentValue); }
+      if (changes.selectionMaxLength) {this.model.setSelectionMaxLength(changes.selectionMaxLength.currentValue); }
+      if (changes.data) {this.model.setSourceData(changes.data.currentValue); }
+      if (changes.appendData) {this.model.appendToSource(changes.appendData.currentValue); }
     }
     if (changes.openUp && changes.openUp.currentValue) {
       this.verticalOrder = [2, 1];
@@ -280,6 +261,16 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
   }
 
   ngOnInit(): void {
+    this.model = this.injector.get(ModelService);
+    let equalsFn;
+    if (typeof this.equals === 'function') {
+      equalsFn = <any>this.equals;
+    } else {
+      equalsFn = ((item1, item2) => item1[<string>this.equals] === item2[<string>this.equals]);
+    }
+    this.model.setSelection(new Selection(this.selectionMode, this.selectionMaxLength, equalsFn));
+    this.model.setSource(SourceFactory.getInstance(this.sourceType, equalsFn, this.data.concat(this.appendData), (sourceItem) => {this.afterSourceItemInit.emit(sourceItem); }));
+
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
       if (this.expanded && this._searchComponent) {
@@ -293,7 +284,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
           this.scrollToSelection();
       }
     });
-    this.selectionChangeSubscription = this.model.$selectionsObservable.subscribe(selection => {
+    this.selectionSubscription = this.model.$selectionsObservable.subscribe(selection => {
       this.selection = selection;
       if (this.changed) {
         this.changed(selection.getItems());
@@ -306,7 +297,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   ngOnDestroy(): void {
     this.expandedChangedSubscription.unsubscribe();
-    this.selectionChangeSubscription.unsubscribe();
+    this.selectionSubscription.unsubscribe();
     this.sourceSubscription.unsubscribe();
   }
 
@@ -451,8 +442,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     if (sourceItem.disabled) {
       return;
     }
-    const sourceItems = [sourceItem];
-    this.model.selectItems(sourceItems);
+    this.model.selectItem(sourceItem);
     if (this.closeAfterSelect) {
       this.collapse();
     }
