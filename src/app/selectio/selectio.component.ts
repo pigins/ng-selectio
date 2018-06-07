@@ -250,7 +250,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     if (this.model) {
       if (changes.selectionMode) {this.model.setSelectionMode(changes.selectionMode.currentValue); }
       if (changes.selectionMaxLength) {this.model.setSelectionMaxLength(changes.selectionMaxLength.currentValue); }
-      if (changes.data) {this.model.setSourceData(changes.data.currentValue); }
+      if (changes.data) {this.model.setSourceItems(changes.data.currentValue); }
       if (changes.appendData) {this.model.appendToSource(changes.appendData.currentValue); }
     }
     if (changes.openUp && changes.openUp.currentValue) {

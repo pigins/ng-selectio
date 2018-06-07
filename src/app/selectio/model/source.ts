@@ -6,7 +6,7 @@ import {SourceItem} from './source-item';
  * recursive and list data structures.
  */
 export interface Source extends Iterable<SourceItem> {
-  itemEquals: ((item1: Item, item2: Item) => boolean);
+  equals: ((item1: Item, item2: Item) => boolean);
   size(): number;
   appendItem(item: Item);
   appendItems(items: Item[]);
@@ -15,7 +15,7 @@ export interface Source extends Iterable<SourceItem> {
   setSelection(selection: Item[]): void;
   isHighlited(sourceItem: SourceItem): boolean;
   setHighlited(sourceItem: SourceItem): void;
-  getHighlited(): SourceItem;
+  getHighlited(): SourceItem | null;
   setOnItemInit(param: (sourceItem) => void): void;
   setItems(items: Item[]): void;
 }

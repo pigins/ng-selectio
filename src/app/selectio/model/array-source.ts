@@ -4,10 +4,18 @@ import {Source} from './source';
 import {ArraySourceItem} from './array-source-item';
 
 export class ArraySource implements Source {
-  itemEquals: (item1: Item, item2: Item) => boolean;
-  private sourceItems: ArraySourceItem[] = [];
-  private highlitedItem: ArraySourceItem;
+  equals: (item1: Item, item2: Item) => boolean;
+  private sourceItems: ArraySourceItem[];
+  private highlitedItem: ArraySourceItem | null;
   private onItemInitCallback: (sourceItem) => void | null;
+
+  constructor(items: Item[], onItemInitCallback: (sourceItem) => void | null, equals: (item1: Item, item2: Item) => boolean) {
+    this.highlitedItem = null;
+    this.equals = equals;
+    this.onItemInitCallback = onItemInitCallback;
+    this.sourceItems = [];
+    this.appendItems(items);
+  }
 
   setOnItemInit(param: (sourceItem) => void): void {
     this.onItemInitCallback = param;
@@ -77,10 +85,10 @@ export class ArraySource implements Source {
   }
 
   setItemEquals(itemEquals: (item1: Item, item2: Item) => boolean) {
-    this.itemEquals = itemEquals;
+    this.equals = itemEquals;
   }
 
-  getHighlited(): SourceItem {
+  getHighlited(): SourceItem | null {
     return this.highlitedItem;
   }
 
