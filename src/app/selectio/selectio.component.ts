@@ -40,14 +40,14 @@ import {SourceFactory} from './model/source-factory';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  selector: 'selectio-plugin',
+  selector: 'ng-selectio',
   providers: [
     {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true},
     ModelService
   ],
   template: `
     <ng-template #defaultListItemTemplate let-sourceItem="sourceItem">
-      <span>{{sourceItem.data | defaultItem}}</span>
+      <span>{{sourceItem.item | defaultItem}}</span>
     </ng-template>
 
     <ng-template #defaultListAboveUlTemplate>
@@ -62,7 +62,7 @@ import {SourceFactory} from './model/source-factory';
     </ng-template>
 
     <ng-template #defaultSelectionItemTemplate let-selectionItem="selectionItem">
-      <span>{{selectionItem.data | defaultItem}}</span>
+      <span>{{selectionItem.item | defaultItem}}</span>
     </ng-template>
 
     <ng-template #defaultSelectionEmptyTemplate>
@@ -84,42 +84,51 @@ import {SourceFactory} from './model/source-factory';
       <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
         <div class="selection-wrapper" *ngIf="order===1">
           <!-------------------SELECTION------------------------>
-          <div (click)="onClickSelection()" [ngStyle]="{'position': 'relative', 'display': autocomplete ? 'inline-block' : 'block'}" [ngClass]="{'selection': true}">
+          <div (click)="onClickSelection()"
+               [ngStyle]="{'position': 'relative', 'display': autocomplete ? 'inline-block' : 'block'}"
+               [ngClass]="{'selection': true}">
             <div *ngIf="selection.size() === 0" class="empty">
-              <ng-container *ngTemplateOutlet="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"></ng-container>
+              <ng-container
+                *ngTemplateOutlet="autocomplete ? '' : selectionEmptyTemplate ? selectionEmptyTemplate : defaultSelectionEmptyTemplate"></ng-container>
             </div>
             <ng-container *ngIf="selection.size() >= 1">
               <div *ngIf="singleMode() && !allowClear" class="single">
                 <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
-                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
                 </div>
               </div>
               <div *ngIf="singleMode() && allowClear" class="single allow-clear">
                 <div [ngClass]="{'single': true, 'selected': selection.firstItemHighlighted()}">
-                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selection.get(0)}"></ng-container>
                   <span class="clear" (click)="onDeleteClick($event, selection.get(0))">
-                    <ng-container *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
                   </span>
                 </div>
               </div>
               <div *ngIf="multipleMode() && !allowClear" class="multiple">
                 <div *ngFor="let selectionItem of selection;"
                      [ngStyle]="{'display': 'inline-block'}"
-                     [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+                     [ngClass]="{'selected': selectionItem.highlighted}"
                      (click)="highlight(selectionItem)">
-                  <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
+                  <ng-container
+                    *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
                 </div>
               </div>
               <div *ngIf="multipleMode() && allowClear" class="multiple allow-clear">
                 <div *ngFor="let selectionItem of selection"
                      [ngStyle]="{'display': 'inline-block'}"
-                     [ngClass]="{'selected': selection.itemHighlighted(selectionItem)}"
+                     [ngClass]="{'selected': selectionItem.highlighted}"
                      (click)="highlight(selectionItem)">
                   <span class="clear" (click)="onDeleteClick($event, selectionItem)">
-                    <ng-container *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="selectionClearTemplate ? selectionClearTemplate : defaultSelectionClearTemplate"></ng-container>
                   </span>
                   <span>
-                    <ng-container *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
+                    <ng-container
+                      *ngTemplateOutlet="selectionItemTemplate ? selectionItemTemplate : defaultSelectionItemTemplate;context:{selectionItem:selectionItem}"></ng-container>
                   </span>
                 </div>
               </div>
@@ -164,12 +173,13 @@ import {SourceFactory} from './model/source-factory';
                       [ngStyle]="{'list-style-type': 'none', 'overflow-y':'auto', position: 'relative'}"
                       (scroll)="onUlScroll($event)">
                     <li #itemList
-                        *ngFor="let sourceItem of source | selectionPipe:selection; trackBy: trackByFn"
+                        *ngFor="let sourceItem of source | selectionPipe:selection; trackBy: trackByFn, let i = index"
                         [sourceItem]="sourceItem"
-                        [ngClass]="{'active': !sourceItem.disabled && source.isHighlited(sourceItem), 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
-                        (mouseenter)="source.setHighlited(sourceItem)"
+                        [ngClass]="{'active': !sourceItem.disabled && sourceItem.highlighted, 'selected': sourceItem.selected, 'disabled': sourceItem.disabled}"
+                        (mouseenter)="source.highlight(i)"
                         (click)="onClickItem(sourceItem)">
-                      <ng-container *ngTemplateOutlet="listItemTemplate ? listItemTemplate : defaultListItemTemplate;context:{sourceItem: sourceItem}"></ng-container>
+                      <ng-container
+                        *ngTemplateOutlet="listItemTemplate ? listItemTemplate : defaultListItemTemplate;context:{sourceItem: sourceItem}"></ng-container>
                     </li>
                   </ul>
                   <ng-container *ngTemplateOutlet="listUnderUlTemplate ? listUnderUlTemplate : defaultListUnderUlTemplate;
@@ -369,7 +379,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   onTextInputKeyDown(event: KeyboardEvent) {
     if (this.autocomplete && event.keyCode === KEY_CODE.BACKSPACE && !this._searchComponent.getValue()) {
-      this.selection.highlightOrDeleteLastItem();
+      this.selection.deleteLastItem();
     }
   }
 
@@ -461,6 +471,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       this.ul.nativeElement.scrollTop = lastSelectedLi.topPosition;
     }
   }
+
   getHighlited(): SourceItemDirective | null {
     const activeList = this.itemList.filter((li: SourceItemDirective) => {
       return this.source.getHighlited() === li.sourceItem;
@@ -471,6 +482,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
       return null;
     }
   }
+
   getSource(): Source {
     return this.source;
   }

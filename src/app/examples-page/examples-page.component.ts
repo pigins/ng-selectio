@@ -19,61 +19,61 @@ import {Selection} from '../selectio/model/selection';
     <ng-template #countrySourceTemplate let-countryItem="sourceItem">
       <div id="country-iso-name">
         <div class="flag-wrapper">
-          <div class="icon-flag" [innerHtml]="countryItem.data.svgFlag | safeHtml"></div>
+          <div class="icon-flag" [innerHtml]="countryItem.item.svgFlag | safeHtml"></div>
         </div>
-        <span class="country-name">{{countryItem.data.name + '(' + countryItem.data.code + ')'}}</span>
+        <span class="country-name">{{countryItem.item.name + '(' + countryItem.item.code + ')'}}</span>
       </div>
     </ng-template>
 
     <ng-template #countrySelectionTemplate let-countryItem="selectionItem">
       <div id="country-iso-name">
         <div class="flag-wrapper">
-          <div class="icon-flag" [innerHtml]="countryItem.data.svgFlag | safeHtml"></div>
+          <div class="icon-flag" [innerHtml]="countryItem.item.svgFlag | safeHtml"></div>
         </div>
-        <span class="country-name">{{countryItem.data.name + '(' + countryItem.data.code + ')'}}</span>
+        <span class="country-name">{{countryItem.item.name + '(' + countryItem.item.code + ')'}}</span>
       </div>
     </ng-template>
 
-    <ng-template #personSourceTemplate let-item="sourceItem">
-      {{item.data.name.first}}
+    <ng-template #personSourceTemplate let-sourceItem="sourceItem">
+      {{sourceItem.item.name.first}}
     </ng-template>
 
-    <ng-template #personSelectionTemplate let-item="selectionItem">
-      {{item.data.name.first}}
+    <ng-template #personSelectionTemplate let-selectionItem="selectionItem">
+      {{selectionItem.item.name.first}}
     </ng-template>
 
     <div id="examples-cont">
       <h2>Simple select array of strings</h2>
-      <selectio-plugin
+      <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
         [data]="stringArray"
         [allowClear]="true"
         (afterSourceItemInit)="afterSourceItemInit($event)"
-      ></selectio-plugin>
+      ></ng-selectio>
       <h2>Simple select array of objects</h2>
-      <selectio-plugin
+      <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
         [listItemTemplate]="countrySourceTemplate"
         [selectionItemTemplate]="countrySelectionTemplate"
         [data]="objectArray"
-      ></selectio-plugin>
+      ></ng-selectio>
       <h2>Simple select array of strings with search</h2>
-      <selectio-plugin
+      <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
         [data]="stringArray"
         [search]="true"
         (onSearch)="onSearchString($event)"
-      ></selectio-plugin>
+      ></ng-selectio>
       <h2>Simple select array of strings with search and autocomplete</h2>
-      <selectio-plugin
+      <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
         [data]="stringArray"
         [search]="true"
         [autocomplete]="true"
         (onSearch)="onSearchString($event)"
-      ></selectio-plugin>
+      ></ng-selectio>
       <h2>Remote data select with search and pagination</h2>
-      <selectio-plugin #remoteSelectio
+      <ng-selectio #remoteSelectio
         [selectionEmptyTemplate]="selectioTemplate"
         [listItemTemplate]="personSourceTemplate"
         [selectionItemTemplate]="personSelectionTemplate"
@@ -86,18 +86,18 @@ import {Selection} from '../selectio/model/selection';
         [paginationDelay]="500"
         (onSearch)="onSearch($event)"
         (listScrollExhausted)="onListScrollExhausted()"
-      ></selectio-plugin>
+      ></ng-selectio>
 
       <h2>ngmodel</h2>
       <div>
-      <selectio-plugin
+      <ng-selectio
         [selectionEmptyTemplate]="selectioTemplate"
         [selectionMode]="'multiple'"
         [(ngModel)]="itemArray"
         [data]="stringArray"
         [allowClear]="true"
       >
-      </selectio-plugin>
+      </ng-selectio>
       <div class="selected-item">{{itemArray | json}}</div>
       </div>
     </div>

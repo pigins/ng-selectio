@@ -48,7 +48,7 @@ export class ModelService {
   }
 
   selectItem(sourceItem: SourceItem) {
-    this.selection.updateItems([sourceItem.data]);
+    this.selection.updateItems([sourceItem.item]);
     this.source.setSelection(this.selection.getItems());
     this.nextSelection();
     this.nextSource();
@@ -84,6 +84,14 @@ export class ModelService {
   appendToSource(data: Item[]) {
     this.source.appendItems(data);
     this.nextSource();
+  }
+
+  highlightUpper() {
+    this.source.highlightUpper();
+  }
+
+  highlightBelow() {
+    this.source.highlightBelow();
   }
 }
 

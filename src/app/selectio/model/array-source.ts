@@ -6,11 +6,10 @@ import {ArraySourceItem} from './array-source-item';
 export class ArraySource implements Source {
   equals: (item1: Item, item2: Item) => boolean;
   private sourceItems: ArraySourceItem[];
-  private highlitedItem: ArraySourceItem | null;
+  private previousHighlightedIndex: number;
   private onItemInitCallback: (sourceItem) => void | null;
 
   constructor(items: Item[], onItemInitCallback: (sourceItem) => void | null, equals: (item1: Item, item2: Item) => boolean) {
-    this.highlitedItem = null;
     this.equals = equals;
     this.onItemInitCallback = onItemInitCallback;
     this.sourceItems = [];
@@ -50,7 +49,7 @@ export class ArraySource implements Source {
 
   getItems(): Item[] {
     return this.sourceItems.map(sourceItem => {
-      return sourceItem.data;
+      return sourceItem.item;
     });
   }
 
@@ -58,38 +57,55 @@ export class ArraySource implements Source {
     return this.sourceItems.filter(sourceItem => sourceItem.disabled);
   }
 
-  public size(): number {
+  size(): number {
     return this.sourceItems.length;
   }
 
   // TODO rewrite with hash
-  public setSelection(selection: Item[]): void {
+  setSelection(selection: Item[]): void {
     if (selection.length === 0) {
       for (let j = 0; j < this.sourceItems.length; j++) {
-        this.sourceItems[j].selected = false;
+        this.sourceItems[j].deselect();
       }
     }
     for (let i = 0; i < selection.length; i++) {
       for (let j = 0; j < this.sourceItems.length; j++) {
-        this.sourceItems[j].selected = (selection[i] === this.sourceItems[j].data);
+        if (this.equals(selection[i], this.sourceItems[j].item)) {
+          this.sourceItems[j].select();
+        } else {
+          this.sourceItems[j].deselect();
+        }
       }
     }
   }
 
-  isHighlited(sourceItem: ArraySourceItem): boolean {
-    return sourceItem === this.highlitedItem;
-  }
-
-  setHighlited(sourceItem: ArraySourceItem): void {
-    this.highlitedItem = sourceItem;
-  }
-
-  setItemEquals(itemEquals: (item1: Item, item2: Item) => boolean) {
-    this.equals = itemEquals;
-  }
-
   getHighlited(): SourceItem | null {
-    return this.highlitedItem;
+    const arr = this.sourceItems.filter((sourceItem) => sourceItem.highlighted);
+    if (arr.length > 0) {
+      return arr[0];
+    } else {
+      return null;
+    }
+  }
+
+  highlight(index: number) {
+    if (this.previousHighlightedIndex >= 0) {
+      this.sourceItems[this.previousHighlightedIndex].unhighlight();
+    }
+    this.sourceItems[index].highlight();
+    this.previousHighlightedIndex = index;
+  }
+
+  highlightUpper(): void {
+    if (this.previousHighlightedIndex > 0) {
+      this.highlight(this.previousHighlightedIndex - 1);
+    }
+  }
+
+  highlightBelow(): void {
+    if (this.previousHighlightedIndex < this.sourceItems.length - 1) {
+      this.highlight(this.previousHighlightedIndex + 1);
+    }
   }
 
   [Symbol.iterator](): Iterator<ArraySourceItem> {
@@ -103,4 +119,5 @@ export class ArraySource implements Source {
       },
     };
   }
+
 }

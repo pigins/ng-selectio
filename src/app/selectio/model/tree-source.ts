@@ -2,14 +2,14 @@ import {Source} from './source';
 import {Item} from './item';
 import {SourceItem} from './source-item';
 import {Stack} from './stack';
-
-export class TreeSource implements SourceItem, Source {
+// export class TreeSource implements SourceItem, Source
+export class TreeSource {
   equals: (item1: Item, item2: Item) => boolean;
   private parent: TreeSource;
   private children: TreeSource[] = [];
-  data: Item;
-  disabled: boolean;
-  selected: boolean;
+  _item: Item;
+  _disabled: boolean;
+  _selected: boolean;
 
   public static fromFlatArray(arr: Item[], idProp: string, parentIdProp: string): TreeSource {
     const mappedArr = {};
@@ -24,8 +24,8 @@ export class TreeSource implements SourceItem, Source {
       if (mappedArr.hasOwnProperty(prop)) {
         mappedElem = mappedArr[prop];
         // If the element is not at the root level, add it to its parent array of children.
-        if (mappedElem.data[parentIdProp]) {
-          const node = mappedArr[mappedElem.data[parentIdProp]];
+        if (mappedElem.item[parentIdProp]) {
+          const node = mappedArr[mappedElem.item[parentIdProp]];
           node.addChildNode(mappedElem);
           // If the element is at the root level, add it to first level elements array.
         } else {
@@ -37,11 +37,47 @@ export class TreeSource implements SourceItem, Source {
   }
 
   constructor(data: Item) {
-    this.data = data;
+    this._item = data;
   }
 
-  public getData() {
-    return this.data;
+  get item(): Item {
+    return this._item;
+  }
+
+  get disabled(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  get selected(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  get highlighted(): boolean {
+    throw new Error('Method not implemented.');
+  }
+
+  disable(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  enable(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  select(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  deselect(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  highlight(): void {
+    throw new Error('Method not implemented.');
+  }
+
+  unhighlight(): void {
+    throw new Error('Method not implemented.');
   }
 
   public getParent() {
@@ -158,5 +194,8 @@ export class TreeSource implements SourceItem, Source {
 
   setItems(items: Item[]): void {
     throw new Error('not implemented');
+  }
+
+  highlightUpper(): void {
   }
 }

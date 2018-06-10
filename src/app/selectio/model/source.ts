@@ -13,9 +13,10 @@ export interface Source extends Iterable<SourceItem> {
   getItems(): Item[];
   getEnabledSourceItems(): SourceItem[];
   setSelection(selection: Item[]): void;
-  isHighlited(sourceItem: SourceItem): boolean;
-  setHighlited(sourceItem: SourceItem): void;
   getHighlited(): SourceItem | null;
   setOnItemInit(param: (sourceItem) => void): void;
   setItems(items: Item[]): void;
+  highlight(index: number): void;
+  highlightUpper(): void;
+  highlightBelow(): void;
 }

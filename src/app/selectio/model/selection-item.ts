@@ -1,27 +1,27 @@
 import {Item} from './item';
 
 export class SelectionItem {
-  private _data: Item;
-  private _markedForDelete: boolean;
+  private readonly _item: Item;
+  private _highlighted: boolean;
 
-  constructor(data: Item, markedForDelete: boolean) {
-    this._data = data;
-    this._markedForDelete = markedForDelete;
+  constructor(item: Item, highlighted: boolean) {
+    this._item = item;
+    this._highlighted = highlighted;
   }
 
-  get data(): Item {
-    return this._data;
+  get item(): Item {
+    return this._item;
   }
 
-  set data(value: Item) {
-    this._data = value;
+  get highlighted(): boolean {
+    return this._highlighted;
   }
 
-  get markedForDelete(): boolean {
-    return this._markedForDelete;
+  highlight() {
+    this._highlighted = true;
   }
 
-  set markedForDelete(value: boolean) {
-    this._markedForDelete = value;
+  unhighlight() {
+    this._highlighted = false;
   }
 }

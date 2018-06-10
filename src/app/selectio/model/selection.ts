@@ -4,14 +4,12 @@ import {SelectionMode} from './selection-modes';
 
 export class Selection implements Iterable<SelectionItem> {
   private items: SelectionItem[];
-  private highlightedItem: SelectionItem | null;
   private selectionMode: SelectionMode;
   private readonly equals: (item1: Item, item2: Item) => boolean;
   private selectionMaxLength: number;
 
   constructor(selectionMode: SelectionMode, selectionMaxLength: number, equals: (item1: Item, item2: Item) => boolean) {
     this.items = [];
-    this.highlightedItem = null;
     this.selectionMode = selectionMode;
     this.selectionMaxLength = selectionMaxLength;
     this.equals = equals;
@@ -31,18 +29,18 @@ export class Selection implements Iterable<SelectionItem> {
     });
   }
 
-  removeData(data: Item): void {
+  removeData(item: Item): void {
     for (let i = 0; i < this.items.length; i++) {
-      if (this.equals(this.items[i].data, data)) {
+      if (this.equals(this.items[i].item, item)) {
         this.items.splice(this.items.indexOf(this.items[i]), 1);
         break;
       }
     }
   }
 
-  contains(data: Item): boolean {
+  contains(item: Item): boolean {
     for (let i = 0; i < this.items.length; i++) {
-      if (this.equals(this.items[i].data, data)) {
+      if (this.equals(this.items[i].item, item)) {
         return true;
       }
     }
@@ -59,8 +57,8 @@ export class Selection implements Iterable<SelectionItem> {
     });
   }
 
-  push(data: Item): void {
-    this.items.push(new SelectionItem(data, false));
+  push(item: Item): void {
+    this.items.push(new SelectionItem(item, false));
   }
 
   pushAll(items: SelectionItem[]): void {
@@ -80,34 +78,29 @@ export class Selection implements Iterable<SelectionItem> {
   }
 
   getItems(): Item[] {
-    return this.items
-      .filter(item => !item.markedForDelete)
-      .map(item => item.data);
+    return this.items.map(item => item.item);
   }
 
   toItem(): Item | null {
-    return (this.items.length > 0 && !this.items[0].markedForDelete) ? this.items[0].data : null;
+    return (this.items.length > 0) ? this.items[0].item : null;
   }
 
   firstItemHighlighted(): boolean {
-    return this.items[0] === this.highlightedItem;
+    return this.items[0].highlighted;
   }
 
-  itemHighlighted(item: SelectionItem): boolean {
-    return this.highlightedItem === item;
+  deleteLastItem(): void {
+    this.items.pop();
   }
 
-  highlightOrDeleteLastItem(): void {
-    if (!this.highlightedItem) {
-      this.setHighlightedItem(this.items[this.items.length - 1]);
-    } else {
-      this.items = this.items.filter(item => item !== this.highlightedItem);
-      this.highlightedItem = null;
-    }
-  }
-
-  setHighlightedItem(value: SelectionItem | null) {
-    this.highlightedItem = value;
+  setHighlightedItem(value: SelectionItem) {
+    this.items.forEach((selectionItem) => {
+      if (this.equals(value.item, selectionItem.item)) {
+        selectionItem.highlight();
+      } else {
+        selectionItem.unhighlight();
+      }
+    });
   }
 
   updateItems(items: Item[]) {
