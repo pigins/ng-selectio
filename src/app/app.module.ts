@@ -31,7 +31,7 @@ import {SafeHtmlPipe} from './safeHtml.pipe';
     BrowserModule,
     FormsModule,
     HttpModule,
-    SelectioPluginModule.forRoot({openUp: false}),
+    SelectioPluginModule.forRoot({openUp: true}),
     RouterModule.forRoot(routes, {useHash: true})
   ],
   providers: [DataService],

@@ -23,6 +23,7 @@ export class ArraySource implements Source {
   setItems(items: Item[]): void {
     const sourceItems = items.map(item => new ArraySourceItem(item));
     this.sourceItems = sourceItems;
+    this.previousHighlightedIndex = -1;
     if (this.onItemInitCallback) {
       sourceItems.forEach((sourceItem) => {
         this.onItemInitCallback(sourceItem);

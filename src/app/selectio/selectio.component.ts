@@ -81,7 +81,7 @@ import {SourceFactory} from './model/source-factory';
          (keydown.tab)="onTab()"
          (clickOutside)="onClickOutside()"
     >
-      <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
+      <ng-container *ngFor="let order of verticalOrder">
         <div class="selection-wrapper" *ngIf="order===1">
           <!-------------------SELECTION------------------------>
           <div (click)="onClickSelection()"
@@ -149,12 +149,13 @@ import {SourceFactory} from './model/source-factory';
                            (onSearchMinLengthBorderCrossing)="onSearchBorderCrossing($event)"
           ></selectio-search>
         </div>
+        <!-------------------DROPDOWN------------------------>
         <div class="dropdown-wrapper" *ngIf="order===2"
              [ngStyle]="{'position': 'relative', 'display': expanded && !disabled ? 'block':'none'}">
           <div class="dropdown"
                [ngStyle]="{'position':'absolute', 'z-index': 9999999, 'width': '100%', 'bottom': openUp ? 0: 'auto', 'top': !openUp ? 0: 'auto'}">
             <div>
-              <ng-container *ngFor="let order of verticalOrder; trackBy: trackByOpenUp">
+              <ng-container *ngFor="let order of verticalOrder">
                 <selectio-search #searchComponent *ngIf="order===1 && !autocomplete && search"
                                  [autocomplete]="autocomplete"
                                  [searchPlaceholder]="searchPlaceholder"
@@ -265,7 +266,7 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
     if (changes.openUp && changes.openUp.currentValue) {
       this.verticalOrder = [2, 1];
-    } else {
+    } else if (changes.openUp && !changes.openUp.currentValue) {
       this.verticalOrder = [1, 2];
     }
   }
@@ -280,6 +281,10 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
     }
     this.model.setSelection(new Selection(this.selectionMode, this.selectionMaxLength, equalsFn));
     this.model.setSource(SourceFactory.getInstance(this.sourceType, equalsFn, this.data.concat(this.appendData), (sourceItem) => {this.afterSourceItemInit.emit(sourceItem); }));
+
+    if (this.openUp) {
+      this.verticalOrder = [2, 1];
+    }
 
     this.expandedChangedSubscription = this.expandedChanged.subscribe((expanded: boolean) => {
       this.expanded = expanded;
@@ -404,10 +409,6 @@ export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, Co
 
   multipleMode() {
     return this.selectionMode === SelectionMode.MULTIPLE;
-  }
-
-  trackByOpenUp(index, item) {
-    return item;
   }
 
   hasFocus(): boolean {
