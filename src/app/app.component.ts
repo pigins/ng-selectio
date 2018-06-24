@@ -1,6 +1,6 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {NavigationEnd, Router} from '@angular/router';
-import {Subscription} from 'rxjs/Subscription';
+import {Subscription} from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -20,7 +20,8 @@ import {Subscription} from 'rxjs/Subscription';
       <div class="container">
         <a class="small-link" href="https://github.com/pigins/ng-selectio">See on GitHub</a>
         <div class="iframe-wrapper">
-          <iframe src="https://ghbtns.com/github-btn.html?user=pigins&repo=ng-selectio&type=star&count=true&size=large" frameborder="0" scrolling="0" width="121px" height="30px"></iframe>
+          <iframe src="https://ghbtns.com/github-btn.html?user=pigins&repo=ng-selectio&type=star&count=true&size=large"
+          frameborder="0" scrolling="0" width="121px" height="30px"></iframe>
         </div>
       </div>
     </div>

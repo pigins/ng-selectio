@@ -1,11 +1,10 @@
 import {Component, ViewChild, ViewEncapsulation} from '@angular/core';
-import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
-import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from 'selectio';
 import {SourceItem} from 'selectio';
 import {SelectioComponent} from 'selectio';
+import {map} from "rxjs/operators";
 
 @Component({
   selector: 'selectio-examples-page',
@@ -169,8 +168,9 @@ export class ExamplesPageComponent {
     if (term === '') {
       this.users = [];
     } else {
-      this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
-        .map(r => r.json()).map(r => r.results).subscribe(r => {
+      this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`).pipe(
+        map(r => r.json().results)
+      ).subscribe(r => {
         this.users = r;
       });
     }
@@ -187,8 +187,9 @@ export class ExamplesPageComponent {
   onListScrollExhausted() {
     const term = this.remoteSelectio.searchComponent.getValue();
     const page = this.remoteSelectio.getSource().size() / 10 + 1;
-    this.http.get(`https://randomuser.me/api?seed=${term}&results=${10}&page=${page}&nat=uk&inc=gender,name,picture`)
-      .map(r => r.json()).map(r => r.results).subscribe(r => {
+    this.http.get(`https://randomuser.me/api?seed=${term}&results=${10}&page=${page}&nat=uk&inc=gender,name,picture`).pipe(
+      map(r => r.json().results)
+    ).subscribe(r => {
       this.appendUsers = r;
       this.remoteSelectio.scrollToTheBottom();
     });

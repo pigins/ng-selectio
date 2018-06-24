@@ -2,8 +2,9 @@ import {
   Component, ElementRef, EventEmitter, Input, OnChanges, OnDestroy, OnInit, Output, SimpleChanges,
   ViewChild, NgZone} from '@angular/core';
 import {FormControl, FormGroup} from '@angular/forms';
-import {Subscription} from 'rxjs/Subscription';
+import {Subscription} from 'rxjs';
 import {TextWidthService} from './text-width.service';
+import { debounceTime, filter} from 'rxjs/operators';
 
 @Component({
   selector: 'selectio-search',
@@ -70,29 +71,29 @@ export class SearchComponent implements OnChanges, OnInit, OnDestroy {
         this.search.nativeElement.style.width = 5 + 'px';
       }
     });
-    this.searchTextChangeSubscription = this.textInput.valueChanges
-      .debounceTime(this.searchDelay)
-      .filter(e => this.textInput.value.length >= this.searchMinLength)
-      .subscribe((v: string) => {
+    this.searchTextChangeSubscription = this.textInput.valueChanges.pipe(
+      debounceTime(this.searchDelay),
+      filter(e => this.textInput.value.length >= this.searchMinLength),
+      ).subscribe((v: string) => {
         this.onSearchValueChanges.emit(v);
       });
 
     if (this.autocomplete) {
-      let inside: boolean = false;
-      this.searchMinLengthBorderCrossingSubscription = this.textInput.valueChanges
-        .debounceTime(this.searchDelay)
-        .subscribe((v: string) => {
-          if (this.textInput.value.length >= this.searchMinLength) {
-            if (!inside) {
-              this.onSearchMinLengthBorderCrossing.emit(true);
-              inside = true;
-            }
+      let inside = false;
+      this.searchMinLengthBorderCrossingSubscription = this.textInput.valueChanges.pipe(
+        debounceTime(this.searchDelay)
+      ).subscribe((v: string) => {
+        if (this.textInput.value.length >= this.searchMinLength) {
+          if (!inside) {
+            this.onSearchMinLengthBorderCrossing.emit(true);
+            inside = true;
           }
-          if (this.textInput.value.length <= this.searchMinLength && inside) {
-            this.onSearchMinLengthBorderCrossing.emit(false);
-            inside = false;
-          }
-        });
+        }
+        if (this.textInput.value.length <= this.searchMinLength && inside) {
+          this.onSearchMinLengthBorderCrossing.emit(false);
+          inside = false;
+        }
+      });
     }
   }
 

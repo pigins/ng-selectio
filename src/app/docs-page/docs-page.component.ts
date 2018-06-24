@@ -8,14 +8,13 @@ import {
   ViewChild,
   ViewEncapsulation
 } from '@angular/core';
-import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
-import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
 import {Item} from 'selectio';
 import {SelectioComponent} from 'selectio';
 import {NavigationEnd, Router} from '@angular/router';
 import {SelectionMode} from 'selectio';
+import {map} from 'rxjs/operators';
 
 @Component({
   selector: 'app-docs-page',
@@ -142,8 +141,9 @@ export class DocsPageComponent implements OnInit, OnDestroy {
       if (term === '') {
         this.data = [];
       } else {
-        this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`)
-          .map(r => r.json()).map(r => r.results).subscribe(r => {
+        this.http.get(`https://randomuser.me/api?seed=${term}&inc=gender,name,picture&results=${10}&nat=uk`).pipe(
+          map(r => r.json().results)
+        ).subscribe(r => {
           this.data = r;
         });
       }
@@ -171,8 +171,9 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   }
 
   appendUser(pagination) {
-    this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`)
-      .map(r => r.json()).map(r => r.results).subscribe(r => {
+    this.http.get(`https://randomuser.me/api?seed=${pagination.term}&results=${10}&page=${pagination.currentLength / 10 + 1}&nat=uk&inc=gender,name,picture`).pipe(
+      map(r => r.json().results)
+    ).subscribe(r => {
       this.appendData = r;
     });
   }

@@ -16,11 +16,7 @@ import {
   ViewChild,
   ViewChildren, ViewEncapsulation
 } from '@angular/core';
-import 'rxjs/add/operator/debounceTime';
-import 'rxjs/add/operator/filter';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/take';
-import {Subscription} from 'rxjs/Subscription';
+import {Subscription} from 'rxjs';
 import {Item} from './model/item';
 import {SearchComponent} from './search.component';
 import {ControlValueAccessor, NG_VALUE_ACCESSOR} from '@angular/forms';
@@ -240,7 +236,7 @@ export class SelectioComponent implements OnInit, OnChanges, OnDestroy, ControlV
 
   cross = '&#10005';
   expanded: boolean;
-  focus: boolean = false;
+  focus = false;
   verticalOrder = [1, 2];
   selection: Selection;
   source: Source;
@@ -281,7 +277,11 @@ export class SelectioComponent implements OnInit, OnChanges, OnDestroy, ControlV
       equalsFn = ((item1, item2) => item1[<string>this.equals] === item2[<string>this.equals]);
     }
     this.model.setSelection(new Selection(this.selectionMode, this.selectionMaxLength, equalsFn));
-    this.model.setSource(SourceFactory.getInstance(this.sourceType, equalsFn, this.data.concat(this.appendData), (sourceItem) => {this.afterSourceItemInit.emit(sourceItem); }));
+    this.model.setSource(SourceFactory.getInstance(this.sourceType, equalsFn, this.data.concat(this.appendData),
+      (sourceItem) => {
+        this.afterSourceItemInit.emit(sourceItem);
+      }
+    ));
 
     if (this.openUp) {
       this.verticalOrder = [2, 1];
