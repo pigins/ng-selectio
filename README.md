@@ -18,13 +18,13 @@ features:
 
 1) npm install --save ng-selectio
 
-2) import { NgSelectioModule } from 'ng-selectio/ng-selectio.module';
+2) import { NgSelectioModule } from 'ng-selectio/selectio.module';
 
    @NgModule({
      ...
      imports: [
        ...
-       NgSelectioModule
+       NgSelectioModule.forRoot({}),
        ...
      ]
      ...

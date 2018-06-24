@@ -37,10 +37,10 @@ import {SELECTIO_DEFAULTS_OVERRIDE, SelectioDefaultsOverride} from './model/defa
     SelectioRequiredValidator
   ]
 })
-export class SelectioPluginModule {
+export class NgSelectioModule {
   static forRoot(defaults: SelectioDefaultsOverride): ModuleWithProviders {
     return {
-      ngModule: SelectioPluginModule,
+      ngModule: NgSelectioModule,
       providers: [{provide: SELECTIO_DEFAULTS_OVERRIDE, useValue: defaults}]
     };
   }

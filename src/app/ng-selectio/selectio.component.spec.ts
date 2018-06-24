@@ -36,7 +36,7 @@ describe('SelectionComponent', () => {
       providers: [TextWidthService]
     }).overrideComponent(SelectioPluginComponent, {
       set: {
-        styleUrls: ['selectio.css'],
+        styleUrls: ['ng-selectio.css'],
         changeDetection: ChangeDetectionStrategy.Default
       }
     });

@@ -3,10 +3,10 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../selectio/model/item';
-import {SourceItem} from '../selectio/model/source-item';
-import {SelectioPluginComponent} from '../selectio/selectio.component';
-import {Selection} from '../selectio/model/selection';
+import {Item} from '../ng-selectio/model/item';
+import {SourceItem} from '../ng-selectio/model/source-item';
+import {SelectioPluginComponent} from '../ng-selectio/selectio.component';
+import {Selection} from '../ng-selectio/model/selection';
 
 @Component({
   selector: 'selectio-examples-page',

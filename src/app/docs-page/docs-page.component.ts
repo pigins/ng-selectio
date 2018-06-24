@@ -12,10 +12,10 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../selectio/model/item';
-import {SelectioPluginComponent} from '../selectio/selectio.component';
+import {Item} from '../ng-selectio/model/item';
+import {SelectioPluginComponent} from '../ng-selectio/selectio.component';
 import {NavigationEnd, Router} from '@angular/router';
-import {SelectionMode} from '../selectio/model/selection-modes';
+import {SelectionMode} from '../ng-selectio/model/selection-modes';
 
 @Component({
   selector: 'app-docs-page',
