@@ -1,5 +1,5 @@
 import {ModuleWithProviders, NgModule} from '@angular/core';
-import {SelectioPluginComponent} from './selectio.component';
+import {SelectioComponent} from './selectio.component';
 import {SearchComponent} from './search.component';
 import {ReactiveFormsModule} from '@angular/forms';
 import {CommonModule} from '@angular/common';
@@ -14,7 +14,7 @@ import {SELECTIO_DEFAULTS_OVERRIDE, SelectioDefaultsOverride} from './model/defa
 
 @NgModule({
   declarations: [
-    SelectioPluginComponent,
+    SelectioComponent,
     DefaultItemPipe,
     SearchComponent,
     ClickOutsideDirective,
@@ -32,15 +32,15 @@ import {SELECTIO_DEFAULTS_OVERRIDE, SelectioDefaultsOverride} from './model/defa
   ],
   exports: [
     ReactiveFormsModule,
-    SelectioPluginComponent,
+    SelectioComponent,
     SearchComponent,
     SelectioRequiredValidator
   ]
 })
-export class NgSelectioModule {
+export class SelectioModule {
   static forRoot(defaults: SelectioDefaultsOverride): ModuleWithProviders {
     return {
-      ngModule: NgSelectioModule,
+      ngModule: SelectioModule,
       providers: [{provide: SELECTIO_DEFAULTS_OVERRIDE, useValue: defaults}]
     };
   }

@@ -3,8 +3,8 @@ import {Directive} from '@angular/core';
 
 /**
  * Use this function for reactive forms
- * @param {AbstractControl} c
- * @returns {any}
+ * @param c
+ * @returns any
  */
 export function selectioRequiredValidator(c: AbstractControl) {
   if (c.value && c.value.length !== 0) {

@@ -3,10 +3,9 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/model/item';
-import {SourceItem} from '../ng-selectio/model/source-item';
-import {SelectioPluginComponent} from '../ng-selectio/selectio.component';
-import {Selection} from '../ng-selectio/model/selection';
+import {Item} from 'selectio';
+import {SourceItem} from 'selectio';
+import {SelectioComponent} from 'selectio';
 
 @Component({
   selector: 'selectio-examples-page',
@@ -152,7 +151,7 @@ export class ExamplesPageComponent {
   itemArray: Item[] = ['russia'];
   defaultCountry: Item;
 
-  @ViewChild('remoteSelectio') remoteSelectio: SelectioPluginComponent;
+  @ViewChild('remoteSelectio') remoteSelectio: SelectioComponent;
 
   constructor(private http: Http, public dataService: DataService) {
     this.objectArray = this.dataService.countriesData;

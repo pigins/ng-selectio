@@ -1,5 +1,5 @@
 import {ComponentFixture, TestBed} from '@angular/core/testing';
-import {SelectioPluginComponent} from './selectio.component';
+import {SelectioComponent} from './selectio.component';
 import {SelectioRequiredValidator} from './selectio-required.validator';
 import {TextWidthService} from './text-width.service';
 import {SelectionPipe} from './selection.pipe';
@@ -14,14 +14,14 @@ import {ModelService} from './model/model.service';
 import {ChangeDetectionStrategy} from '@angular/core';
 
 describe('SelectionComponent', () => {
-  let component: SelectioPluginComponent;
-  let fixture: ComponentFixture<SelectioPluginComponent>;
+  let component: SelectioComponent;
+  let fixture: ComponentFixture<SelectioComponent>;
   let modelService: ModelService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
       declarations: [
-        SelectioPluginComponent,
+        SelectioComponent,
         DefaultItemPipe,
         SearchComponent,
         ClickOutsideDirective,
@@ -34,13 +34,13 @@ describe('SelectionComponent', () => {
         ReactiveFormsModule
       ],
       providers: [TextWidthService]
-    }).overrideComponent(SelectioPluginComponent, {
+    }).overrideComponent(SelectioComponent, {
       set: {
-        styleUrls: ['ng-selectio.css'],
+        styleUrls: ['selectio.component.css'],
         changeDetection: ChangeDetectionStrategy.Default
       }
     });
-    fixture = TestBed.createComponent(SelectioPluginComponent);
+    fixture = TestBed.createComponent(SelectioComponent);
     component = fixture.componentInstance;
     modelService = fixture.debugElement.injector.get(ModelService);
   });

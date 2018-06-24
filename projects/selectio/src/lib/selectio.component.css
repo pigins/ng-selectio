@@ -49,6 +49,11 @@
 }
 .ngs .dropdown-wrapper .dropdown ul {
   max-height: 150px;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  overflow-y: auto;
+  position: relative;
 }
 .ngs .dropdown-wrapper .dropdown li {
   min-height: 30px;

@@ -18,19 +18,17 @@ features:
 
 1) npm install --save ng-selectio
 
-2) import { NgSelectioModule } from 'ng-selectio/selectio.module';
+2) import { SelectioModule } from 'selectio';
 
    @NgModule({
      ...
      imports: [
        ...
-       NgSelectioModule.forRoot({}),
+       SelectioModule.forRoot({}),
        ...
      ]
      ...
    })
-
-3) @import '../node_modules/ng-selectio/ng-selectio.css';
 
 # Examples and docs
 https://pigins.github.io/ng-selectio

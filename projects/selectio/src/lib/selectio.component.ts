@@ -14,7 +14,7 @@ import {
   SimpleChanges,
   TemplateRef,
   ViewChild,
-  ViewChildren
+  ViewChildren, ViewEncapsulation
 } from '@angular/core';
 import 'rxjs/add/operator/debounceTime';
 import 'rxjs/add/operator/filter';
@@ -30,19 +30,20 @@ import {Selection} from './model/selection';
 import {ModelService} from './model/model.service';
 import {SourceItem} from './model/source-item';
 import {SelectionItem} from './model/selection-item';
-import {ArraySource} from './model/array-source';
 import {SourceItemDirective} from './source-item.directive';
 import {KEY_CODE} from './model/key-codes';
 import {SourceType} from './model/source-types';
 import {SelectionMode} from './model/selection-modes';
-import {SELECTIO_DEFAULTS, SELECTIO_DEFAULTS_OVERRIDE, SelectioSettings, SelectioDefaultsOverride} from './model/defaults';
+import {SELECTIO_DEFAULTS, SELECTIO_DEFAULTS_OVERRIDE, SelectioDefaultsOverride} from './model/defaults';
 import {SourceFactory} from './model/source-factory';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  encapsulation: ViewEncapsulation.None,
   selector: 'ng-selectio',
+  styleUrls:['selectio.component.css'],
   providers: [
-    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioPluginComponent), multi: true},
+    {provide: NG_VALUE_ACCESSOR, useExisting: forwardRef(() => SelectioComponent), multi: true},
     ModelService
   ],
   template: `
@@ -194,7 +195,7 @@ import {SourceFactory} from './model/source-factory';
     </div>
   `
 })
-export class SelectioPluginComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
+export class SelectioComponent implements OnInit, OnChanges, OnDestroy, ControlValueAccessor {
   @Input() data: Item[];
   @Input() appendData: Item[];
   @Input() selectionMode: SelectionMode;

@@ -12,10 +12,10 @@ import 'rxjs/add/observable/of';
 import {Http} from '@angular/http';
 import 'rxjs/add/operator/map';
 import {DataService} from '../service/data.service';
-import {Item} from '../ng-selectio/model/item';
-import {SelectioPluginComponent} from '../ng-selectio/selectio.component';
+import {Item} from 'selectio';
+import {SelectioComponent} from 'selectio';
 import {NavigationEnd, Router} from '@angular/router';
-import {SelectionMode} from '../ng-selectio/model/selection-modes';
+import {SelectionMode} from 'selectio';
 
 @Component({
   selector: 'app-docs-page',
@@ -74,7 +74,7 @@ export class DocsPageComponent implements OnInit, OnDestroy {
   private fixed: boolean;
   private menuPositionChange = new EventEmitter<boolean>();
 
-  @ViewChild('selectio') selectio: SelectioPluginComponent;
+  @ViewChild('selectio') selectio: SelectioComponent;
   @ViewChild('menu') menu: ElementRef;
   @ViewChild('container') container: ElementRef;
 

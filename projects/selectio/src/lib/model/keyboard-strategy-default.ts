@@ -1,11 +1,11 @@
 import {KeyboardStrategy} from './keyboard-strategy';
-import {SelectioPluginComponent} from '../selectio.component';
+import {SelectioComponent} from '../selectio.component';
 import {KEY_CODE} from './key-codes';
 import {ModelService} from './model.service';
 
 export class KeyboardStrategyDefault implements KeyboardStrategy {
 
-  onKeyPress(event: KeyboardEvent, selectio: SelectioPluginComponent, model: ModelService): void {
+  onKeyPress(event: KeyboardEvent, selectio: SelectioComponent, model: ModelService): void {
     if (event.keyCode === KEY_CODE.DOWN_ARROW && !selectio.expanded && selectio.hasFocus()) {
       selectio.expand();
     }
